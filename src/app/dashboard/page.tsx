@@ -1,0 +1,22 @@
+import { PlusCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ContactTable } from '@/components/dashboard/contact-table';
+import { mockContacts } from '@/lib/data';
+
+export default function DashboardPage() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight font-headline">Contacts</h1>
+          <p className="text-muted-foreground">Manage your contact database.</p>
+        </div>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Contact
+        </Button>
+      </div>
+      <ContactTable contacts={mockContacts} />
+    </div>
+  );
+}
