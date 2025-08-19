@@ -15,13 +15,12 @@ dotenv.config({
 });
 
 async function seed() {
-  console.log('Pushing schema to database...');
+  console.log('Applying migrations...');
   try {
-    // Using the npx command with the local drizzle-kit installation
-    execSync('npx drizzle-kit push', { stdio: 'inherit' });
-    console.log('Schema pushed successfully.');
+    execSync('npm run db:migrate', { stdio: 'inherit' });
+    console.log('Migrations applied successfully.');
   } catch (error) {
-    console.error('Error pushing schema:', error);
+    console.error('Error applying migrations:', error);
     process.exit(1);
   }
 
