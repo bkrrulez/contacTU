@@ -12,10 +12,9 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AppSidebar } from './sidebar';
-import { UserProfile } from './user-profile';
 import { Separator } from '@/components/ui/separator';
 
-export function AppHeader() {
+export function AppHeader({ children }: { children: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
        <Sheet>
@@ -47,7 +46,7 @@ export function AppHeader() {
               variant="ghost"
               className="flex items-center gap-2 p-2"
             >
-               <UserProfile />
+               {children}
                <div className="text-left hidden sm:block">
                     <p className="text-sm font-medium">System Administrator</p>
                     <p className="text-xs text-muted-foreground">Admin</p>

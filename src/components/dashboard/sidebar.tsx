@@ -13,7 +13,10 @@ import {
   Contact,
   LayoutDashboard,
   FileText,
+  UploadCloud,
+  Settings,
 } from 'lucide-react';
+import { Separator } from '../ui/separator';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -22,29 +25,23 @@ const navItems = [
   { href: '/dashboard/audit', icon: FileText, label: 'Audit Logs' },
 ];
 
+const secondaryNavItems = [
+    { href: '/dashboard/import', icon: UploadCloud, label: 'Import' },
+    { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+];
+
 export function AppSidebar() {
   return (
     <Sidebar
       className="border-r"
     >
       <SidebarContent className="flex flex-col">
-        <SidebarHeader className="h-16 flex items-center justify-start px-4">
-            <div className="flex items-center gap-2">
-                 <Logo className="w-8 h-8 text-primary" />
-                 <span className="font-bold text-xl font-headline">
-                    contacTU
-                 </span>
-            </div>
-        </SidebarHeader>
-
+        <SidebarHeader className="h-16 flex items-center justify-start px-4" />
         <SidebarMenu className="flex-1 p-2">
           {navItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
+            <SidebarMenuItem key={item.label}>
               <SidebarMenuButton
                 asChild
-                // This is a client-side only solution for active path.
-                // A server-side solution would be better.
-                // isActive={pathname === item.href}
                 tooltip={{ children: item.label }}
               >
                 <Link href={item.href}>
@@ -53,6 +50,20 @@ export function AppSidebar() {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+          ))}
+          <Separator className="my-2" />
+          {secondaryNavItems.map((item) => (
+             <SidebarMenuItem key={item.label}>
+             <SidebarMenuButton
+               asChild
+               tooltip={{ children: item.label }}
+             >
+               <Link href={item.href}>
+                 <item.icon />
+                 <span>{item.label}</span>
+               </Link>
+             </SidebarMenuButton>
+           </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>

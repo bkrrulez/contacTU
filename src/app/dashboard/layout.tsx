@@ -1,6 +1,7 @@
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/sidebar';
 import { AppHeader } from '@/components/dashboard/header';
+import { UserProfile } from '@/components/dashboard/user-profile';
 
 export default function DashboardLayout({
   children,
@@ -12,7 +13,9 @@ export default function DashboardLayout({
       <div className="flex min-h-screen w-full bg-muted/40">
         <AppSidebar />
         <div className="flex flex-col flex-1">
-          <AppHeader />
+          <AppHeader>
+            <UserProfile />
+          </AppHeader>
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             {children}
           </main>

@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Card,
   CardContent,
@@ -18,7 +16,6 @@ import {
 } from 'lucide-react';
 import { ContactTable } from '@/components/dashboard/contact-table';
 import { db } from '@/lib/db';
-import { useEffect, useState } from 'react';
 import type { Contact as ContactType, User } from '@/lib/types';
 import Link from 'next/link';
 import { ShieldQuestion } from 'lucide-react';
@@ -47,25 +44,11 @@ const StatCard = ({
   </Card>
 );
 
-export default function DashboardPage() {
-  const [contacts, setContacts] = useState<ContactType[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [organizations, setOrganizations] = useState(0);
-  const [recentChanges, setRecentChanges] = useState(0);
-
-  useEffect(() => {
-    async function fetchData() {
-      const allContacts = await db.query.contacts.findMany();
-      setContacts(allContacts);
-      
-      const allUsers = await db.query.users.findMany();
-      setUsers(allUsers);
-
-      const orgs = new Set(allContacts.map(c => c.organization).filter(Boolean));
-      setOrganizations(orgs.size);
-    }
-    fetchData();
-  }, []);
+export default async function DashboardPage() {
+  const contacts: ContactType[] = await db.query.contacts.findMany();
+  const users: User[] = await db.query.users.findMany();
+  const organizations = new Set(contacts.map(c => c.organization).filter(Boolean));
+  const recentChanges = 0; // Placeholder
 
   return (
     <div className="space-y-6">
@@ -85,7 +68,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Contacts" value={contacts.length} icon={Contact} color="#2563EB" />
         <StatCard title="Active Users" value={users.length} icon={Users} color="#16A34A" />
-        <StatCard title="Organizations" value={organizations} icon={Building} color="#9333EA" />
+        <StatCard title="Organizations" value={organizations.size} icon={Building} color="#9333EA" />
         <StatCard title="Recent Changes" value={recentChanges} icon={LineChart} color="#F59E0B" />
       </div>
 
