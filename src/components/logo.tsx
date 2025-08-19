@@ -6,7 +6,7 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement> & { 
     <div className={cn("flex items-center", className)}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 500 100"
+        viewBox="0 0 470 100"
         className="h-10 w-auto"
         {...props}
       >
@@ -25,10 +25,10 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement> & { 
           </g>
 
           {/* Text */}
-          <text x="87" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-gray-600">
+          <text x="79" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-gray-600">
             contac
           </text>
-          <text x="312" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-blue-600">
+          <text x="304" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-blue-600">
             TU
           </text>
         </g>
