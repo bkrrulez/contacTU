@@ -57,7 +57,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="space-y-1 text-center pt-8 flex items-center justify-center">
-            <Logo className="h-24 w-auto" />
+            <Logo />
         </CardHeader>
         <CardContent>
           <Form {...form}>
