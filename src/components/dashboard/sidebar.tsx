@@ -25,7 +25,6 @@ import { Logo } from '../logo';
 import type { User } from '@/lib/types';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { db } from '@/lib/db';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -40,30 +39,12 @@ const bottomNavItems = [
     { href: '/', icon: LogOut, label: 'Log Out' },
 ];
 
-async function getCurrentUser() {
-    // In a real app, you'd get the current user from the session.
-    // For now, we'll fetch the first user from the database.
-    return await db.query.users.findFirst();
-}
-
-
 export function AppSidebar() {
   const pathname = usePathname();
-  const [currentUser, setCurrentUser] = useState<User | undefined>();
-
-  useEffect(() => {
-    // This is not ideal for server components, but for a client component
-    // that needs async data, this is a common pattern.
-    // In a real app, this would likely come from a session context.
-    async function fetchUser() {
-        const user = await getCurrentUser();
-        setCurrentUser(user);
-    }
-    fetchUser();
-  }, []);
-
-  // Default to a restrictive role if no user is found
-  const userRole = currentUser?.role || 'Read-Only';
+  // In a real app, role would come from a session context.
+  // For now, we'll default to a role that can see most things.
+  // The header component already fetches and displays the current user's info.
+  const userRole = 'Admin';
 
   return (
     <Sidebar

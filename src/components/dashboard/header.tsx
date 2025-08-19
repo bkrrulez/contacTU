@@ -1,3 +1,4 @@
+'use client';
 
 import {
   DropdownMenu,
@@ -14,18 +15,25 @@ import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AppSidebar } from './sidebar';
 import { SidebarTrigger } from '../ui/sidebar';
-import { db } from '@/lib/db';
-import { UserProfile } from './user-profile';
+import React, { useState, useEffect } from 'react';
+import type { User } from '@/lib/types';
 
-async function getCurrentUser() {
-    // In a real app, you'd get the current user from the session.
-    // For now, we'll fetch the first user from the database.
-    return await db.query.users.findFirst();
-}
+export function AppHeader({ children }: { children: React.ReactNode }) {
+  // In a real app, role would come from a session context.
+  // For now, we'll default to a role that can see most things.
+  // The logic for fetching the user is handled by the UserProfile component passed as a child.
+  const [user, setUser] = useState<User | null>(null);
 
+  // This is a placeholder for where you might fetch user data on the client
+  // or receive it from a provider. For now, we'll just use a default.
+  // In a real app, you might have a global state or context for the user.
+  useEffect(() => {
+    // This is a mock fetching. In a real app, this could be an API call
+    // or data from a client-side session management library.
+    // For the purpose of display in the dropdown, we'll just create a placeholder.
+    setUser({ id: 1, name: 'Admin User', email: 'admin@cardbase.com', role: 'Admin' });
+  }, []);
 
-export async function AppHeader({ children }: { children: React.ReactNode }) {
-  const currentUser = await getCurrentUser();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
@@ -59,10 +67,10 @@ export async function AppHeader({ children }: { children: React.ReactNode }) {
               variant="ghost"
               className="flex items-center gap-2 p-2"
             >
-               <UserProfile />
-               <div className="text-left">
-                    <p className="text-sm font-medium">{currentUser?.name ?? 'User'}</p>
-                    <p className="text-xs text-muted-foreground">{currentUser?.role ?? 'Role'}</p>
+               {children}
+               <div className="text-left hidden md:block">
+                    <p className="text-sm font-medium">{user?.name ?? 'User'}</p>
+                    <p className="text-xs text-muted-foreground">{user?.role ?? 'Role'}</p>
                </div>
             </Button>
           </DropdownMenuTrigger>
