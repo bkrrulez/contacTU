@@ -29,12 +29,7 @@ export function AppHeader({ children }: { children: React.ReactNode }) {
               <AppSidebar />
             </SheetContent>
         </Sheet>
-        
-        <Link href="/dashboard" className="hidden md:flex">
-          <Logo />
-        </Link>
       </div>
-
 
       <div className="ml-auto flex items-center gap-4">
         <div className="relative flex-1 md:grow-0">
