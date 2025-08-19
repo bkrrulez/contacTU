@@ -55,23 +55,25 @@ export async function AppSidebar() {
                 <Logo />
             </Link>
         </SidebarHeader>
-        <SidebarMenu className="flex-1 p-2">
-          {navItems.map((item) => (
-            (!item.roles || item.roles.includes(userRole)) && (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={{ children: item.label }}
-                >
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )
-          ))}
-        </SidebarMenu>
+        <div className="flex-1">
+            <SidebarMenu className="p-2">
+            {navItems.map((item) => (
+                (!item.roles || item.roles.includes(userRole)) && (
+                <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                    asChild
+                    tooltip={{ children: item.label }}
+                    >
+                    <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                    </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                )
+            ))}
+            </SidebarMenu>
+        </div>
         <SidebarFooter className="p-2">
             <Separator className="my-2" />
             <SidebarMenu>
