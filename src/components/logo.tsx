@@ -7,14 +7,18 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M18 2H6a4 4 0 0 0-4 4v12a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4Z" />
-      <path d="M12 12a3 3 0 1 0-3-3" />
-      <path d="M12 17.5c-3.87 0-7-2.02-7-4.5" />
+      <path d="M16 2H8C6.34 2 5 3.34 5 5v14c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V5c0-1.66-1.34-2-3-2z" />
+      <path d="M9 7h6" />
+      <path d="M9 11h6" />
+      <path d="M9 15h4" />
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v2" />
+      <path d="M11 4h2" />
     </svg>
   );
 }
