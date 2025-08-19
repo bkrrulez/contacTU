@@ -1,4 +1,5 @@
-CREATE TYPE "phone_type" AS ENUM ('Telephone', 'Mobile');
+-- Previous migration files were combined into this single file for simplicity and to resolve migration application issues.
+-- This file represents the complete desired schema for the application.
 
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" serial PRIMARY KEY NOT NULL,
@@ -19,26 +20,32 @@ CREATE TABLE IF NOT EXISTS "contacts" (
 	"avatar" varchar(256)
 );
 
-CREATE TABLE IF NOT EXISTS "contact_organizations" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"contact_id" integer NOT NULL,
-	"organization" varchar(256) NOT NULL,
-	"designation" varchar(256),
-    "team" varchar(256),
-    "department" varchar(256)
-);
-
-CREATE TABLE IF NOT EXISTS "contact_emails" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"contact_id" integer NOT NULL,
-	"email" varchar(256) NOT NULL
-);
+DO $$ BEGIN
+ CREATE TYPE "public"."phone_type" AS ENUM('Telephone', 'Mobile');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
 
 CREATE TABLE IF NOT EXISTS "contact_phones" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"contact_id" integer NOT NULL,
 	"phone" varchar(50) NOT NULL,
 	"type" "phone_type" NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "contact_organizations" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"contact_id" integer NOT NULL,
+	"organization" varchar(256) NOT NULL,
+	"designation" varchar(256),
+	"team" varchar(256),
+	"department" varchar(256)
+);
+
+CREATE TABLE IF NOT EXISTS "contact_emails" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"contact_id" integer NOT NULL,
+	"email" varchar(256) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "contact_urls" (
@@ -60,6 +67,12 @@ CREATE TABLE IF NOT EXISTS "contact_associated_names" (
 );
 
 DO $$ BEGIN
+ ALTER TABLE "contact_phones" ADD CONSTRAINT "contact_phones_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
  ALTER TABLE "contact_organizations" ADD CONSTRAINT "contact_organizations_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -67,12 +80,6 @@ END $$;
 
 DO $$ BEGIN
  ALTER TABLE "contact_emails" ADD CONSTRAINT "contact_emails_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
- ALTER TABLE "contact_phones" ADD CONSTRAINT "contact_phones_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
