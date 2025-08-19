@@ -14,6 +14,7 @@ import {
   FileText,
   UploadCloud,
   Settings,
+  LogOut,
 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Logo } from '../logo';
@@ -30,6 +31,7 @@ const navItems = [
 const secondaryNavItems = [
     { href: '/dashboard/import', icon: UploadCloud, label: 'Import' },
     { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+    { href: '/', icon: LogOut, label: 'Log Out' },
 ];
 
 export async function AppSidebar() {
