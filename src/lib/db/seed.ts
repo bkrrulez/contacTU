@@ -12,7 +12,9 @@ import {
 } from './schema';
 import type { Contact, User } from '../types';
 import * as dotenv from 'dotenv';
-import { execSync } from 'child_process';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
 
 dotenv.config({
   path: '.env.local',
@@ -123,13 +125,24 @@ const mockContacts: MockContact[] = [
 
 
 async function seed() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL environment variable is not set.');
+  }
+
+  // Use a separate client for migrations
+  const migrationClient = postgres(connectionString, { max: 1 });
+  const migrationDb = drizzle(migrationClient);
+
   console.log('Applying migrations...');
   try {
-    execSync('npm run db:migrate', { stdio: 'inherit' });
+    await migrate(migrationDb, { migrationsFolder: 'drizzle' });
     console.log('Migrations applied successfully.');
   } catch (error) {
     console.error('Error applying migrations:', error);
     process.exit(1);
+  } finally {
+    await migrationClient.end();
   }
 
   console.log('Seeding database...');
