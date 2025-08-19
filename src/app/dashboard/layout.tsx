@@ -2,6 +2,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/sidebar';
 import { AppHeader } from '@/components/dashboard/header';
 import { UserProfile } from '@/components/dashboard/user-profile';
+import { Logo } from '@/components/logo';
 
 export default function DashboardLayout({
   children,

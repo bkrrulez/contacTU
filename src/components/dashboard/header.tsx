@@ -13,6 +13,8 @@ import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AppSidebar } from './sidebar';
 import { Separator } from '@/components/ui/separator';
+import { Logo } from '../logo';
+import { cn } from '@/lib/utils';
 
 export function AppHeader({ children }: { children: React.ReactNode }) {
   return (
@@ -29,7 +31,7 @@ export function AppHeader({ children }: { children: React.ReactNode }) {
             </SheetContent>
         </Sheet>
         
-        <h1 className="text-xl font-semibold">Dashboard</h1>
+        <Logo className="hidden md:flex" />
 
       <div className="ml-auto flex items-center gap-4">
         <div className="relative flex-1 md:grow-0">
