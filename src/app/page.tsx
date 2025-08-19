@@ -58,7 +58,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <Logo className="h-16 w-16 text-primary" />
+            <Logo className="h-20 w-20 text-primary" />
           </div>
           <CardDescription>Enter your credentials to access your contacts</CardDescription>
         </CardHeader>
