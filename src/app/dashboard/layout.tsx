@@ -20,7 +20,7 @@ export default function DashboardLayout({
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             {children}
           </main>
-          <footer className="py-4 text-center" style={{ color: 'darkblue', fontSize: '1rem' }}>
+          <footer className="py-4 text-center" style={{ color: 'darkblue', fontSize: '0.5rem' }}>
             Created by Bikramjit Chowdhury
           </footer>
         </div>
