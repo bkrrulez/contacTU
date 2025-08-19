@@ -6,81 +6,32 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement> & { 
     <div className={cn("flex items-center", className)}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 500 200"
+        viewBox="0 0 450 100"
         className="h-10 w-auto"
         {...props}
       >
-        <rect
-          x="40"
-          y="40"
-          width="70"
-          height="120"
-          rx="5"
-          ry="5"
-          stroke="#0b2a55"
-          strokeWidth="3"
-          fill="none"
-        />
-        <rect
-          x="65"
-          y="20"
-          width="20"
-          height="20"
-          stroke="#41a642"
-          strokeWidth="3"
-          fill="none"
-        />
-        <circle cx="75" cy="30" r="2.5" fill="#41a642" />
-        <circle
-          cx="75"
-          cy="80"
-          r="12"
-          stroke="#41a642"
-          strokeWidth="3"
-          fill="none"
-        />
-        <path
-          d="M60,105 Q75,95 90,105"
-          stroke="#41a642"
-          strokeWidth="3"
-          fill="none"
-        />
-        <line
-          x1="60"
-          y1="125"
-          x2="90"
-          y2="125"
-          stroke="#41a642"
-          strokeWidth="3"
-        />
-        <line
-          x1="60"
-          y1="140"
-          x2="90"
-          y2="140"
-          stroke="#41a642"
-          strokeWidth="3"
-        />
-        <text
-          x="130"
-          y="140"
-          fontFamily="Arial, sans-serif"
-          fontSize="72"
-          fontWeight="bold"
-          fill="#0b2a55"
-        >
-          contac
-        </text>
-        <text
-          x="365"
-          y="140"
-          fontFamily="Arial, sans-serif"
-          fontSize="72"
-          fontWeight="bold"
-          fill="#41a642"
-        >
-          TU
-        </text>
+        <g transform="translate(10, 10)">
+          {/* Icon */}
+          <g fill="#757575">
+            <path d="M56.25,3.75H43.75a7.5,7.5,0,0,0-7.5,7.5v60a7.5,7.5,0,0,0,7.5,7.5h22.5a7.5,7.5,0,0,0,7.5-7.5v-60A7.5,7.5,0,0,0,66.25,3.75H56.25Z" fill="#e0e0e0" stroke="#757575" strokeWidth="2.5" />
+            <path d="M60,3.75H50a2.5,2.5,0,0,0-2.5,2.5V10a2.5,2.5,0,0,0,2.5,2.5H60a2.5,2.5,0,0,0,2.5-2.5V6.25A2.5,2.5,0,0,0,60,3.75Z" fill="#bdbdbd" stroke="#757575" strokeWidth="2.5" />
+            
+            <g transform="translate(39, 25)">
+              <rect width="32" height="32" rx="3" ry="3" fill="#fafafa" stroke="#757575" strokeWidth="2.5" />
+              {/* Person Icon */}
+              <circle cx="16" cy="13" r="5" fill="none" stroke="#757575" strokeWidth="2.5"/>
+              <path d="M10,24 q6,-8 12,0" fill="none" stroke="#757575" strokeWidth="2.5"/>
+            </g>
+          </g>
+
+          {/* Text */}
+          <text x="110" y="58" fontFamily="Arial, sans-serif" fontSize="36" fontWeight="bold" fill="#555555">
+            contact
+          </text>
+          <text x="245" y="58" fontFamily="Arial, sans-serif" fontSize="36" fontWeight="bold" fill="#0077c8">
+            TU
+          </text>
+        </g>
       </svg>
     </div>
   );
