@@ -30,7 +30,7 @@ interface ContactTableProps {
 }
 
 export function ContactTable({ contacts }: ContactTableProps) {
-  const [selectedRows, setSelectedRows] = React.useState<Set<string>>(new Set());
+  const [selectedRows, setSelectedRows] = React.useState<Set<number>>(new Set());
 
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
     if (checked === true) {
@@ -40,7 +40,7 @@ export function ContactTable({ contacts }: ContactTableProps) {
     }
   };
 
-  const handleSelectRow = (id: string, checked: boolean) => {
+  const handleSelectRow = (id: number, checked: boolean) => {
     const newSelectedRows = new Set(selectedRows);
     if (checked) {
       newSelectedRows.add(id);
@@ -84,7 +84,7 @@ export function ContactTable({ contacts }: ContactTableProps) {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={contact.avatar} alt={contact.firstName} data-ai-hint="person portrait" />
+                      {contact.avatar && <AvatarImage src={contact.avatar} alt={contact.firstName} data-ai-hint="person portrait" />}
                       <AvatarFallback>
                         {contact.firstName.charAt(0)}
                         {contact.lastName.charAt(0)}

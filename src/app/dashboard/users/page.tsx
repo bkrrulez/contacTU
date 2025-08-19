@@ -1,9 +1,10 @@
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserTable } from '@/components/dashboard/user-table';
-import { mockUsers } from '@/lib/data';
+import { db } from '@/lib/db';
 
-export default function UsersPage() {
+export default async function UsersPage() {
+  const users = await db.query.users.findMany();
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -16,7 +17,7 @@ export default function UsersPage() {
           Add User
         </Button>
       </div>
-      <UserTable users={mockUsers} />
+      <UserTable users={users} />
     </div>
   );
 }

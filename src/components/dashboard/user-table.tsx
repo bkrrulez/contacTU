@@ -38,11 +38,11 @@ const roleVariant: { [key in User['role']]: 'default' | 'secondary' | 'destructi
 };
 
 export function UserTable({ users }: UserTableProps) {
-  const [userRoles, setUserRoles] = React.useState<Record<string, User['role']>>(
+  const [userRoles, setUserRoles] = React.useState<Record<number, User['role']>>(
     users.reduce((acc, user) => ({ ...acc, [user.id]: user.role }), {})
   );
 
-  const handleRoleChange = (userId: string, role: string) => {
+  const handleRoleChange = (userId: number, role: string) => {
     setUserRoles(prev => ({ ...prev, [userId]: role as User['role'] }));
   };
   
@@ -64,7 +64,7 @@ export function UserTable({ users }: UserTableProps) {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="person portrait" />
+                      {user.avatar && <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="person portrait" />}
                       <AvatarFallback>
                         {user.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>

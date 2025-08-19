@@ -1,9 +1,11 @@
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ContactTable } from '@/components/dashboard/contact-table';
-import { mockContacts } from '@/lib/data';
+import { db } from '@/lib/db';
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const contacts = await db.query.contacts.findMany();
+  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -16,7 +18,7 @@ export default function DashboardPage() {
           Add Contact
         </Button>
       </div>
-      <ContactTable contacts={mockContacts} />
+      <ContactTable contacts={contacts} />
     </div>
   );
 }

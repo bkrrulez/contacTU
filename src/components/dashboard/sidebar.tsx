@@ -1,6 +1,4 @@
-'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
   Sidebar,
   SidebarHeader,
@@ -22,7 +20,8 @@ import {
 } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { mockUsers } from '@/lib/data';
+import { db } from '@/lib/db';
+import { User } from '@/lib/types';
 
 const navItems = [
   { href: '/dashboard', icon: Contact, label: 'Contacts' },
@@ -31,11 +30,29 @@ const navItems = [
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
-export function AppSidebar() {
-  const pathname = usePathname();
-  const { toggleSidebar, state } = useSidebar();
-  const currentUser = mockUsers[0];
+async function UserProfile() {
+  // In a real app, you'd fetch the current user based on session
+  const currentUser = await db.query.users.findFirst();
+  
+  if (!currentUser) {
+    return null;
+  }
 
+  return (
+    <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
+        <Avatar className="h-9 w-9">
+            {currentUser.avatar && <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint="person portrait" />}
+            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div className="group-data-[collapsible=icon]:hidden">
+            <p className="text-sm font-medium leading-none">{currentUser.name}</p>
+            <p className="text-xs leading-none text-muted-foreground">{currentUser.email}</p>
+        </div>
+    </div>
+  )
+}
+
+export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
@@ -54,10 +71,12 @@ export function AppSidebar() {
             variant="ghost"
             size="icon"
             className="h-8 w-8 group-data-[collapsible=icon]:hidden"
-            onClick={toggleSidebar}
+            asChild
           >
-            <ChevronLeft />
-            <span className="sr-only">Toggle Sidebar</span>
+            <SidebarMenuButton>
+                <ChevronLeft />
+                <span className="sr-only">Toggle Sidebar</span>
+            </SidebarMenuButton>
           </Button>
         </SidebarHeader>
 
@@ -66,7 +85,9 @@ export function AppSidebar() {
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname === item.href}
+                // This is a client-side only solution for active path.
+                // A server-side solution would be better.
+                // isActive={pathname === item.href}
                 tooltip={{ children: item.label }}
               >
                 <Link href={item.href}>
@@ -89,16 +110,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-                <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
-                    <Avatar className="h-9 w-9">
-                        <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint="person portrait" />
-                        <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="group-data-[collapsible=icon]:hidden">
-                        <p className="text-sm font-medium leading-none">{currentUser.name}</p>
-                        <p className="text-xs leading-none text-muted-foreground">{currentUser.email}</p>
-                    </div>
-                </div>
+                <UserProfile />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>

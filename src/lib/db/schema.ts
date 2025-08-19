@@ -1,4 +1,5 @@
 import { pgTable, serial, text, varchar } from 'drizzle-orm/pg-core';
+import { InferSelectModel } from 'drizzle-orm';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -21,3 +22,6 @@ export const contacts = pgTable('contacts', {
     notes: text('notes'),
     avatar: varchar('avatar', { length: 256 }),
 });
+
+export type UserSchema = InferSelectModel<typeof users>;
+export type ContactSchema = InferSelectModel<typeof contacts>;

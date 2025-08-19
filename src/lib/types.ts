@@ -1,21 +1,4 @@
-export type Contact = {
-  id: string;
-  firstName: string;
-  lastName:string;
-  email: string;
-  phone: string;
-  mobile?: string;
-  address?: string;
-  organization: string;
-  designation: string;
-  notes?: string;
-  avatar: string;
-};
+import { ContactSchema, UserSchema } from './db/schema';
 
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  role: 'Admin' | 'Power User' | 'Standard User' | 'Read-Only';
-  avatar: string;
-};
+export type Contact = ContactSchema;
+export type User = UserSchema;
