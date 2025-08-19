@@ -1,0 +1,11 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "id": "6921361c-8c76-42d8-8422-261f8a8469d7",
+      "tag": "0000_initial_schema",
+      "breakpoints": true
+    }
+  ]
+}
