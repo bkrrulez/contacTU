@@ -26,22 +26,7 @@ async function seed() {
   if (!connectionString) {
     throw new Error('DATABASE_URL environment variable is not set.');
   }
-
-  // Use a separate client for migrations
-  const migrationClient = postgres(connectionString, { max: 1 });
-  const migrationDb = drizzle(migrationClient);
-
-  console.log('Applying migrations...');
-  try {
-    await migrate(migrationDb, { migrationsFolder: 'drizzle' });
-    console.log('Migrations applied successfully.');
-  } catch (error) {
-    console.error('Error applying migrations:', error);
-    process.exit(1);
-  } finally {
-    await migrationClient.end();
-  }
-
+  
   console.log('Seeding database...');
 
   // Clear existing data
