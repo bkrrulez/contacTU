@@ -3,11 +3,15 @@ import { Button } from '@/components/ui/button';
 import { ContactTable } from '@/components/dashboard/contact-table';
 import { db } from '@/lib/db';
 import { Card, CardContent } from '@/components/ui/card';
-import { contacts as contactsSchema } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 
 export default async function ContactsPage() {
-  const contacts = await db.query.contacts.findMany();
+  const contacts = await db.query.contacts.findMany({
+    with: {
+        organizations: true,
+        emails: true,
+        phones: true,
+    }
+  });
 
   return (
     <div className="space-y-4">

@@ -4,7 +4,10 @@ import {
   users,
   contactOrganizations,
   contactEmails,
-  contactPhones
+  contactPhones,
+  contactAssociatedNames,
+  contactSocialLinks,
+  contactUrls
 } from './schema';
 import { mockContacts, mockUsers } from '../data';
 import * as dotenv from 'dotenv';
@@ -27,6 +30,9 @@ async function seed() {
   console.log('Seeding database...');
 
   // Clear existing data
+  await db.delete(contactAssociatedNames);
+  await db.delete(contactSocialLinks);
+  await db.delete(contactUrls);
   await db.delete(contactOrganizations);
   await db.delete(contactEmails);
   await db.delete(contactPhones);
