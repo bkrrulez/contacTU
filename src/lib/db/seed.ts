@@ -2,12 +2,22 @@ import { db } from './';
 import { contacts, users } from './schema';
 import { mockContacts, mockUsers } from '../data';
 import * as dotenv from 'dotenv';
+import { execSync } from 'child_process';
 
 dotenv.config({
   path: '.env.local',
 });
 
 async function seed() {
+  console.log('Pushing schema to database...');
+  try {
+    execSync('npx drizzle-kit push', { stdio: 'inherit' });
+    console.log('Schema pushed successfully.');
+  } catch (error) {
+    console.error('Error pushing schema:', error);
+    process.exit(1);
+  }
+
   console.log('Seeding database...');
 
   // Clear existing data
