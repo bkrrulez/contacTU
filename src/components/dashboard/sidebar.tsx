@@ -19,7 +19,6 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
-import { UserProfile } from './user-profile';
 
 const navItems = [
   { href: '/dashboard', icon: Contact, label: 'Contacts' },
