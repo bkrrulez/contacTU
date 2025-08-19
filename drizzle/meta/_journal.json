@@ -6,6 +6,11 @@
       "id": "6921361c-8c76-42d8-8422-261f8a8469d7",
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "id": "2d141d3b-8182-4f93-87ea-b436c7a72382",
+      "tag": "0001_add_birthday_column",
+      "breakpoints": true
     }
   ]
 }

@@ -13,8 +13,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { createContact } from '../actions';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CalendarIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const contactFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -24,8 +28,14 @@ const contactFormSchema = z.object({
   phoneType: z.enum(['Telephone', 'Mobile']).default('Mobile'),
   organization: z.string().optional(),
   designation: z.string().optional(),
+  team: z.string().optional(),
+  department: z.string().optional(),
   address: z.string().optional(),
   notes: z.string().optional(),
+  website: z.string().url('Invalid URL').optional().or(z.literal('')),
+  birthday: z.date().optional(),
+  associatedName: z.string().optional(),
+  socialMedia: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
@@ -44,8 +54,13 @@ export default function NewContactPage() {
       phoneType: 'Mobile',
       organization: '',
       designation: '',
+      team: '',
+      department: '',
       address: '',
       notes: '',
+      website: '',
+      associatedName: '',
+      socialMedia: '',
     },
   });
 
@@ -191,6 +206,34 @@ export default function NewContactPage() {
                             )}
                         />
                     </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="team"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Team</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Product" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="department"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Department</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Engineering" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                      <FormField
                         control={form.control}
                         name="address"
@@ -204,6 +247,88 @@ export default function NewContactPage() {
                             </FormItem>
                         )}
                         />
+                     <FormField
+                        control={form.control}
+                        name="website"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Website</FormLabel>
+                            <FormControl>
+                                <Input placeholder="https://example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                     <FormField
+                        control={form.control}
+                        name="socialMedia"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Social Media</FormLabel>
+                            <FormControl>
+                                <Input placeholder="https://linkedin.com/in/johndoe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                     <div className="grid md:grid-cols-2 gap-4">
+                         <FormField
+                            control={form.control}
+                            name="birthday"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                <FormLabel>Birthday</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                        )}
+                                        >
+                                        {field.value ? (
+                                            format(field.value, "PPP")
+                                        ) : (
+                                            <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={field.value}
+                                        onSelect={field.onChange}
+                                        disabled={(date) =>
+                                        date > new Date() || date < new Date("1900-01-01")
+                                        }
+                                        initialFocus
+                                    />
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                        <FormField
+                            control={form.control}
+                            name="associatedName"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Associated Name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Assistant's Name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                     </div>
                      <FormField
                         control={form.control}
                         name="notes"
