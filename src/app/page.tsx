@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -55,9 +58,8 @@ export default function LoginPage() {
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <Logo className="h-10 w-10 text-primary" />
+            <Logo className="h-16 w-16 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-headline">Welcome to contacTU</CardTitle>
           <CardDescription>Enter your credentials to access your contacts</CardDescription>
         </CardHeader>
         <CardContent>
@@ -88,7 +90,19 @@ export default function LoginPage() {
                         </Link>
                       </div>
                     <FormControl>
-                      <Input type="password" placeholder="********" {...field} />
+                      <div className="relative">
+                        <Input type={showPassword ? 'text' : 'password'} placeholder="********" {...field} />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute inset-y-0 right-0 h-full px-3"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff /> : <Eye />}
+                          <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -99,12 +113,6 @@ export default function LoginPage() {
               </Button>
             </form>
           </Form>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
-            <Link href="#" className="underline">
-              Sign up
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
