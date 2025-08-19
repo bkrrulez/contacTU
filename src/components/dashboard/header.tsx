@@ -12,14 +12,13 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AppSidebar } from './sidebar';
-import { Separator } from '@/components/ui/separator';
 import { Logo } from '../logo';
-import { cn } from '@/lib/utils';
 
 export function AppHeader({ children }: { children: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
-       <Sheet>
+      <div className="flex items-center gap-4">
+        <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="md:hidden">
                 <PanelLeft className="h-5 w-5" />
@@ -31,7 +30,11 @@ export function AppHeader({ children }: { children: React.ReactNode }) {
             </SheetContent>
         </Sheet>
         
-        <Logo className="hidden md:flex" />
+        <Link href="/dashboard" className="hidden md:flex">
+          <Logo />
+        </Link>
+      </div>
+
 
       <div className="ml-auto flex items-center gap-4">
         <div className="relative flex-1 md:grow-0">

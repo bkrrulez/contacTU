@@ -36,7 +36,11 @@ export function AppSidebar() {
       className="border-r"
     >
       <SidebarContent className="flex flex-col">
-        <SidebarHeader className="h-16 flex items-center justify-start px-4" />
+        <SidebarHeader className="h-16 flex items-center justify-start px-4">
+          <Link href="/dashboard">
+            <Logo />
+          </Link>
+        </SidebarHeader>
         <SidebarMenu className="flex-1 p-2">
           {navItems.map((item) => (
             <SidebarMenuItem key={item.label}>
