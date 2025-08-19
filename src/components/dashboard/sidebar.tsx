@@ -6,6 +6,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarContent,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
 import {
   Users,
@@ -26,10 +27,10 @@ const navItems = [
   { href: '/dashboard/contacts', icon: Contact, label: 'Contacts' },
   { href: '/dashboard/users', icon: Users, label: 'User Management', roles: ['Admin', 'Power User'] },
   { href: '/dashboard/audit', icon: FileText, label: 'Audit Logs', roles: ['Admin', 'Power User'] },
+  { href: '/dashboard/import', icon: UploadCloud, label: 'Import' },
 ];
 
-const secondaryNavItems = [
-    { href: '/dashboard/import', icon: UploadCloud, label: 'Import' },
+const bottomNavItems = [
     { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
     { href: '/', icon: LogOut, label: 'Log Out' },
 ];
@@ -70,21 +71,25 @@ export async function AppSidebar() {
               </SidebarMenuItem>
             )
           ))}
-          <Separator className="my-2" />
-          {secondaryNavItems.map((item) => (
-             <SidebarMenuItem key={item.label}>
-             <SidebarMenuButton
-               asChild
-               tooltip={{ children: item.label }}
-             >
-               <Link href={item.href}>
-                 <item.icon />
-                 <span>{item.label}</span>
-               </Link>
-             </SidebarMenuButton>
-           </SidebarMenuItem>
-          ))}
         </SidebarMenu>
+        <SidebarFooter className="p-2">
+            <Separator className="my-2" />
+            <SidebarMenu>
+                {bottomNavItems.map((item) => (
+                    <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                        asChild
+                        tooltip={{ children: item.label }}
+                    >
+                        <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                        </Link>
+                    </SidebarMenuButton>
+                    </SidebarMenuItem>
+                ))}
+            </SidebarMenu>
+        </SidebarFooter>
       </SidebarContent>
     </Sidebar>
   );
