@@ -175,7 +175,7 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state, open, openMobile, setOpenMobile } = useSidebar()
 
     if (collapsible === "none") {
       return (
@@ -212,11 +212,14 @@ const Sidebar = React.forwardRef<
       )
     }
 
+    if (!open) {
+        return null;
+    }
+
     return (
       <div
         ref={ref}
-        className={cn("hidden md:block text-foreground transition-all duration-200 ease-in-out", 
-          state === 'expanded' ? 'w-[var(--sidebar-width)]' : 'w-[var(--sidebar-width-icon)]',
+        className={cn("hidden md:block text-foreground transition-all duration-200 ease-in-out w-[var(--sidebar-width)]",
           className
         )}
         data-state={state}
