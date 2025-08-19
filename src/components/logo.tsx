@@ -12,11 +12,11 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement> & { 
       >
         <g transform="translate(10, 10)">
           {/* Icon: Simple ID Card */}
-          <g fill="none" stroke="currentColor" strokeWidth="2.5">
-            <rect x="30" y="0" width="60" height="80" rx="6" ry="6" className="text-gray-400" stroke="currentColor" fill="none"/>
-            <circle cx="60" cy="25" r="10" className="text-gray-300" stroke="currentColor"/>
-            <line x1="45" y1="48" x2="75" y2="48" className="text-gray-300" stroke="currentColor" />
-            <line x1="45" y1="60" x2="75" y2="60" className="text-gray-300" stroke="currentColor" />
+          <g fill="none" stroke="#000000" strokeWidth="2.5">
+            <rect x="30" y="0" width="60" height="80" rx="6" ry="6" fill="none"/>
+            <circle cx="60" cy="25" r="10" />
+            <line x1="45" y1="48" x2="75" y2="48" />
+            <line x1="45" y1="60" x2="75" y2="60" />
           </g>
 
           {/* Text */}
