@@ -11,6 +11,7 @@ dotenv.config({
 async function seed() {
   console.log('Pushing schema to database...');
   try {
+    // Using the npx command with the local drizzle-kit installation
     execSync('npx drizzle-kit push', { stdio: 'inherit' });
     console.log('Schema pushed successfully.');
   } catch (error) {
@@ -28,13 +29,13 @@ async function seed() {
 
   // Seed users
   const seededUsers = await db.insert(users).values(
-    mockUsers.map(({ id, ...user }) => user)
+    mockUsers
   ).returning();
   console.log(`Seeded ${seededUsers.length} users.`);
 
   // Seed contacts
   const seededContacts = await db.insert(contacts).values(
-    mockContacts.map(({ id, ...contact }) => contact)
+    mockContacts
   ).returning();
   console.log(`Seeded ${seededContacts.length} contacts.`);
 

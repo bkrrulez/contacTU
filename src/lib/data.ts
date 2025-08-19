@@ -1,29 +1,25 @@
 import type { Contact, User } from './types';
 
-export const mockUsers: User[] = [
+export const mockUsers: Omit<User, 'id'>[] = [
   {
-    id: '1',
     name: 'Admin User',
     email: 'admin@cardbase.com',
     role: 'Admin',
     avatar: 'https://placehold.co/100x100.png',
   },
   {
-    id: '2',
     name: 'Alice Johnson',
     email: 'alice@example.com',
     role: 'Power User',
     avatar: 'https://placehold.co/100x100.png',
   },
   {
-    id: '3',
     name: 'Bob Williams',
     email: 'bob@example.com',
     role: 'Standard User',
     avatar: 'https://placehold.co/100x100.png',
   },
   {
-    id: '4',
     name: 'Charlie Brown',
     email: 'charlie@example.com',
     role: 'Read-Only',
@@ -31,9 +27,8 @@ export const mockUsers: User[] = [
   },
 ];
 
-export const mockContacts: Contact[] = [
+export const mockContacts: Omit<Contact, 'id'>[] = [
   {
-    id: 'c1',
     firstName: 'John',
     lastName: 'Doe',
     email: 'john.doe@acmecorp.com',
@@ -46,7 +41,6 @@ export const mockContacts: Contact[] = [
     notes: 'Key contact for Project Titan.'
   },
   {
-    id: 'c2',
     firstName: 'Jane',
     lastName: 'Smith',
     email: 'jane.smith@techsolutions.io',
@@ -55,9 +49,10 @@ export const mockContacts: Contact[] = [
     designation: 'Project Manager',
     avatar: 'https://placehold.co/100x100.png',
     address: '456 Tech Ave, Innovation Valley',
+    notes: null,
+    mobile: null,
   },
   {
-    id: 'c3',
     firstName: 'Sam',
     lastName: 'Wilson',
     email: 'sam.wilson@webweavers.dev',
@@ -65,10 +60,11 @@ export const mockContacts: Contact[] = [
     organization: 'WebWeavers',
     designation: 'UX/UI Designer',
     avatar: 'https://placehold.co/100x100.png',
-    notes: 'Met at the design conference.'
+    notes: 'Met at the design conference.',
+    mobile: null,
+    address: null,
   },
   {
-    id: 'c4',
     firstName: 'Emily',
     lastName: 'White',
     email: 'emily.white@datadyne.com',
@@ -76,9 +72,11 @@ export const mockContacts: Contact[] = [
     organization: 'DataDyne',
     designation: 'Data Scientist',
     avatar: 'https://placehold.co/100x100.png',
+    notes: null,
+    mobile: null,
+    address: null,
   },
     {
-    id: 'c5',
     firstName: 'Michael',
     lastName: 'Brown',
     email: 'michael.b@cloudcentral.net',
@@ -86,9 +84,11 @@ export const mockContacts: Contact[] = [
     organization: 'Cloud Central',
     designation: 'DevOps Specialist',
     avatar: 'https://placehold.co/100x100.png',
+    notes: null,
+    mobile: null,
+    address: null,
   },
   {
-    id: 'c6',
     firstName: 'Sarah',
     lastName: 'Green',
     email: 'sarah.g@innovateinc.co',
@@ -96,6 +96,8 @@ export const mockContacts: Contact[] = [
     organization: 'Innovate Inc.',
     designation: 'CEO',
     avatar: 'https://placehold.co/100x100.png',
-    notes: 'Founder and primary decision maker.'
+    notes: 'Founder and primary decision maker.',
+    mobile: null,
+    address: null,
   },
 ];
