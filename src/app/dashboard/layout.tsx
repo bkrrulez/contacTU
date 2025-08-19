@@ -2,7 +2,6 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/sidebar';
 import { AppHeader } from '@/components/dashboard/header';
 import { UserProfile } from '@/components/dashboard/user-profile';
-import { Logo } from '@/components/logo';
 
 export default function DashboardLayout({
   children,
@@ -11,18 +10,18 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-muted/40">
+      <div className="flex h-screen w-full bg-muted/40">
         <AppSidebar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 h-screen">
           <AppHeader>
             <UserProfile />
           </AppHeader>
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-            {children}
-          </main>
-          <footer className="py-4 text-center" style={{ color: 'darkblue', fontSize: '0.67rem' }}>
-            Created by Bikramjit Chowdhury
-          </footer>
+          <div className="flex flex-col flex-1 overflow-auto">
+            <main className="flex-1 p-4 lg:p-6">{children}</main>
+            <footer className="py-4 text-center text-xs" style={{ color: 'darkblue', fontSize: '0.67rem' }}>
+              Created by Bikramjit Chowdhury
+            </footer>
+          </div>
         </div>
       </div>
     </SidebarProvider>
