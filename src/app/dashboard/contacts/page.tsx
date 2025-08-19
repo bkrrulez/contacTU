@@ -7,13 +7,7 @@ import { contacts as contactsSchema } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 export default async function ContactsPage() {
-  const contacts = await db.query.contacts.findMany({
-    with: {
-      organizations: true,
-      emails: true,
-      phones: true,
-    }
-  });
+  const contacts = await db.query.contacts.findMany();
 
   return (
     <div className="space-y-4">
