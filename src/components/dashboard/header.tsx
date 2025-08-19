@@ -1,3 +1,4 @@
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +14,19 @@ import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AppSidebar } from './sidebar';
 import { SidebarTrigger } from '../ui/sidebar';
+import { db } from '@/lib/db';
+import { UserProfile } from './user-profile';
 
-export function AppHeader({ children }: { children: React.ReactNode }) {
+async function getCurrentUser() {
+    // In a real app, you'd get the current user from the session.
+    // For now, we'll fetch the first user from the database.
+    return await db.query.users.findFirst();
+}
+
+
+export async function AppHeader({ children }: { children: React.ReactNode }) {
+  const currentUser = await getCurrentUser();
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <div className="flex items-center gap-4">
@@ -47,10 +59,10 @@ export function AppHeader({ children }: { children: React.ReactNode }) {
               variant="ghost"
               className="flex items-center gap-2 p-2"
             >
-               {children}
+               <UserProfile />
                <div className="text-left">
-                    <p className="text-sm font-medium">System Administrator</p>
-                    <p className="text-xs text-muted-foreground">Admin</p>
+                    <p className="text-sm font-medium">{currentUser?.name ?? 'User'}</p>
+                    <p className="text-xs text-muted-foreground">{currentUser?.role ?? 'Role'}</p>
                </div>
             </Button>
           </DropdownMenuTrigger>

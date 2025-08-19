@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -57,6 +58,8 @@ export default async function DashboardPage() {
       organization: true
     }
   }).then(orgs => new Set(orgs.map(o => o.organization)));
+  const currentUser = await db.query.users.findFirst();
+
 
   const recentChanges = 0; // Placeholder
 
@@ -66,7 +69,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back, System! Here's your contact management overview.
+            Welcome back, {currentUser?.name ?? 'User'}! Here's your contact management overview.
           </p>
         </div>
         <div className="flex gap-2">
