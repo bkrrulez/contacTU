@@ -60,15 +60,15 @@ export default async function DashboardPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href="/dashboard/settings">
-              <ShieldQuestion className="mr-2 h-4 w-4" />
-              Manage Duplicates
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
             <Link href="/dashboard/import">
               <Upload className="mr-2 h-4 w-4" />
               Import
+            </Link>
+          </Button>
+           <Button variant="outline" asChild>
+            <Link href="/dashboard/settings">
+              <ShieldQuestion className="mr-2 h-4 w-4" />
+              Manage Duplicates
             </Link>
           </Button>
           <Button variant="outline">
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Contacts</CardTitle>
             <Button asChild variant="link" className="text-primary">
-                <Link href="/dashboard">View All</Link>
+                <Link href="/dashboard/contacts">View All</Link>
             </Button>
           </CardHeader>
           <CardContent>

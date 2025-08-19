@@ -17,12 +17,14 @@ import {
 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Logo } from '../logo';
+import { db } from '@/lib/db';
+import type { User } from '@/lib/types';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/dashboard', icon: Contact, label: 'Contacts' },
-  { href: '/dashboard/users', icon: Users, label: 'User Management' },
-  { href: '/dashboard/audit', icon: FileText, label: 'Audit Logs' },
+  { href: '/dashboard/contacts', icon: Contact, label: 'Contacts' },
+  { href: '/dashboard/users', icon: Users, label: 'User Management', roles: ['Admin', 'Power User'] },
+  { href: '/dashboard/audit', icon: FileText, label: 'Audit Logs', roles: ['Admin', 'Power User'] },
 ];
 
 const secondaryNavItems = [
@@ -30,7 +32,16 @@ const secondaryNavItems = [
     { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
-export function AppSidebar() {
+export async function AppSidebar() {
+  // In a real app, you'd get the current user from the session.
+  // For this prototype, we'll fetch the admin user to determine role.
+  const currentUser: User | undefined = await db.query.users.findFirst({
+    where: (users, { eq }) => eq(users.role, 'Admin'),
+  });
+  
+  // Default to a restrictive role if no user is found
+  const userRole = currentUser?.role || 'Read-Only';
+
   return (
     <Sidebar
       className="border-r"
@@ -43,17 +54,19 @@ export function AppSidebar() {
         </SidebarHeader>
         <SidebarMenu className="flex-1 p-2">
           {navItems.map((item) => (
-            <SidebarMenuItem key={item.label}>
-              <SidebarMenuButton
-                asChild
-                tooltip={{ children: item.label }}
-              >
-                <Link href={item.href}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            (!item.roles || item.roles.includes(userRole)) && (
+              <SidebarMenuItem key={item.label}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={{ children: item.label }}
+                >
+                  <Link href={item.href}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
           ))}
           <Separator className="my-2" />
           {secondaryNavItems.map((item) => (
