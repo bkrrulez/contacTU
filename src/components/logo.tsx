@@ -11,24 +11,19 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement> & { 
         {...props}
       >
         <g transform="translate(10, 10)">
-          {/* Icon */}
-          <g fill="#757575">
-            <path d="M56.25,3.75H43.75a7.5,7.5,0,0,0-7.5,7.5v60a7.5,7.5,0,0,0,7.5,7.5h22.5a7.5,7.5,0,0,0,7.5-7.5v-60A7.5,7.5,0,0,0,66.25,3.75H56.25Z" fill="currentColor" className="text-gray-200" stroke="currentColor" strokeWidth="2.5" />
-            <path d="M60,3.75H50a2.5,2.5,0,0,0-2.5,2.5V10a2.5,2.5,0,0,0,2.5,2.5H60a2.5,2.5,0,0,0,2.5-2.5V6.25A2.5,2.5,0,0,0,60,3.75Z" fill="currentColor" className="text-gray-400" stroke="currentColor" strokeWidth="2.5" />
-            
-            <g transform="translate(39, 25)">
-              <rect width="32" height="32" rx="3" ry="3" fill="currentColor" className="text-white" stroke="currentColor" strokeWidth="2.5" />
-              {/* Person Icon */}
-              <circle cx="16" cy="13" r="5" fill="none" stroke="currentColor" strokeWidth="2.5"/>
-              <path d="M10,24 q6,-8 12,0" fill="none" stroke="currentColor" strokeWidth="2.5"/>
-            </g>
+          {/* Icon: Simple ID Card */}
+          <g fill="none" stroke="currentColor" strokeWidth="2.5">
+            <rect x="36.25" y="3.75" width="45" height="75" rx="7.5" ry="7.5" className="text-gray-400" fill="currentColor"/>
+            <rect x="45" y="15" width="28" height="20" rx="3" ry="3" className="text-white" fill="currentColor" />
+            <line x1="45" y1="45" x2="73" y2="45" className="text-gray-300" stroke="currentColor" />
+            <line x1="45" y1="55" x2="73" y2="55" className="text-gray-300" stroke="currentColor" />
           </g>
 
           {/* Text */}
-          <text x="79" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-gray-600">
+          <text x="85" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-gray-600">
             contac
           </text>
-          <text x="304" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-blue-600">
+          <text x="310" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-blue-600">
             TU
           </text>
         </g>
