@@ -12,7 +12,6 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AppSidebar } from './sidebar';
-import { Logo } from '../logo';
 import { SidebarTrigger } from '../ui/sidebar';
 
 export function AppHeader({ children }: { children: React.ReactNode }) {

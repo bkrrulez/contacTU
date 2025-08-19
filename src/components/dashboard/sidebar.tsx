@@ -72,6 +72,7 @@ export function AppSidebar() {
                     asChild
                     tooltip={{ children: item.label }}
                     isActive={pathname === item.href}
+                    className={pathname === item.href ? "shadow-md" : ""}
                     >
                     <Link href={item.href}>
                         <item.icon />
