@@ -13,11 +13,13 @@ import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AppSidebar } from './sidebar';
 import { Logo } from '../logo';
+import { SidebarTrigger } from '../ui/sidebar';
 
 export function AppHeader({ children }: { children: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <div className="flex items-center gap-4">
+        <SidebarTrigger className="hidden md:flex" />
         <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="md:hidden">
@@ -47,7 +49,7 @@ export function AppHeader({ children }: { children: React.ReactNode }) {
               className="flex items-center gap-2 p-2"
             >
                {children}
-               <div className="text-left hidden sm:block">
+               <div className="text-left">
                     <p className="text-sm font-medium">System Administrator</p>
                     <p className="text-xs text-muted-foreground">Admin</p>
                </div>

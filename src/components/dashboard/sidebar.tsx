@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   Sidebar,
@@ -19,8 +21,9 @@ import {
 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Logo } from '../logo';
-import { db } from '@/lib/db';
 import type { User } from '@/lib/types';
+import { usePathname } from 'next/navigation';
+import React from 'react';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -35,13 +38,18 @@ const bottomNavItems = [
     { href: '/', icon: LogOut, label: 'Log Out' },
 ];
 
-export async function AppSidebar() {
-  // In a real app, you'd get the current user from the session.
-  // For this prototype, we'll fetch the admin user to determine role.
-  const currentUser: User | undefined = await db.query.users.findFirst({
-    where: (users, { eq }) => eq(users.role, 'Admin'),
-  });
-  
+// This is a placeholder for fetching user data.
+// In a real app, you'd get the current user from the session.
+const currentUser: User = {
+    id: 1,
+    name: 'Admin User',
+    email: 'admin@cardbase.com',
+    role: 'Admin',
+    avatar: 'https://placehold.co/100x100.png'
+};
+
+export function AppSidebar() {
+  const pathname = usePathname();
   // Default to a restrictive role if no user is found
   const userRole = currentUser?.role || 'Read-Only';
 
@@ -63,6 +71,7 @@ export async function AppSidebar() {
                     <SidebarMenuButton
                     asChild
                     tooltip={{ children: item.label }}
+                    isActive={pathname === item.href}
                     >
                     <Link href={item.href}>
                         <item.icon />
@@ -82,6 +91,7 @@ export async function AppSidebar() {
                     <SidebarMenuButton
                         asChild
                         tooltip={{ children: item.label }}
+                        isActive={pathname === item.href}
                     >
                         <Link href={item.href}>
                         <item.icon />
