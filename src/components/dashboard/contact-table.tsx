@@ -50,18 +50,20 @@ export function ContactTable({ contacts }: ContactTableProps) {
     setSelectedRows(newSelectedRows);
   };
 
-  const isAllSelected = selectedRows.size === contacts.length;
-  const isSomeSelected = selectedRows.size > 0 && selectedRows.size < contacts.length;
+  const isAllSelected = selectedRows.size > 0 && selectedRows.size === contacts.length;
+  const isSomeSelected = selectedRows.size > 0 && !isAllSelected;
 
+  if (contacts.length === 0) {
+    return null;
+  }
+  
   return (
-    <Card>
-      <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]">
                 <Checkbox
-                  checked={isAllSelected || (isSomeSelected ? 'indeterminate' : false)}
+                  checked={isAllSelected ? true : isSomeSelected ? 'indeterminate' : false}
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
@@ -123,7 +125,5 @@ export function ContactTable({ contacts }: ContactTableProps) {
             ))}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
   );
 }

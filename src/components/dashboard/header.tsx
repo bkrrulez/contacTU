@@ -11,13 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Logo } from '../logo';
 import { AppSidebar } from './sidebar';
 import { UserProfile } from './user-profile';
+import { Separator } from '@/components/ui/separator';
 
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
        <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="md:hidden">
@@ -28,30 +28,30 @@ export function AppHeader() {
             <SheetContent side="left" className="p-0 w-[260px] sm:w-[300px]">
               <AppSidebar />
             </SheetContent>
-          </Sheet>
-      <div className="flex items-center gap-2 mr-4">
-        <Logo className="w-7 h-7 text-primary" />
-        <span className="font-bold text-lg font-headline hidden sm:inline-block">
-          contacTU
-        </span>
-      </div>
-      <div className="relative flex-1 md:grow-0">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search contacts..."
-          className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[336px]"
-        />
-      </div>
+        </Sheet>
+        
+        <h1 className="text-xl font-semibold">Dashboard</h1>
+
       <div className="ml-auto flex items-center gap-4">
+        <div className="relative flex-1 md:grow-0">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+            type="search"
+            placeholder="Search contacts..."
+            className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[336px]"
+            />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="outline"
-              size="icon"
-              className="overflow-hidden rounded-full"
+              variant="ghost"
+              className="flex items-center gap-2 p-2"
             >
                <UserProfile />
+               <div className="text-left hidden sm:block">
+                    <p className="text-sm font-medium">System Administrator</p>
+                    <p className="text-xs text-muted-foreground">Admin</p>
+               </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

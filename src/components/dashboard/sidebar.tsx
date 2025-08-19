@@ -5,54 +5,36 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarContent,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/logo';
-import { Button } from '@/components/ui/button';
 import {
   Users,
-  Upload,
-  Settings,
   Contact,
-  LogOut,
-  ChevronLeft,
+  LayoutDashboard,
+  FileText,
 } from 'lucide-react';
-import { useSidebar } from '@/components/ui/sidebar';
 
 const navItems = [
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/dashboard', icon: Contact, label: 'Contacts' },
-  { href: '/dashboard/import', icon: Upload, label: 'Import' },
-  { href: '/dashboard/users', icon: Users, label: 'Users' },
-  { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+  { href: '/dashboard/users', icon: Users, label: 'User Management' },
+  { href: '/dashboard/audit', icon: FileText, label: 'Audit Logs' },
 ];
 
 export function AppSidebar() {
   return (
     <Sidebar
-      collapsible="icon"
-      className="group-data-[collapsible=icon]:border-r"
-      variant="sidebar"
+      className="border-r"
     >
       <SidebarContent className="flex flex-col">
-        <SidebarHeader className="h-14 p-2 flex items-center justify-between">
+        <SidebarHeader className="h-16 flex items-center justify-start px-4">
             <div className="flex items-center gap-2">
-                 <Logo className="w-7 h-7 text-primary" />
-                 <span className="font-bold text-lg font-headline group-data-[collapsible=icon]:hidden">
+                 <Logo className="w-8 h-8 text-primary" />
+                 <span className="font-bold text-xl font-headline">
                     contacTU
                  </span>
             </div>
-            <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 group-data-[collapsible=icon]:hidden"
-                asChild
-            >
-                <SidebarMenuButton>
-                    <ChevronLeft />
-                    <span className="sr-only">Toggle Sidebar</span>
-                </SidebarMenuButton>
-            </Button>
         </SidebarHeader>
 
         <SidebarMenu className="flex-1 p-2">
@@ -73,19 +55,6 @@ export function AppSidebar() {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
-
-        <SidebarFooter className="p-2">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/">
-                  <LogOut />
-                  <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
       </SidebarContent>
     </Sidebar>
   );

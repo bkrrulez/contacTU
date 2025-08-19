@@ -1,24 +1,132 @@
-import { PlusCircle } from 'lucide-react';
+'use client';
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  Users,
+  Contact,
+  Building,
+  LineChart,
+  Upload,
+  DatabaseBackup,
+  Download,
+} from 'lucide-react';
 import { ContactTable } from '@/components/dashboard/contact-table';
 import { db } from '@/lib/db';
+import { useEffect, useState } from 'react';
+import type { Contact as ContactType, User } from '@/lib/types';
+import Link from 'next/link';
+import { ShieldQuestion } from 'lucide-react';
 
-export default async function DashboardPage() {
-  const contacts = await db.query.contacts.findMany();
-  
+const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  color,
+}: {
+  title: string;
+  value: number;
+  icon: React.ElementType;
+  color?: string;
+}) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <div className={`rounded-full p-2`} style={{ backgroundColor: color ? `${color}1A` : 'var(--primary-10)'}}>
+        <Icon className="h-4 w-4 text-primary" style={{color: color ?? 'var(--primary)'}}/>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">{value}</div>
+    </CardContent>
+  </Card>
+);
+
+export default function DashboardPage() {
+  const [contacts, setContacts] = useState<ContactType[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [organizations, setOrganizations] = useState(0);
+  const [recentChanges, setRecentChanges] = useState(0);
+
+  useEffect(() => {
+    async function fetchData() {
+      const allContacts = await db.query.contacts.findMany();
+      setContacts(allContacts);
+      
+      const allUsers = await db.query.users.findMany();
+      setUsers(allUsers);
+
+      const orgs = new Set(allContacts.map(c => c.organization).filter(Boolean));
+      setOrganizations(orgs.size);
+    }
+    fetchData();
+  }, []);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight font-headline">Contacts</h1>
-          <p className="text-muted-foreground">Manage your contact database.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, System! Here's your contact management overview.
+          </p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Contact
+        <Button variant="outline">
+          <Download className="mr-2 h-4 w-4" />
+          Export
         </Button>
       </div>
-      <ContactTable contacts={contacts} />
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Total Contacts" value={contacts.length} icon={Contact} color="#2563EB" />
+        <StatCard title="Active Users" value={users.length} icon={Users} color="#16A34A" />
+        <StatCard title="Organizations" value={organizations} icon={Building} color="#9333EA" />
+        <StatCard title="Recent Changes" value={recentChanges} icon={LineChart} color="#F59E0B" />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Recent Contacts</CardTitle>
+            <Button asChild variant="link" className="text-primary">
+                <Link href="/dashboard">View All</Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {contacts.length > 0 ? (
+                <ContactTable contacts={contacts.slice(0, 5)} />
+            ): (
+                <div className="text-center text-muted-foreground py-12">
+                    No contacts found
+                </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <Button className="w-full justify-start" asChild>
+                        <Link href="/dashboard/import"><Upload className="mr-2 h-4 w-4" /> Bulk Import Contacts</Link>
+                    </Button>
+                    <Button className="w-full justify-start" asChild>
+                        <Link href="/dashboard/settings"><ShieldQuestion className="mr-2 h-4 w-4" /> Manage Duplicates</Link>
+                    </Button>
+                    <Button className="w-full justify-start" asChild>
+                        <Link href="/dashboard/settings"><DatabaseBackup className="mr-2 h-4 w-4" /> Backup Database</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+      </div>
     </div>
   );
 }
