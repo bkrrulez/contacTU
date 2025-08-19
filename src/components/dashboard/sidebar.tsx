@@ -16,6 +16,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { Separator } from '../ui/separator';
+import { Logo } from '../logo';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -36,8 +37,8 @@ export function AppSidebar() {
     >
       <SidebarContent className="flex flex-col">
         <SidebarHeader className="h-16 flex items-center justify-start px-4">
-            <Link href="/dashboard" className="font-bold text-lg">
-                contacTU
+            <Link href="/dashboard">
+                <Logo />
             </Link>
         </SidebarHeader>
         <SidebarMenu className="flex-1 p-2">

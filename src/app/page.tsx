@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { Logo } from '@/components/logo';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -55,9 +56,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="space-y-1 text-center pt-8">
-          <CardTitle className="text-2xl">Sign In</CardTitle>
-          <CardDescription>Enter your credentials to access your contacts</CardDescription>
+        <CardHeader className="space-y-1 text-center pt-8 flex items-center justify-center">
+            <Logo className="h-24 w-auto" />
         </CardHeader>
         <CardContent>
           <Form {...form}>
