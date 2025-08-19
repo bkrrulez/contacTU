@@ -13,17 +13,17 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement> & { 
         <g transform="translate(10, 10)">
           {/* Icon: Simple ID Card */}
           <g fill="none" stroke="currentColor" strokeWidth="2.5">
-            <rect x="36.25" y="3.75" width="45" height="75" rx="7.5" ry="7.5" className="text-gray-400" fill="currentColor"/>
-            <rect x="45" y="15" width="28" height="20" rx="3" ry="3" className="text-white" fill="currentColor" />
-            <line x1="45" y1="45" x2="73" y2="45" className="text-gray-300" stroke="currentColor" />
-            <line x1="45" y1="55" x2="73" y2="55" className="text-gray-300" stroke="currentColor" />
+            <rect x="30" y="0" width="60" height="80" rx="6" ry="6" className="text-gray-400" stroke="currentColor" fill="none"/>
+            <circle cx="60" cy="25" r="10" className="text-gray-300" stroke="currentColor"/>
+            <line x1="45" y1="48" x2="75" y2="48" className="text-gray-300" stroke="currentColor" />
+            <line x1="45" y1="60" x2="75" y2="60" className="text-gray-300" stroke="currentColor" />
           </g>
 
           {/* Text */}
-          <text x="85" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-gray-600">
+          <text x="95" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-gray-600">
             contac
           </text>
-          <text x="310" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-blue-600">
+          <text x="320" y="68" fontFamily="Arial, sans-serif" fontSize="72" fontWeight="bold" className="fill-blue-600">
             TU
           </text>
         </g>
