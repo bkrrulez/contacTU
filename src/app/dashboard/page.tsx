@@ -11,14 +11,13 @@ import {
   Building,
   LineChart,
   Upload,
-  DatabaseBackup,
   Download,
+  ShieldQuestion,
 } from 'lucide-react';
 import { ContactTable } from '@/components/dashboard/contact-table';
 import { db } from '@/lib/db';
 import type { Contact as ContactType, User } from '@/lib/types';
 import Link from 'next/link';
-import { ShieldQuestion } from 'lucide-react';
 
 const StatCard = ({
   title,
@@ -59,10 +58,24 @@ export default async function DashboardPage() {
             Welcome back, System! Here's your contact management overview.
           </p>
         </div>
-        <Button variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          Export
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/settings">
+              <ShieldQuestion className="mr-2 h-4 w-4" />
+              Manage Duplicates
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/import">
+              <Upload className="mr-2 h-4 w-4" />
+              Import
+            </Link>
+          </Button>
+          <Button variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -72,8 +85,8 @@ export default async function DashboardPage() {
         <StatCard title="Recent Changes" value={recentChanges} icon={LineChart} color="#F59E0B" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className="grid gap-6">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Contacts</CardTitle>
             <Button asChild variant="link" className="text-primary">
@@ -90,25 +103,6 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
-
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                    <Button className="w-full justify-start" asChild>
-                        <Link href="/dashboard/import"><Upload className="mr-2 h-4 w-4" /> Bulk Import Contacts</Link>
-                    </Button>
-                    <Button className="w-full justify-start" asChild>
-                        <Link href="/dashboard/settings"><ShieldQuestion className="mr-2 h-4 w-4" /> Manage Duplicates</Link>
-                    </Button>
-                    <Button className="w-full justify-start" asChild>
-                        <Link href="/dashboard/settings"><DatabaseBackup className="mr-2 h-4 w-4" /> Backup Database</Link>
-                    </Button>
-                </CardContent>
-            </Card>
-        </div>
       </div>
     </div>
   );
