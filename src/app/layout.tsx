@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster"
 export const metadata: Metadata = {
   title: 'contacTU',
   description: 'Your contact book in the cloud.',
+  icons: null,
 };
 
 export default function RootLayout({
