@@ -34,6 +34,8 @@ export default function LoginPage() {
   });
 
   const onSubmit = (data: LoginFormValues) => {
+    // This is not a secure way to handle login in a real application.
+    // It's using environment variables for demonstration purposes.
     const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
     const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
 
@@ -55,7 +57,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Logo className="h-10 w-10 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-headline">Welcome to Cardbase</CardTitle>
+          <CardTitle className="text-2xl font-headline">Welcome to contacTU</CardTitle>
           <CardDescription>Enter your credentials to access your contacts</CardDescription>
         </CardHeader>
         <CardContent>

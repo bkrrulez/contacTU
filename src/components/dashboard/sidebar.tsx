@@ -64,7 +64,7 @@ export function AppSidebar() {
           <div className="flex items-center gap-2">
             <Logo className="w-7 h-7 text-primary" />
             <span className="font-bold text-lg font-headline group-data-[collapsible=icon]:hidden">
-              Cardbase
+              contacTU
             </span>
           </div>
           <Button

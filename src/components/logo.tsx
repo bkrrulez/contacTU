@@ -12,10 +12,9 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      <rect width="18" height="18" x="3" y="3" rx="2" />
-      <path d="M7 7h10" />
-      <path d="M7 12h5" />
-      <path d="M7 17h7" />
+      <path d="M18 2H6a4 4 0 0 0-4 4v12a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4Z" />
+      <path d="M12 12a3 3 0 1 0-3-3" />
+      <path d="M12 17.5c-3.87 0-7-2.02-7-4.5" />
     </svg>
   );
 }

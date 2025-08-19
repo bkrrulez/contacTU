@@ -60,7 +60,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold">Data Export</h3>
-                <p className="text-sm text-muted-foreground">Request a full export of your personal data stored in Cardbase.</p>
+                <p className="text-sm text-muted-foreground">Request a full export of your personal data stored in contacTU.</p>
                 <Button variant="secondary" className="mt-2">Request Data Export</Button>
               </div>
               <div>
