@@ -44,9 +44,20 @@ const StatCard = ({
 );
 
 export default async function DashboardPage() {
-  const contacts: ContactType[] = await db.query.contacts.findMany();
+  const contacts: ContactType[] = await db.query.contacts.findMany({
+    with: {
+      organizations: true,
+      emails: true,
+      phones: true,
+    },
+  });
   const users: User[] = await db.query.users.findMany();
-  const organizations = new Set(contacts.map(c => c.organization).filter(Boolean));
+  const organizations = await db.query.contactOrganizations.findMany({
+    columns: {
+      organization: true
+    }
+  }).then(orgs => new Set(orgs.map(o => o.organization)));
+
   const recentChanges = 0; // Placeholder
 
   return (

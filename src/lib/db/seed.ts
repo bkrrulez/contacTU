@@ -1,5 +1,11 @@
 import { db } from './';
-import { contacts, users } from './schema';
+import { 
+  contacts, 
+  users,
+  contactOrganizations,
+  contactEmails,
+  contactPhones
+} from './schema';
 import { mockContacts, mockUsers } from '../data';
 import * as dotenv from 'dotenv';
 import { execSync } from 'child_process';
@@ -22,6 +28,9 @@ async function seed() {
   console.log('Seeding database...');
 
   // Clear existing data
+  await db.delete(contactOrganizations);
+  await db.delete(contactEmails);
+  await db.delete(contactPhones);
   await db.delete(contacts);
   await db.delete(users);
   
@@ -34,11 +43,45 @@ async function seed() {
   console.log(`Seeded ${seededUsers.length} users.`);
 
   // Seed contacts
-  const seededContacts = await db.insert(contacts).values(
-    mockContacts
-  ).returning();
-  console.log(`Seeded ${seededContacts.length} contacts.`);
+  for (const mockContact of mockContacts) {
+    const [newContact] = await db.insert(contacts).values({
+      firstName: mockContact.firstName,
+      lastName: mockContact.lastName,
+      address: mockContact.address,
+      birthday: mockContact.birthday,
+      notes: mockContact.notes,
+      avatar: mockContact.avatar,
+    }).returning();
 
+    if (mockContact.organizations) {
+      await db.insert(contactOrganizations).values(
+        mockContact.organizations.map(org => ({
+          contactId: newContact.id,
+          organization: org.organization,
+          designation: org.designation,
+        }))
+      );
+    }
+    if (mockContact.emails) {
+      await db.insert(contactEmails).values(
+        mockContact.emails.map(email => ({
+          contactId: newContact.id,
+          email: email.email,
+        }))
+      );
+    }
+    if (mockContact.phones) {
+      await db.insert(contactPhones).values(
+        mockContact.phones.map(phone => ({
+          contactId: newContact.id,
+          phone: phone.phone,
+          type: phone.type,
+        }))
+      );
+    }
+  }
+
+  console.log(`Seeded ${mockContacts.length} contacts with their relations.`);
   console.log('Database seeding complete.');
   process.exit(0);
 }

@@ -94,13 +94,13 @@ export function ContactTable({ contacts }: ContactTableProps) {
                     </Avatar>
                     <div>
                       <div className="font-medium">{contact.firstName} {contact.lastName}</div>
-                      <div className="text-sm text-muted-foreground md:hidden">{contact.organization}</div>
+                      <div className="text-sm text-muted-foreground md:hidden">{contact.organizations?.[0]?.organization}</div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell">{contact.organization}</TableCell>
-                <TableCell className="hidden lg:table-cell">{contact.email}</TableCell>
-                <TableCell>{contact.phone}</TableCell>
+                <TableCell className="hidden md:table-cell">{contact.organizations?.[0]?.organization}</TableCell>
+                <TableCell className="hidden lg:table-cell">{contact.emails?.[0]?.email}</TableCell>
+                <TableCell>{contact.phones?.[0]?.phone}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
