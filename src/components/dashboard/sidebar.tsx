@@ -19,9 +19,7 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { db } from '@/lib/db';
-import { User } from '@/lib/types';
+import { UserProfile } from './user-profile';
 
 const navItems = [
   { href: '/dashboard', icon: Contact, label: 'Contacts' },
@@ -29,28 +27,6 @@ const navItems = [
   { href: '/dashboard/users', icon: Users, label: 'Users' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
-
-async function UserProfile() {
-  // In a real app, you'd fetch the current user based on session
-  const currentUser = await db.query.users.findFirst();
-  
-  if (!currentUser) {
-    return null;
-  }
-
-  return (
-    <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
-        <Avatar className="h-9 w-9">
-            {currentUser.avatar && <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint="person portrait" />}
-            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium leading-none">{currentUser.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">{currentUser.email}</p>
-        </div>
-    </div>
-  )
-}
 
 export function AppSidebar() {
   return (
@@ -61,23 +37,23 @@ export function AppSidebar() {
     >
       <SidebarContent className="flex flex-col">
         <SidebarHeader className="h-14 p-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo className="w-7 h-7 text-primary" />
-            <span className="font-bold text-lg font-headline group-data-[collapsible=icon]:hidden">
-              contacTU
-            </span>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 group-data-[collapsible=icon]:hidden"
-            asChild
-          >
-            <SidebarMenuButton>
-                <ChevronLeft />
-                <span className="sr-only">Toggle Sidebar</span>
-            </SidebarMenuButton>
-          </Button>
+            <div className="flex items-center gap-2">
+                 <Logo className="w-7 h-7 text-primary" />
+                 <span className="font-bold text-lg font-headline group-data-[collapsible=icon]:hidden">
+                    contacTU
+                 </span>
+            </div>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 group-data-[collapsible=icon]:hidden"
+                asChild
+            >
+                <SidebarMenuButton>
+                    <ChevronLeft />
+                    <span className="sr-only">Toggle Sidebar</span>
+                </SidebarMenuButton>
+            </Button>
         </SidebarHeader>
 
         <SidebarMenu className="flex-1 p-2">
@@ -108,9 +84,6 @@ export function AppSidebar() {
                   <span className="group-data-[collapsible=icon]:hidden">Logout</span>
                 </Link>
               </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <UserProfile />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
