@@ -7,7 +7,6 @@ import {
   SidebarMenuButton,
   SidebarContent,
 } from '@/components/ui/sidebar';
-import { Logo } from '@/components/logo';
 import {
   Users,
   Contact,
@@ -37,9 +36,9 @@ export function AppSidebar() {
     >
       <SidebarContent className="flex flex-col">
         <SidebarHeader className="h-16 flex items-center justify-start px-4">
-          <Link href="/dashboard">
-            <Logo />
-          </Link>
+            <Link href="/dashboard" className="font-bold text-lg">
+                contacTU
+            </Link>
         </SidebarHeader>
         <SidebarMenu className="flex-1 p-2">
           {navItems.map((item) => (

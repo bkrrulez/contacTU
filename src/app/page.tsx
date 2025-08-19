@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Logo } from '@/components/logo';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 
@@ -56,10 +55,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <Logo className="h-20 w-20 text-primary" />
-          </div>
+        <CardHeader className="space-y-1 text-center pt-8">
+          <CardTitle className="text-2xl">Sign In</CardTitle>
           <CardDescription>Enter your credentials to access your contacts</CardDescription>
         </CardHeader>
         <CardContent>
