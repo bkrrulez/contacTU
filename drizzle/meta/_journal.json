@@ -11,6 +11,11 @@
       "id": "2d141d3b-8182-4f93-87ea-b436c7a72382",
       "tag": "0001_add_all_columns",
       "breakpoints": true
+    },
+    {
+      "id": "e81d7237-7c70-46f9-8692-23c34a2e88a0",
+      "tag": "0002_add_team_department",
+      "breakpoints": true
     }
   ]
 }

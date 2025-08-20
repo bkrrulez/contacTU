@@ -73,6 +73,7 @@ export default function NewContactPage() {
       });
       router.push('/dashboard/contacts');
     } catch (error) {
+      console.error(error);
       toast({
         variant: 'destructive',
         title: 'Error',
