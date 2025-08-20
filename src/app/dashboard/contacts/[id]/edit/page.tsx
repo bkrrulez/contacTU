@@ -4,7 +4,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,10 +26,11 @@ import { contactFormSchema } from '@/lib/schemas';
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 
-export default function EditContactPage({ params }: { params: { id: string } }) {
+export default function EditContactPage() {
   const router = useRouter();
+  const params = useParams();
   const { toast } = useToast();
-  const contactId = parseInt(params.id, 10);
+  const contactId = parseInt(params.id as string, 10);
   const [contact, setContact] = useState<Contact | null>(null);
   
   const form = useForm<ContactFormValues>({
