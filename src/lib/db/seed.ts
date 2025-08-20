@@ -1,4 +1,9 @@
 
+import * as dotenv from 'dotenv';
+dotenv.config({
+  path: '.env.local',
+});
+
 import { db } from './';
 import { 
   contacts, 
@@ -11,13 +16,7 @@ import {
   contactAssociatedNames
 } from './schema';
 import type { UserSchema } from './schema';
-import * as dotenv from 'dotenv';
 import { sql } from 'drizzle-orm';
-
-dotenv.config({
-  path: '.env.local',
-});
-
 
 async function seed() {
   const connectionString = process.env.DATABASE_URL;
@@ -27,20 +26,15 @@ async function seed() {
   
   console.log('Seeding database...');
   
-  // Use the drizzle db instance for all operations
   try {
     console.log('Clearing existing data...');
-    // Order of deletion matters due to foreign key constraints.
-    // Start with tables that have foreign keys pointing to others.
     await db.delete(contactAssociatedNames);
     await db.delete(contactSocialLinks);
     await db.delete(contactUrls);
     await db.delete(contactOrganizations);
     await db.delete(contactEmails);
     await db.delete(contactPhones);
-    // Now delete from the contacts table
     await db.delete(contacts);
-    // Finally, delete from the users table
     await db.delete(users);
     console.log('Cleared existing data.');
   } catch (error) {
