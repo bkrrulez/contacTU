@@ -2,11 +2,13 @@
 import { pgTable, serial, text, varchar, date, integer, pgEnum } from 'drizzle-orm/pg-core';
 import { InferSelectModel, relations } from 'drizzle-orm';
 
+export const userRoleEnum = pgEnum('user_role', ['Admin', 'Power User', 'Standard User', 'Read-Only']);
+
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
   email: varchar('email', { length: 256 }).notNull().unique(),
-  role: text('role', { enum: ['Admin', 'Power User', 'Standard User', 'Read-Only'] }).notNull(),
+  role: userRoleEnum('role').notNull(),
   avatar: varchar('avatar', { length: 256 }),
 });
 

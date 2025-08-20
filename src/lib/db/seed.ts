@@ -5,10 +5,7 @@ import {
   users,
   contactOrganizations,
   contactEmails,
-  contactPhones,
-  contactAssociatedNames,
-  contactSocialLinks,
-  contactUrls
+  contactPhones
 } from './schema';
 import type { UserSchema } from './schema';
 import * as dotenv from 'dotenv';
@@ -29,7 +26,9 @@ async function seed() {
   
   const client = postgres(connectionString);
 
-  // Clear existing data
+  // Clear existing data from tables.
+  // Note: The db-schema.sql script should be run before this to ensure tables exist.
+  console.log('Clearing existing data...');
   await client`DELETE FROM contact_associated_names;`;
   await client`DELETE FROM contact_social_links;`;
   await client`DELETE FROM contact_urls;`;
@@ -38,7 +37,6 @@ async function seed() {
   await client`DELETE FROM contact_phones;`;
   await client`DELETE FROM contacts;`;
   await client`DELETE FROM users;`;
-
   console.log('Cleared existing data.');
 
   const mockUsers: Omit<UserSchema, 'id'>[] = [
@@ -106,39 +104,6 @@ async function seed() {
       organizations: [{ organization: 'WebWeavers', designation: 'UX/UI Designer', team: 'Marketing', department: 'Design' }],
       avatar: 'https://placehold.co/100x100.png',
       notes: 'Met at the design conference.',
-      address: null,
-      birthday: null,
-    },
-    {
-      firstName: 'Emily',
-      lastName: 'White',
-      emails: [{ email: 'emily.white@datadyne.com' }],
-      phones: [{ phone: '456-789-0123', type: 'Telephone' as const }],
-      organizations: [{ organization: 'DataDyne', designation: 'Data Scientist', team: 'Analytics', department: 'Science' }],
-      avatar: 'https://placehold.co/100x100.png',
-      notes: null,
-      address: null,
-      birthday: null,
-    },
-      {
-      firstName: 'Michael',
-      lastName: 'Brown',
-      emails: [{ email: 'michael.b@cloudcentral.net' }],
-      phones: [{ phone: '567-890-1234', type: 'Telephone' as const }],
-      organizations: [{ organization: 'Cloud Central', designation: 'DevOps Specialist', team: 'Infrastructure', department: 'Engineering' }],
-      avatar: 'https://placehold.co/100x100.png',
-      notes: null,
-      address: null,
-      birthday: null,
-    },
-    {
-      firstName: 'Sarah',
-      lastName: 'Green',
-      emails: [{ email: 'sarah.g@innovateinc.co' }],
-      phones: [{ phone: '678-901-2345', type: 'Telephone' as const }],
-      organizations: [{ organization: 'Innovate Inc.', designation: 'CEO', team: 'Leadership', department: 'Executive' }],
-      avatar: 'https://placehold.co/100x100.png',
-      notes: 'Founder and primary decision maker.',
       address: null,
       birthday: null,
     },
