@@ -5,11 +5,14 @@ import {
   users,
   contactOrganizations,
   contactEmails,
-  contactPhones
+  contactPhones,
+  contactUrls,
+  contactSocialLinks,
+  contactAssociatedNames
 } from './schema';
 import type { UserSchema } from './schema';
 import * as dotenv from 'dotenv';
-import postgres from 'postgres';
+import { sql } from 'drizzle-orm';
 
 dotenv.config({
   path: '.env.local',
@@ -24,20 +27,27 @@ async function seed() {
   
   console.log('Seeding database...');
   
-  const client = postgres(connectionString);
+  // Use the drizzle db instance for all operations
+  try {
+    console.log('Clearing existing data...');
+    // Order of deletion matters due to foreign key constraints.
+    // Start with tables that have foreign keys pointing to others.
+    await db.delete(contactAssociatedNames);
+    await db.delete(contactSocialLinks);
+    await db.delete(contactUrls);
+    await db.delete(contactOrganizations);
+    await db.delete(contactEmails);
+    await db.delete(contactPhones);
+    // Now delete from the contacts table
+    await db.delete(contacts);
+    // Finally, delete from the users table
+    await db.delete(users);
+    console.log('Cleared existing data.');
+  } catch (error) {
+    console.error('Error clearing data:', error);
+    process.exit(1);
+  }
 
-  // Clear existing data from tables.
-  // Note: The db-schema.sql script should be run before this to ensure tables exist.
-  console.log('Clearing existing data...');
-  await client`DELETE FROM contact_associated_names;`;
-  await client`DELETE FROM contact_social_links;`;
-  await client`DELETE FROM contact_urls;`;
-  await client`DELETE FROM contact_organizations;`;
-  await client`DELETE FROM contact_emails;`;
-  await client`DELETE FROM contact_phones;`;
-  await client`DELETE FROM contacts;`;
-  await client`DELETE FROM users;`;
-  console.log('Cleared existing data.');
 
   const mockUsers: Omit<UserSchema, 'id'>[] = [
     {
