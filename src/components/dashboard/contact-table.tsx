@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import type { Contact } from '@/lib/types';
+import Link from 'next/link';
 import {
   Table,
   TableBody,
@@ -112,7 +113,9 @@ export function ContactTable({ contacts }: ContactTableProps) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem>View</DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/dashboard/contacts/${contact.id}/edit`}>Edit</Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem>Share</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-destructive">
