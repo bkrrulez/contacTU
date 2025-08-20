@@ -6,16 +6,6 @@
       "id": "6921361c-8c76-42d8-8422-261f8a8469d7",
       "tag": "0000_initial_schema",
       "breakpoints": true
-    },
-    {
-      "id": "2d141d3b-8182-4f93-87ea-b436c7a72382",
-      "tag": "0001_add_all_columns",
-      "breakpoints": true
-    },
-    {
-      "id": "e81d7237-7c70-46f9-8692-23c34a2e88a0",
-      "tag": "0002_add_team_department",
-      "breakpoints": true
     }
   ]
 }

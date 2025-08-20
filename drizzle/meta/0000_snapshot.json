@@ -115,6 +115,18 @@
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
+        },
+        "team": {
+          "name": "team",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "department": {
+          "name": "department",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

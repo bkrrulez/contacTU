@@ -10,11 +10,8 @@ import {
   contactSocialLinks,
   contactUrls
 } from './schema';
-import type { User } from '../types';
+import type { UserSchema } from './schema';
 import * as dotenv from 'dotenv';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
-import postgres from 'postgres';
-import { drizzle } from 'drizzle-orm/postgres-js';
 
 dotenv.config({
   path: '.env.local',
@@ -41,7 +38,7 @@ async function seed() {
   
   console.log('Cleared existing data.');
 
-  const mockUsers: Omit<User, 'id'>[] = [
+  const mockUsers: Omit<UserSchema, 'id'>[] = [
     {
       name: 'Admin User',
       email: 'admin@cardbase.com',
