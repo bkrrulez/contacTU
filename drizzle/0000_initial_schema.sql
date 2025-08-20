@@ -13,9 +13,15 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"name" varchar(256) NOT NULL,
 	"email" varchar(256) NOT NULL,
 	"role" text NOT NULL,
-	"avatar" varchar(256),
-	CONSTRAINT "users_email_unique" UNIQUE("email")
+	"avatar" varchar(256)
 );
+ALTER TABLE "users" ADD CONSTRAINT "users_email_unique" UNIQUE("email");
+
+DO $$ BEGIN
+ CREATE TYPE "public"."phone_type" AS ENUM('Telephone', 'Mobile');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
 
 CREATE TABLE IF NOT EXISTS "contact_associated_names" (
 	"id" serial PRIMARY KEY NOT NULL,
