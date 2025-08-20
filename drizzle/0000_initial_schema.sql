@@ -1,3 +1,9 @@
+DO $$ BEGIN
+ CREATE TYPE "public"."phone_type" AS ENUM('Telephone', 'Mobile');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "contact_associated_names" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"contact_id" integer NOT NULL,
@@ -18,12 +24,6 @@ CREATE TABLE IF NOT EXISTS "contact_organizations" (
 	"team" varchar(256) NOT NULL,
 	"department" varchar(256)
 );
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."phone_type" AS ENUM('Telephone', 'Mobile');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "contact_phones" (
 	"id" serial PRIMARY KEY NOT NULL,
