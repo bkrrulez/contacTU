@@ -7,12 +7,11 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { updateContact } from '../../actions';
+import { updateContact, getContact } from '../../actions';
 import Link from 'next/link';
 import { ArrowLeft, CalendarIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,43 +20,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
-import { db } from '@/lib/db';
 import type { Contact } from '@/lib/types';
-
-const contactFormSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().min(1, 'Please add email to save the contact').email('Invalid email address'),
-  phone: z.string().min(1, 'Please add mobile to save the contact'),
-  phoneType: z.enum(['Telephone', 'Mobile']).default('Mobile'),
-  organization: z.string().min(1, 'Organization is required'),
-  designation: z.string().optional(),
-  team: z.string().min(1, 'Team is required'),
-  department: z.string().optional(),
-  address: z.string().optional(),
-  notes: z.string().optional(),
-  website: z.string().url('Invalid URL').optional().or(z.literal('')),
-  birthday: z.date().optional(),
-  associatedName: z.string().optional(),
-  socialMedia: z.string().url('Invalid URL').optional().or(z.literal('')),
-});
+import { contactFormSchema } from '@/lib/schemas';
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
-
-async function getContact(id: number): Promise<Contact | null> {
-    const contact = await db.query.contacts.findFirst({
-        where: (contacts, { eq }) => eq(contacts.id, id),
-        with: {
-            organizations: true,
-            emails: true,
-            phones: true,
-            urls: true,
-            socialLinks: true,
-            associatedNames: true,
-        }
-    });
-    return contact || null;
-}
 
 
 export default function EditContactPage({ params }: { params: { id: string } }) {
@@ -373,7 +339,7 @@ export default function EditContactPage({ params }: { params: { id: string } }) 
                         <FormField
                             control={form.control}
                             name="associatedName"
-                            render={({ field })_> (
+                            render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Associated Name</FormLabel>
                                 <FormControl>

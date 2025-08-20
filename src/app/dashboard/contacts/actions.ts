@@ -6,24 +6,8 @@ import { db } from '@/lib/db';
 import { contacts, contactEmails, contactPhones, contactOrganizations, contactUrls, contactSocialLinks, contactAssociatedNames } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
-
-const contactFormSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().min(1, 'Please add email to save the contact').email('Invalid email address'),
-  phone: z.string().min(1, 'Please add mobile to save the contact'),
-  phoneType: z.enum(['Telephone', 'Mobile']).default('Mobile'),
-  organization: z.string().min(1, 'Organization is required'),
-  designation: z.string().optional(),
-  team: z.string().min(1, 'Team is required'),
-  department: z.string().optional(),
-  address: z.string().optional(),
-  notes: z.string().optional(),
-  website: z.string().url().optional().or(z.literal('')),
-  birthday: z.date().optional(),
-  associatedName: z.string().optional(),
-  socialMedia: z.string().url().optional().or(z.literal('')),
-});
+import type { Contact } from '@/lib/types';
+import { contactFormSchema } from '@/lib/schemas';
 
 
 export async function createContact(values: z.infer<typeof contactFormSchema>) {
@@ -154,4 +138,19 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
     revalidatePath(`/dashboard/contacts/${id}/edit`);
 
     return { success: true };
+}
+
+export async function getContact(id: number): Promise<Contact | null> {
+    const contact = await db.query.contacts.findFirst({
+        where: (contacts, { eq }) => eq(contacts.id, id),
+        with: {
+            organizations: true,
+            emails: true,
+            phones: true,
+            urls: true,
+            socialLinks: true,
+            associatedNames: true,
+        }
+    });
+    return contact || null;
 }
