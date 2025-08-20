@@ -1,100 +1,75 @@
-CREATE TABLE IF NOT EXISTS "contacts" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"first_name" varchar(256) NOT NULL,
-	"last_name" varchar(256) NOT NULL,
-	"address" text,
-	"birthday" date,
-	"notes" text,
-	"avatar" varchar(256)
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "users" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"name" varchar(256) NOT NULL,
-	"email" varchar(256) NOT NULL,
-	"role" text NOT NULL,
-	"avatar" varchar(256)
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "contact_associated_names" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"contact_id" integer NOT NULL,
-	"name" varchar(256) NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "contact_emails" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"contact_id" integer NOT NULL,
-	"email" varchar(256) NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "contact_organizations" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"contact_id" integer NOT NULL,
-	"organization" varchar(256) NOT NULL,
-	"designation" varchar(256),
-	"team" varchar(256) NOT NULL,
-	"department" varchar(256)
-);
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."phone_type" AS ENUM('Telephone', 'Mobile');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "contact_phones" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"contact_id" integer NOT NULL,
-	"phone" varchar(50) NOT NULL,
-	"type" "phone_type" NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "contact_social_links" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"contact_id" integer NOT NULL,
-	"link" varchar(256) NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "contact_urls" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"contact_id" integer NOT NULL,
-	"url" varchar(256) NOT NULL
-);
---> statement-breakpoint
-ALTER TABLE "users" ADD CONSTRAINT "users_email_unique" UNIQUE("email");
-DO $$ BEGIN
- ALTER TABLE "contact_associated_names" ADD CONSTRAINT "contact_associated_names_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "contact_emails" ADD CONSTRAINT "contact_emails_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "contact_organizations" ADD CONSTRAINT "contact_organizations_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "contact_phones" ADD CONSTRAINT "contact_phones_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "contact_social_links" ADD CONSTRAINT "contact_social_links_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "contact_urls" ADD CONSTRAINT "contact_urls_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
+{
+  "name": "nextn",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack -p 9002",
+    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
+    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/lib/db/migrate.ts",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/lib/db/seed.ts"
+  },
+  "dependencies": {
+    "@genkit-ai/googleai": "^1.14.1",
+    "@genkit-ai/next": "^1.14.1",
+    "@hookform/resolvers": "^4.1.3",
+    "@radix-ui/react-accordion": "^1.2.3",
+    "@radix-ui/react-alert-dialog": "^1.1.6",
+    "@radix-ui/react-avatar": "^1.1.3",
+    "@radix-ui/react-checkbox": "^1.1.4",
+    "@radix-ui/react-collapsible": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-menubar": "^1.1.6",
+    "@radix-ui/react-popover": "^1.1.6",
+    "@radix-ui/react-progress": "^1.1.2",
+    "@radix-ui/react-radio-group": "^1.2.3",
+    "@radix-ui/react-scroll-area": "^1.2.3",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-separator": "^1.1.2",
+    "@radix-ui/react-slider": "^1.2.3",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.1.3",
+    "@radix-ui/react-tabs": "^1.1.3",
+    "@radix-ui/react-toast": "^1.2.6",
+    "@radix-ui/react-tooltip": "^1.1.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.5.0",
+    "drizzle-kit": "^0.24.1",
+    "drizzle-orm": "^0.33.0",
+    "embla-carousel-react": "^8.6.0",
+    "firebase": "^11.9.1",
+    "genkit": "^1.14.1",
+    "lucide-react": "^0.475.0",
+    "next": "15.3.3",
+    "patch-package": "^8.0.0",
+    "postgres": "^3.4.4",
+    "react": "^18.3.1",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "recharts": "^2.15.1",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "genkit-cli": "^1.14.1",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5"
+  }
+}
