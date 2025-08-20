@@ -22,7 +22,7 @@ export const contacts = pgTable('contacts', {
 
 export const contactOrganizations = pgTable('contact_organizations', {
   id: serial('id').primaryKey(),
-  contactId: integer('contact_id').notNull().references(() => contacts.id),
+  contactId: integer('contact_id').notNull().references(() => contacts.id, { onDelete: 'cascade' }),
   organization: varchar('organization', { length: 256 }).notNull(),
   designation: varchar('designation', { length: 256 }),
   team: varchar('team', { length: 256 }).notNull(),
@@ -31,7 +31,7 @@ export const contactOrganizations = pgTable('contact_organizations', {
 
 export const contactEmails = pgTable('contact_emails', {
   id: serial('id').primaryKey(),
-  contactId: integer('contact_id').notNull().references(() => contacts.id),
+  contactId: integer('contact_id').notNull().references(() => contacts.id, { onDelete: 'cascade' }),
   email: varchar('email', { length: 256 }).notNull(),
 });
 
@@ -39,26 +39,26 @@ export const phoneTypeEnum = pgEnum('phone_type', ['Telephone', 'Mobile']);
 
 export const contactPhones = pgTable('contact_phones', {
   id: serial('id').primaryKey(),
-  contactId: integer('contact_id').notNull().references(() => contacts.id),
+  contactId: integer('contact_id').notNull().references(() => contacts.id, { onDelete: 'cascade' }),
   phone: varchar('phone', { length: 50 }).notNull(),
   type: phoneTypeEnum('type').notNull(),
 });
 
 export const contactUrls = pgTable('contact_urls', {
   id: serial('id').primaryKey(),
-  contactId: integer('contact_id').notNull().references(() => contacts.id),
+  contactId: integer('contact_id').notNull().references(() => contacts.id, { onDelete: 'cascade' }),
   url: varchar('url', { length: 256 }).notNull(),
 });
 
 export const contactSocialLinks = pgTable('contact_social_links', {
     id: serial('id').primaryKey(),
-    contactId: integer('contact_id').notNull().references(() => contacts.id),
+    contactId: integer('contact_id').notNull().references(() => contacts.id, { onDelete: 'cascade' }),
     link: varchar('link', { length: 256 }).notNull(),
 });
 
 export const contactAssociatedNames = pgTable('contact_associated_names', {
     id: serial('id').primaryKey(),
-    contactId: integer('contact_id').notNull().references(() => contacts.id),
+    contactId: integer('contact_id').notNull().references(() => contacts.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 256 }).notNull(),
 });
 
