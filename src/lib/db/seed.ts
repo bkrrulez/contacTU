@@ -1,9 +1,4 @@
 
-import * as dotenv from 'dotenv';
-dotenv.config({
-  path: '.env.local',
-});
-
 import { db } from './';
 import { 
   contacts, 
@@ -16,14 +11,8 @@ import {
   contactAssociatedNames
 } from './schema';
 import type { UserSchema } from './schema';
-import { sql } from 'drizzle-orm';
 
 async function seed() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error('DATABASE_URL environment variable is not set.');
-  }
-  
   console.log('Seeding database...');
   
   try {
