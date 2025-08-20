@@ -12,6 +12,7 @@ import {
 } from './schema';
 import type { UserSchema } from './schema';
 import * as dotenv from 'dotenv';
+import postgres from 'postgres';
 
 dotenv.config({
   path: '.env.local',
@@ -25,17 +26,19 @@ async function seed() {
   }
   
   console.log('Seeding database...');
+  
+  const client = postgres(connectionString);
 
   // Clear existing data
-  await db.delete(contactAssociatedNames);
-  await db.delete(contactSocialLinks);
-  await db.delete(contactUrls);
-  await db.delete(contactOrganizations);
-  await db.delete(contactEmails);
-  await db.delete(contactPhones);
-  await db.delete(contacts);
-  await db.delete(users);
-  
+  await client`DELETE FROM contact_associated_names;`;
+  await client`DELETE FROM contact_social_links;`;
+  await client`DELETE FROM contact_urls;`;
+  await client`DELETE FROM contact_organizations;`;
+  await client`DELETE FROM contact_emails;`;
+  await client`DELETE FROM contact_phones;`;
+  await client`DELETE FROM contacts;`;
+  await client`DELETE FROM users;`;
+
   console.log('Cleared existing data.');
 
   const mockUsers: Omit<UserSchema, 'id'>[] = [

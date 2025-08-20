@@ -1,75 +1,195 @@
-{
-  "name": "nextn",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack -p 9002",
-    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
-    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/lib/db/migrate.ts",
-    "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx src/lib/db/seed.ts"
-  },
-  "dependencies": {
-    "@genkit-ai/googleai": "^1.14.1",
-    "@genkit-ai/next": "^1.14.1",
-    "@hookform/resolvers": "^4.1.3",
-    "@radix-ui/react-accordion": "^1.2.3",
-    "@radix-ui/react-alert-dialog": "^1.1.6",
-    "@radix-ui/react-avatar": "^1.1.3",
-    "@radix-ui/react-checkbox": "^1.1.4",
-    "@radix-ui/react-collapsible": "^1.1.11",
-    "@radix-ui/react-dialog": "^1.1.6",
-    "@radix-ui/react-dropdown-menu": "^2.1.6",
-    "@radix-ui/react-label": "^2.1.2",
-    "@radix-ui/react-menubar": "^1.1.6",
-    "@radix-ui/react-popover": "^1.1.6",
-    "@radix-ui/react-progress": "^1.1.2",
-    "@radix-ui/react-radio-group": "^1.2.3",
-    "@radix-ui/react-scroll-area": "^1.2.3",
-    "@radix-ui/react-select": "^2.1.6",
-    "@radix-ui/react-separator": "^1.1.2",
-    "@radix-ui/react-slider": "^1.2.3",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@radix-ui/react-switch": "^1.1.3",
-    "@radix-ui/react-tabs": "^1.1.3",
-    "@radix-ui/react-toast": "^1.2.6",
-    "@radix-ui/react-tooltip": "^1.1.8",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^3.6.0",
-    "dotenv": "^16.5.0",
-    "drizzle-kit": "^0.24.1",
-    "drizzle-orm": "^0.33.0",
-    "embla-carousel-react": "^8.6.0",
-    "firebase": "^11.9.1",
-    "genkit": "^1.14.1",
-    "lucide-react": "^0.475.0",
-    "next": "15.3.3",
-    "patch-package": "^8.0.0",
-    "postgres": "^3.4.4",
-    "react": "^18.3.1",
-    "react-day-picker": "^8.10.1",
-    "react-dom": "^18.3.1",
-    "react-hook-form": "^7.54.2",
-    "recharts": "^2.15.1",
-    "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "genkit-cli": "^1.14.1",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "tsx": "^4.19.0",
-    "typescript": "^5"
+import { db } from './';
+import { 
+  contacts, 
+  users,
+  contactOrganizations,
+  contactEmails,
+  contactPhones,
+  contactAssociatedNames,
+  contactSocialLinks,
+  contactUrls
+} from './schema';
+import type { UserSchema } from './schema';
+import * as dotenv from 'dotenv';
+import postgres from 'postgres';
+
+dotenv.config({
+  path: '.env.local',
+});
+
+
+async function seed() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL environment variable is not set.');
   }
+  
+  console.log('Seeding database...');
+  
+  const client = postgres(connectionString);
+
+  // Clear existing data
+  await client`DELETE FROM contact_associated_names;`;
+  await client`DELETE FROM contact_social_links;`;
+  await client`DELETE FROM contact_urls;`;
+  await client`DELETE FROM contact_organizations;`;
+  await client`DELETE FROM contact_emails;`;
+  await client`DELETE FROM contact_phones;`;
+  await client`DELETE FROM contacts;`;
+  await client`DELETE FROM users;`;
+
+  console.log('Cleared existing data.');
+
+  const mockUsers: Omit<UserSchema, 'id'>[] = [
+    {
+      name: 'Admin User',
+      email: 'admin@cardbase.com',
+      role: 'Admin',
+      avatar: 'https://placehold.co/100x100.png',
+    },
+    {
+      name: 'Alice Johnson',
+      email: 'alice@example.com',
+      role: 'Power User',
+      avatar: 'https://placehold.co/100x100.png',
+    },
+    {
+      name: 'Bob Williams',
+      email: 'bob@example.com',
+      role: 'Standard User',
+      avatar: 'https://placehold.co/100x100.png',
+    },
+    {
+      name: 'Charlie Brown',
+      email: 'charlie@example.com',
+      role: 'Read-Only',
+      avatar: 'https://placehold.co/100x100.png',
+    },
+  ];
+
+  // Seed users
+  const seededUsers = await db.insert(users).values(
+    mockUsers
+  ).returning();
+  console.log(`Seeded ${seededUsers.length} users.`);
+
+
+  const mockContacts = [
+    {
+      firstName: 'John',
+      lastName: 'Doe',
+      emails: [{ email: 'john.doe@acmecorp.com' }],
+      phones: [{ phone: '123-456-7890', type: 'Telephone' as const }, { phone: '098-765-4321', type: 'Mobile' as const }],
+      organizations: [{ organization: 'Acme Corp', designation: 'Lead Engineer', team: 'Platform', department: 'Engineering' }],
+      avatar: 'https://placehold.co/100x100.png',
+      address: '123 Acme St, Tech City',
+      notes: 'Key contact for Project Titan.',
+      birthday: '1985-05-15',
+    },
+    {
+      firstName: 'Jane',
+      lastName: 'Smith',
+      emails: [{ email: 'jane.smith@techsolutions.io' }],
+      phones: [{ phone: '234-567-8901', type: 'Telephone' as const }],
+      organizations: [{ organization: 'Tech Solutions', designation: 'Project Manager', team: 'Core Products', department: 'Product' }],
+      avatar: 'https://placehold.co/100x100.png',
+      address: '456 Tech Ave, Innovation Valley',
+      notes: null,
+      birthday: null,
+    },
+    {
+      firstName: 'Sam',
+      lastName: 'Wilson',
+      emails: [{ email: 'sam.wilson@webweavers.dev' }],
+      phones: [{ phone: '345-678-9012', type: 'Mobile' as const }],
+      organizations: [{ organization: 'WebWeavers', designation: 'UX/UI Designer', team: 'Marketing', department: 'Design' }],
+      avatar: 'https://placehold.co/100x100.png',
+      notes: 'Met at the design conference.',
+      address: null,
+      birthday: null,
+    },
+    {
+      firstName: 'Emily',
+      lastName: 'White',
+      emails: [{ email: 'emily.white@datadyne.com' }],
+      phones: [{ phone: '456-789-0123', type: 'Telephone' as const }],
+      organizations: [{ organization: 'DataDyne', designation: 'Data Scientist', team: 'Analytics', department: 'Science' }],
+      avatar: 'https://placehold.co/100x100.png',
+      notes: null,
+      address: null,
+      birthday: null,
+    },
+      {
+      firstName: 'Michael',
+      lastName: 'Brown',
+      emails: [{ email: 'michael.b@cloudcentral.net' }],
+      phones: [{ phone: '567-890-1234', type: 'Telephone' as const }],
+      organizations: [{ organization: 'Cloud Central', designation: 'DevOps Specialist', team: 'Infrastructure', department: 'Engineering' }],
+      avatar: 'https://placehold.co/100x100.png',
+      notes: null,
+      address: null,
+      birthday: null,
+    },
+    {
+      firstName: 'Sarah',
+      lastName: 'Green',
+      emails: [{ email: 'sarah.g@innovateinc.co' }],
+      phones: [{ phone: '678-901-2345', type: 'Telephone' as const }],
+      organizations: [{ organization: 'Innovate Inc.', designation: 'CEO', team: 'Leadership', department: 'Executive' }],
+      avatar: 'https://placehold.co/100x100.png',
+      notes: 'Founder and primary decision maker.',
+      address: null,
+      birthday: null,
+    },
+  ];
+
+  // Seed contacts
+  for (const mockContact of mockContacts) {
+    const [newContact] = await db.insert(contacts).values({
+      firstName: mockContact.firstName,
+      lastName: mockContact.lastName,
+      address: mockContact.address,
+      birthday: mockContact.birthday,
+      notes: mockContact.notes,
+      avatar: mockContact.avatar,
+    }).returning();
+
+    if (mockContact.organizations) {
+      await db.insert(contactOrganizations).values(
+        mockContact.organizations.map(org => ({
+          contactId: newContact.id,
+          organization: org.organization,
+          designation: org.designation,
+          team: org.team,
+          department: org.department,
+        }))
+      );
+    }
+    if (mockContact.emails) {
+      await db.insert(contactEmails).values(
+        mockContact.emails.map(email => ({
+          contactId: newContact.id,
+          email: email.email,
+        }))
+      );
+    }
+    if (mockContact.phones) {
+      await db.insert(contactPhones).values(
+        mockContact.phones.map(phone => ({
+          contactId: newContact.id,
+          phone: phone.phone,
+          type: phone.type,
+        }))
+      );
+    }
+  }
+
+  console.log(`Seeded ${mockContacts.length} contacts with their relations.`);
+  console.log('Database seeding complete.');
+  process.exit(0);
 }
+
+seed().catch((error) => {
+  console.error('Error seeding database:', error);
+  process.exit(1);
+});
