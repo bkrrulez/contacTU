@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:seed": "node --loader tsx src/lib/db/seed.ts"
+    "db:seed": "node --import tsx src/lib/db/seed.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
