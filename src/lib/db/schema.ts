@@ -1,3 +1,4 @@
+
 import { pgTable, serial, text, varchar, date, integer, pgEnum } from 'drizzle-orm/pg-core';
 import { InferSelectModel, relations } from 'drizzle-orm';
 
@@ -24,7 +25,7 @@ export const contactOrganizations = pgTable('contact_organizations', {
   contactId: integer('contact_id').notNull().references(() => contacts.id),
   organization: varchar('organization', { length: 256 }).notNull(),
   designation: varchar('designation', { length: 256 }),
-  team: varchar('team', { length: 256 }),
+  team: varchar('team', { length: 256 }).notNull(),
   department: varchar('department', { length: 256 }),
 });
 

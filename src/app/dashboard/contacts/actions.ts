@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -8,12 +9,12 @@ import { revalidatePath } from 'next/cache';
 const contactFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  phone: z.string().optional(),
+  email: z.string().min(1, 'Please add email to save the contact').email('Invalid email address'),
+  phone: z.string().min(1, 'Please add mobile to save the contact'),
   phoneType: z.enum(['Telephone', 'Mobile']).default('Mobile'),
-  organization: z.string().optional(),
+  organization: z.string().min(1, 'Organization is required'),
   designation: z.string().optional(),
-  team: z.string().optional(),
+  team: z.string().min(1, 'Team is required'),
   department: z.string().optional(),
   address: z.string().optional(),
   notes: z.string().optional(),
@@ -22,6 +23,7 @@ const contactFormSchema = z.object({
   associatedName: z.string().optional(),
   socialMedia: z.string().url().optional().or(z.literal('')),
 });
+
 
 export async function createContact(values: z.infer<typeof contactFormSchema>) {
     const validatedFields = contactFormSchema.safeParse(values);

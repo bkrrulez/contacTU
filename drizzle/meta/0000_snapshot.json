@@ -1,3 +1,4 @@
+
 {
   "id": "6921361c-8c76-42d8-8422-261f8a8469d7",
   "prevId": "00000000-0000-0000-0000-000000000000",
@@ -120,7 +121,7 @@
           "name": "team",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "department": {
           "name": "department",
