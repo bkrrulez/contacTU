@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS "contact_associated_names" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"contact_id" integer NOT NULL,
