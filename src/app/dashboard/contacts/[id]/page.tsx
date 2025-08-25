@@ -24,7 +24,7 @@ export default async function ContactDetailsPage({ params }: { params: { id: str
         <Icon className="h-5 w-5 text-muted-foreground mt-1" />
         <div>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="font-medium">{value}</p>
+          <div className="font-medium">{value}</div>
         </div>
       </div>
     );
@@ -141,7 +141,7 @@ export default async function ContactDetailsPage({ params }: { params: { id: str
                 <CardHeader><CardTitle>Address & Notes</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <DetailItem icon={Building} label="Address" value={contact.address} />
-                    <DetailItem icon={FileText} label="Notes" value={<p className="whitespace-pre-wrap">{contact.notes}</p>} />
+                    <DetailItem icon={FileText} label="Notes" value={<div className="whitespace-pre-wrap">{contact.notes}</div>} />
                 </CardContent>
             </Card>
         </div>
