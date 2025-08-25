@@ -1,3 +1,4 @@
+
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ContactTable } from '@/components/dashboard/contact-table';
@@ -13,7 +14,8 @@ export default async function ContactsPage() {
         organizations: true,
         emails: true,
         phones: true,
-    }
+    },
+    orderBy: (contacts, { asc }) => [asc(contacts.firstName), asc(contacts.lastName)],
   });
 
   return (

@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -22,17 +23,88 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ContactTableProps {
   contacts: Contact[];
 }
 
-export function ContactTable({ contacts }: ContactTableProps) {
-  const [selectedRows, setSelectedRows] = React.useState<Set<number>>(new Set());
+type SortKey = 'name' | 'organization' | 'email' | 'phone';
 
+export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
+  const [selectedRows, setSelectedRows] = React.useState<Set<number>>(new Set());
+  const [contacts, setContacts] = React.useState(initialContacts);
+  const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>({ key: 'name', direction: 'ascending' });
+
+  React.useEffect(() => {
+    setContacts(initialContacts);
+  }, [initialContacts]);
+
+  const handleSort = (key: SortKey) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+
+    const sortedContacts = [...contacts].sort((a, b) => {
+      let aValue: string | undefined = '';
+      let bValue: string | undefined = '';
+
+      switch (key) {
+        case 'name':
+          aValue = `${a.firstName} ${a.lastName}`;
+          bValue = `${b.firstName} ${b.lastName}`;
+          break;
+        case 'organization':
+          aValue = a.organizations?.[0]?.organization;
+          bValue = b.organizations?.[0]?.organization;
+          break;
+        case 'email':
+          aValue = a.emails?.[0]?.email;
+          bValue = b.emails?.[0]?.email;
+          break;
+        case 'phone':
+          aValue = a.phones?.[0]?.phone;
+          bValue = b.phones?.[0]?.phone;
+          break;
+      }
+      
+      aValue = aValue || '';
+      bValue = bValue || '';
+
+      if (aValue < bValue) {
+        return direction === 'ascending' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return direction === 'ascending' ? 1 : -1;
+      }
+      return 0;
+    });
+    setContacts(sortedContacts);
+  };
+
+  const getSortIndicator = (key: SortKey) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground/50" />;
+    }
+    return sortConfig.direction === 'ascending' ? (
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    ) : (
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    );
+  };
+
+  const renderHeader = (key: SortKey, label: string, className?: string) => (
+    <TableHead className={cn('cursor-pointer', className)} onDoubleClick={() => handleSort(key)}>
+      <div className="flex items-center">
+        {label}
+        {getSortIndicator(key)}
+      </div>
+    </TableHead>
+  );
+  
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
     if (checked === true) {
       setSelectedRows(new Set(contacts.map((c) => c.id)));
@@ -68,10 +140,10 @@ export function ContactTable({ contacts }: ContactTableProps) {
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead className="hidden md:table-cell">Organization</TableHead>
-              <TableHead className="hidden lg:table-cell">Email</TableHead>
-              <TableHead>Phone</TableHead>
+              {renderHeader('name', 'Name')}
+              {renderHeader('organization', 'Organization', 'hidden md:table-cell')}
+              {renderHeader('email', 'Email', 'hidden lg:table-cell')}
+              {renderHeader('phone', 'Phone')}
               <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
