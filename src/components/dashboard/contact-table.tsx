@@ -112,7 +112,9 @@ export function ContactTable({ contacts }: ContactTableProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/dashboard/contacts/${contact.id}`}>View</Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/contacts/${contact.id}/edit`}>Edit</Link>
                       </DropdownMenuItem>
