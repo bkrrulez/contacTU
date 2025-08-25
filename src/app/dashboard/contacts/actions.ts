@@ -18,7 +18,7 @@ export async function createContact(values: z.infer<typeof contactFormSchema>) {
     }
 
     const { 
-        firstName, lastName, email, phone, phoneType, organization, designation, team, department,
+        firstName, lastName, emails, phones, organizations,
         address, notes, website, birthday, associatedName, socialMedia
     } = validatedFields.data;
 
@@ -30,29 +30,35 @@ export async function createContact(values: z.infer<typeof contactFormSchema>) {
         birthday: birthday ? birthday.toISOString().split('T')[0] : undefined,
     }).returning();
 
-    if (email) {
-        await db.insert(contactEmails).values({
-            contactId: newContact.id,
-            email,
-        });
+    if (emails?.length) {
+        await db.insert(contactEmails).values(
+            emails.map(email => ({
+                contactId: newContact.id,
+                email: email.email,
+            }))
+        );
     }
 
-    if (phone) {
-        await db.insert(contactPhones).values({
-            contactId: newContact.id,
-            phone,
-            type: phoneType,
-        });
+    if (phones?.length) {
+        await db.insert(contactPhones).values(
+            phones.map(phone => ({
+                contactId: newContact.id,
+                phone: phone.phone,
+                type: phone.type,
+            }))
+        );
     }
 
-    if (organization) {
-        await db.insert(contactOrganizations).values({
-            contactId: newContact.id,
-            organization,
-            designation,
-            team,
-            department
-        });
+    if (organizations?.length) {
+        await db.insert(contactOrganizations).values(
+            organizations.map(org => ({
+                contactId: newContact.id,
+                organization: org.organization,
+                designation: org.designation,
+                team: org.team,
+                department: org.department,
+            }))
+        );
     }
 
     if (website) {
@@ -90,7 +96,7 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
     }
 
     const { 
-        firstName, lastName, email, phone, phoneType, organization, designation, team, department,
+        firstName, lastName, emails, phones, organizations,
         address, notes, website, birthday, associatedName, socialMedia
     } = validatedFields.data;
 
@@ -105,18 +111,30 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
     // For simplicity, we'll clear and re-insert related data.
     // In a real app, you might want to do a more sophisticated diff and update.
     await db.delete(contactEmails).where(eq(contactEmails.contactId, id));
-    if (email) {
-        await db.insert(contactEmails).values({ contactId: id, email });
+    if (emails?.length) {
+        await db.insert(contactEmails).values(
+            emails.map(email => ({ contactId: id, email: email.email }))
+        );
     }
 
     await db.delete(contactPhones).where(eq(contactPhones.contactId, id));
-    if (phone) {
-        await db.insert(contactPhones).values({ contactId: id, phone, type: phoneType });
+    if (phones?.length) {
+        await db.insert(contactPhones).values(
+            phones.map(phone => ({ contactId: id, phone: phone.phone, type: phone.type }))
+        );
     }
     
     await db.delete(contactOrganizations).where(eq(contactOrganizations.contactId, id));
-    if (organization) {
-        await db.insert(contactOrganizations).values({ contactId: id, organization, designation, team, department });
+    if (organizations?.length) {
+        await db.insert(contactOrganizations).values(
+            organizations.map(org => ({ 
+                contactId: id, 
+                organization: org.organization, 
+                designation: org.designation, 
+                team: org.team, 
+                department: org.department 
+            }))
+        );
     }
 
     await db.delete(contactUrls).where(eq(contactUrls.contactId, id));
