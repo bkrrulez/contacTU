@@ -153,12 +153,14 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
     }
 
     revalidatePath('/dashboard/contacts');
+    revalidatePath(`/dashboard/contacts/${id}`);
     revalidatePath(`/dashboard/contacts/${id}/edit`);
 
     return { success: true };
 }
 
 export async function getContact(id: number): Promise<Contact | null> {
+    if (isNaN(id)) return null;
     const contact = await db.query.contacts.findFirst({
         where: (contacts, { eq }) => eq(contacts.id, id),
         with: {
