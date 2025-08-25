@@ -39,7 +39,7 @@ export default function NewContactPage() {
       address: '',
       notes: '',
       website: '',
-      associatedName: '',
+      subordinateName: '',
       socialMedia: '',
     },
   });
@@ -404,10 +404,10 @@ export default function NewContactPage() {
                             />
                         <FormField
                             control={form.control}
-                            name="associatedName"
+                            name="subordinateName"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Associated Name</FormLabel>
+                                <FormLabel>Subordinate Names</FormLabel>
                                 <FormControl>
                                     <Input placeholder="e.g., Assistant's Name" {...field} />
                                 </FormControl>

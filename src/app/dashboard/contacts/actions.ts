@@ -19,7 +19,7 @@ export async function createContact(values: z.infer<typeof contactFormSchema>) {
 
     const { 
         firstName, lastName, emails, phones, organizations,
-        address, notes, website, birthday, associatedName, socialMedia
+        address, notes, website, birthday, subordinateName, socialMedia
     } = validatedFields.data;
 
     const [newContact] = await db.insert(contacts).values({
@@ -75,10 +75,10 @@ export async function createContact(values: z.infer<typeof contactFormSchema>) {
         });
     }
 
-    if (associatedName) {
+    if (subordinateName) {
         await db.insert(contactAssociatedNames).values({
             contactId: newContact.id,
-            name: associatedName,
+            name: subordinateName,
         })
     }
 
@@ -97,7 +97,7 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
 
     const { 
         firstName, lastName, emails, phones, organizations,
-        address, notes, website, birthday, associatedName, socialMedia
+        address, notes, website, birthday, subordinateName, socialMedia
     } = validatedFields.data;
 
     await db.update(contacts).set({
@@ -148,8 +148,8 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
     }
 
     await db.delete(contactAssociatedNames).where(eq(contactAssociatedNames.contactId, id));
-    if (associatedName) {
-        await db.insert(contactAssociatedNames).values({ contactId: id, name: associatedName });
+    if (subordinateName) {
+        await db.insert(contactAssociatedNames).values({ contactId: id, name: subordinateName });
     }
 
     revalidatePath('/dashboard/contacts');

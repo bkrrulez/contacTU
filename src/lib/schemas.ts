@@ -25,6 +25,6 @@ export const contactFormSchema = z.object({
   notes: z.string().optional(),
   website: z.string().url('Invalid URL').optional().or(z.literal('')),
   birthday: z.date().optional(),
-  associatedName: z.string().optional(),
+  subordinateName: z.string().optional(),
   socialMedia: z.string().url('Invalid URL').optional().or(z.literal('')),
 });

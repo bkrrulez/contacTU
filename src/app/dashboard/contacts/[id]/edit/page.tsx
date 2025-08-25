@@ -45,7 +45,7 @@ export default function EditContactPage() {
         address: '',
         notes: '',
         website: '',
-        associatedName: '',
+        subordinateName: '',
         socialMedia: '',
       },
   });
@@ -76,7 +76,7 @@ export default function EditContactPage() {
             notes: data.notes ?? '',
             website: data.urls?.[0]?.url ?? '',
             birthday: data.birthday ? new Date(data.birthday) : undefined,
-            associatedName: data.associatedNames?.[0]?.name ?? '',
+            subordinateName: data.associatedNames?.[0]?.name ?? '',
             socialMedia: data.socialLinks?.[0]?.link ?? '',
           });
         }
@@ -434,10 +434,10 @@ export default function EditContactPage() {
                             />
                         <FormField
                             control={form.control}
-                            name="associatedName"
+                            name="subordinateName"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Associated Name</FormLabel>
+                                <FormLabel>Subordinate Names</FormLabel>
                                 <FormControl>
                                     <Input placeholder="e.g., Assistant's Name" {...field} />
                                 </FormControl>

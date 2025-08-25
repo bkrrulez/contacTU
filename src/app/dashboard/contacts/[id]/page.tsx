@@ -74,7 +74,7 @@ export default async function ContactDetailsPage({ params }: { params: { id: str
                     <DetailItem icon={Globe} label="Website" value={contact.urls?.[0]?.url ? <a href={contact.urls[0].url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{contact.urls[0].url}</a> : null} />
                     <DetailItem icon={LinkIcon} label="Social Media" value={contact.socialLinks?.[0]?.link ? <a href={contact.socialLinks[0].link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{contact.socialLinks[0].link}</a> : null} />
                     <DetailItem icon={Gift} label="Birthday" value={contact.birthday ? format(new Date(contact.birthday), 'PPP') : null} />
-                    <DetailItem icon={User} label="Associated Name" value={contact.associatedNames?.[0]?.name} />
+                    <DetailItem icon={User} label="Subordinate Names" value={contact.associatedNames?.[0]?.name} />
                 </CardContent>
            </Card>
         </div>
