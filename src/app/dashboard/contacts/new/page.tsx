@@ -19,10 +19,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { contactFormSchema } from '@/lib/schemas';
+import { contactFormSchema, ExtractedContactSchema } from '@/lib/schemas';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useEffect } from 'react';
-import { ExtractedContactSchema } from '@/ai/flows/extract-contact-flow';
+import { extractContactFromImage } from '@/ai/flows/extract-contact-flow';
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 type ExtractedContact = z.infer<typeof ExtractedContactSchema>;

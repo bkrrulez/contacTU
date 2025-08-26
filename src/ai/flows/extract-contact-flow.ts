@@ -10,33 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { contactFormSchema } from '@/lib/schemas';
-
-
-export const ExtractedContactSchema = contactFormSchema.pick({
-    firstName: true,
-    lastName: true,
-    emails: true,
-    phones: true,
-    organizations: true,
-    address: true,
-    website: true,
-}).partial().extend({
-    // All fields from pick are optional due to .partial()
-    // We can add descriptions here for the AI model
-    firstName: z.string().optional().describe('The first name of the contact.'),
-    lastName: z.string().optional().describe('The last name of the contact.'),
-    emails: z.array(z.object({ email: z.string().email() })).optional().describe('Email addresses of the contact.'),
-    phones: z.array(z.object({ phone: z.string(), type: z.enum(['Telephone', 'Mobile']) })).optional().describe('Phone numbers of the contact. Infer the type (Mobile or Telephone) based on context.'),
-    organizations: z.array(z.object({ 
-        organization: z.string(), 
-        designation: z.string().optional(),
-        team: z.string().optional(),
-        department: z.string().optional() 
-    })).optional().describe("The contact's organization, including their title/designation, team, and department if available."),
-    address: z.string().optional().describe('The full mailing address of the contact or their organization.'),
-    website: z.string().url().optional().describe("The contact's personal or company website URL."),
-});
+import { ExtractedContactSchema } from '@/lib/schemas';
 
 
 const ContactExtractionInputSchema = z.object({
