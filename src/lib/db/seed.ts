@@ -11,6 +11,7 @@ import {
   contactAssociatedNames
 } from './schema';
 import type { UserSchema } from './schema';
+import bcrypt from 'bcryptjs';
 
 async function seed() {
   console.log('Seeding database...');
@@ -31,31 +32,36 @@ async function seed() {
     process.exit(1);
   }
 
+  const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'password123', 10);
 
-  const mockUsers: Omit<UserSchema, 'id'>[] = [
+  const mockUsers: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry'>[] = [
     {
       name: 'Admin User',
       email: 'admin@cardbase.com',
       role: 'Admin',
       avatar: 'https://placehold.co/100x100.png',
+      password: hashedPassword,
     },
     {
       name: 'Alice Johnson',
       email: 'alice@example.com',
       role: 'Power User',
       avatar: 'https://placehold.co/100x100.png',
+      password: hashedPassword,
     },
     {
       name: 'Bob Williams',
       email: 'bob@example.com',
       role: 'Standard User',
       avatar: 'https://placehold.co/100x100.png',
+      password: hashedPassword,
     },
     {
       name: 'Charlie Brown',
       email: 'charlie@example.com',
       role: 'Read-Only',
       avatar: 'https://placehold.co/100x100.png',
+      password: hashedPassword,
     },
   ];
 

@@ -1,5 +1,5 @@
 
-import { pgTable, serial, text, varchar, date, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, date, integer, pgEnum, timestamp } from 'drizzle-orm/pg-core';
 import { InferSelectModel, relations } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum('user_role', ['Admin', 'Power User', 'Standard User', 'Read-Only']);
@@ -8,8 +8,11 @@ export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
   email: varchar('email', { length: 256 }).notNull().unique(),
+  password: varchar('password', { length: 256 }),
   role: userRoleEnum('role').notNull(),
   avatar: varchar('avatar', { length: 256 }),
+  resetToken: varchar('reset_token', { length: 256 }),
+  resetTokenExpiry: timestamp('reset_token_expiry', { withTimezone: true }),
 });
 
 export const contacts = pgTable('contacts', {

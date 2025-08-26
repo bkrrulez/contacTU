@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import bcrypt from 'bcryptjs';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,10 @@ import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
+import { db } from '@/lib/db';
+import { users } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { signIn } from './actions';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -37,19 +42,16 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    // This is not a secure way to handle login in a real application.
-    // It's using environment variables for demonstration purposes.
-    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+  const onSubmit = async (data: LoginFormValues) => {
+    const result = await signIn(data);
 
-    if (data.email === adminEmail && data.password === adminPassword) {
+    if (result.success) {
       router.push('/dashboard');
     } else {
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid email or password.",
+        description: result.error,
       });
     }
   };
@@ -83,7 +85,7 @@ export default function LoginPage() {
                   <FormItem>
                      <div className="flex items-center">
                         <FormLabel>Password</FormLabel>
-                        <Link href="#" className="ml-auto inline-block text-sm underline">
+                        <Link href="/forgot-password" prefetch={false} className="ml-auto inline-block text-sm underline">
                           Forgot your password?
                         </Link>
                       </div>
@@ -106,8 +108,8 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Sign in
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                 {form.formState.isSubmitting ? 'Signing in...' : 'Sign in'}
               </Button>
             </form>
           </Form>
