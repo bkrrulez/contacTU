@@ -35,7 +35,7 @@ const prompt = ai.definePrompt({
   name: 'extractContactPrompt',
   input: {schema: ContactExtractionInputSchema},
   output: {schema: ContactExtractionOutputSchema},
-  model: 'openai/gpt-4o',
+  model: 'openai/gpt-4o-latest',
   prompt: `You are an expert at accurately reading business cards and extracting contact information.
   
 Given the image, identify all the business cards present. For each business card, extract all possible contact details.

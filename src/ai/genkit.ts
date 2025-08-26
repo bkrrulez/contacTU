@@ -41,11 +41,11 @@ function toOpenAIMessages(messages: MessageData[]): any[] {
 
 
 const openrouter: Plugin<any> = genkitPlugin(
-  'openrouter',
+  'openai',
   async (options: any) => ({
     models: {
-      'gpt-4o': {
-        name: 'OpenRouter - GPT 4o',
+      'gpt-4o-latest': {
+        name: 'OpenRouter - GPT 4o Latest',
         versions: ['openai/gpt-4o-latest'],
         supports: {
           multiturn: true,
