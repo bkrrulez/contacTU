@@ -15,7 +15,7 @@ const Gpt4oLatest = {
   },
 } as const;
 
-const openrouter: ModelReference<any> = genkitPlugin('openrouter', async (options: {apiKey?: string}) => {
+const openrouter = genkitPlugin('openrouter', async (options: {apiKey?: string}) => {
   const apiKey = options.apiKey ?? process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     throw new Error('OPENROUTER_API_KEY is required');
@@ -49,6 +49,7 @@ const openrouter: ModelReference<any> = genkitPlugin('openrouter', async (option
         temperature: request.config?.temperature,
         top_p: request.config?.topP,
         stop: request.config?.stopSequences,
+        ...(request.output?.format === 'json' && {response_format: {type: 'json_object'}}),
       };
 
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -97,12 +98,6 @@ export const ai = genkit({
     openrouter({
       apiKey: process.env.OPENROUTER_API_KEY,
     }),
-  ],
-  models: [
-    {
-        name: 'openai/gpt-4o-latest',
-        path: 'openai/gpt-4o-latest'
-    }
   ],
   logLevel: 'debug',
   enableTracing: true,

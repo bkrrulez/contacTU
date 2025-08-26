@@ -23,7 +23,7 @@ const ContactExtractionInputSchema = z.object({
 export type ContactExtractionInput = z.infer<typeof ContactExtractionInputSchema>;
 
 const ContactExtractionOutputSchema = z.object({
-  contacts: z.array(ExtractedContactSchema).describe('An array of contacts extracted from the image.'),
+  contacts: z.array(ExtractedactedContactSchema).describe('An array of contacts extracted from the image.'),
 });
 export type ContactExtractionOutput = z.infer<typeof ContactExtractionOutputSchema>;
 
@@ -35,7 +35,7 @@ const prompt = ai.definePrompt({
   name: 'extractContactPrompt',
   input: {schema: ContactExtractionInputSchema},
   output: {schema: ContactExtractionOutputSchema},
-  model: 'openai/gpt-4o-latest',
+  model: 'openrouter/gpt-4o-latest',
   prompt: `You are an expert at accurately reading business cards and extracting contact information.
   
 Given the image, identify all the business cards present. For each business card, extract all possible contact details.
@@ -49,6 +49,9 @@ Pay close attention to details:
 - Do not invent information. If a field is not present on the card, omit it.
 
 Image to process: {{media url=photoDataUri}}`,
+  config: {
+      temperature: 0.1,
+  }
 });
 
 const extractContactFlow = ai.defineFlow(
