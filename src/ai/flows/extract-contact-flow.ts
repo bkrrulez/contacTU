@@ -23,7 +23,7 @@ const ContactExtractionInputSchema = z.object({
 export type ContactExtractionInput = z.infer<typeof ContactExtractionInputSchema>;
 
 const ContactExtractionOutputSchema = z.object({
-  contacts: z.array(ExtractedactedContactSchema).describe('An array of contacts extracted from the image.'),
+  contacts: z.array(ExtractedContactSchema).describe('An array of contacts extracted from the image.'),
 });
 export type ContactExtractionOutput = z.infer<typeof ContactExtractionOutputSchema>;
 
