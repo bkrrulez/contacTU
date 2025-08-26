@@ -41,7 +41,9 @@ async function seed() {
     process.exit(1);
   }
 
-  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
+  const hashedStandardPassword = await bcrypt.hash('password123', 10);
+
 
   const mockUsers: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry'>[] = [
     {
@@ -49,28 +51,28 @@ async function seed() {
       email: adminEmail,
       role: 'Admin',
       avatar: 'https://placehold.co/100x100.png',
-      password: hashedPassword,
+      password: hashedAdminPassword,
     },
     {
       name: 'Alice Johnson',
       email: 'alice@example.com',
       role: 'Power User',
       avatar: 'https://placehold.co/100x100.png',
-      password: hashedPassword,
+      password: hashedStandardPassword,
     },
     {
       name: 'Bob Williams',
       email: 'bob@example.com',
       role: 'Standard User',
       avatar: 'https://placehold.co/100x100.png',
-      password: hashedPassword,
+      password: hashedStandardPassword,
     },
     {
       name: 'Charlie Brown',
       email: 'charlie@example.com',
       role: 'Read-Only',
       avatar: 'https://placehold.co/100x100.png',
-      password: hashedPassword,
+      password: hashedStandardPassword,
     },
   ];
 
