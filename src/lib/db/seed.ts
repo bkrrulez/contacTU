@@ -37,7 +37,7 @@ async function seed() {
   const mockUsers: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry'>[] = [
     {
       name: 'Admin User',
-      email: 'admin@cardbase.com',
+      email: process.env.ADMIN_EMAIL || 'admin@example.com',
       role: 'Admin',
       avatar: 'https://placehold.co/100x100.png',
       password: hashedPassword,
