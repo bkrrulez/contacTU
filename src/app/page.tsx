@@ -33,7 +33,7 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
-      password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '',
+      password: '',
     },
   });
 
