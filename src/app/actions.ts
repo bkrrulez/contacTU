@@ -26,6 +26,7 @@ export async function signIn(values: z.infer<typeof loginSchema>) {
   });
 
   if (!existingUser || !existingUser.password) {
+    // Avoid revealing whether the user exists or not for security reasons.
     return { error: 'Invalid email or password.' };
   }
 
@@ -35,7 +36,7 @@ export async function signIn(values: z.infer<typeof loginSchema>) {
     return { error: 'Invalid email or password.' };
   }
   
-  // Here you would typically create a session, set a cookie, etc.
-  // For this app, we'll just return success.
+  // In a real app, you would create a session and set a cookie.
+  // For this demo, we'll just return a success message.
   return { success: 'Login successful!' };
 }
