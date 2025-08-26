@@ -4,7 +4,7 @@
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,11 +21,15 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { contactFormSchema } from '@/lib/schemas';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useEffect } from 'react';
+import { ExtractedContactSchema } from '@/ai/flows/extract-contact-flow';
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
+type ExtractedContact = z.infer<typeof ExtractedContactSchema>;
 
 export default function NewContactPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   
   const form = useForm<ContactFormValues>({
@@ -43,6 +47,34 @@ export default function NewContactPage() {
       socialMedia: '',
     },
   });
+  
+  useEffect(() => {
+    const dataParam = searchParams.get('data');
+    if (dataParam) {
+        try {
+            const extractedData: ExtractedContact = JSON.parse(dataParam);
+            const { emails, phones, organizations, ...rest } = extractedData;
+
+            // Reset the form with the new data
+            form.reset({
+              ...form.getValues(), // keep existing defaults
+              ...rest,
+              emails: emails && emails.length > 0 ? emails : [{ email: '' }],
+              phones: phones && phones.length > 0 ? phones : [{ phone: '', type: 'Mobile' }],
+              organizations: organizations && organizations.length > 0 ? organizations.map(o => ({...o, team: o.team || '', designation: o.designation || '', department: o.department || ''})) : [{ organization: '', designation: '', team: '', department: '' }],
+            });
+
+            toast({
+              title: "Contact Info Extracted",
+              description: "Please review the information extracted from the image and save the contact."
+            })
+        } catch (error) {
+            console.error("Failed to parse extracted contact data:", error);
+        }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, form.reset]);
+
 
   const { fields: emailFields, append: appendEmail, remove: removeEmail } = useFieldArray({
     control: form.control,
