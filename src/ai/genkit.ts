@@ -1,7 +1,7 @@
 
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
-import {Plugin, genkitPlugin} from 'genkit';
+import {Plugin, genkitPlugin} from 'genkit/plugin';
 import {ModelAction, ModelDefinition} from 'genkit/model';
 import {Request,Response,MessageData,Part} from 'genkit/content';
 
@@ -20,7 +20,7 @@ function toOpenAIRole(role: string): string {
   }
 }
 
-function toOpenAIMessages(messages: MessageData[]) {
+function toOpenAIMessages(messages: MessageData[]): any[] {
     return messages.map((message) => {
         const content = message.content.map((part) => {
             if (part.text) {
@@ -31,7 +31,7 @@ function toOpenAIMessages(messages: MessageData[]) {
             }
             // Add other part types as needed
             return { type: 'text', text: '' };
-        });
+        }).filter(item => item.text || item.image_url);
 
         return {
             role: toOpenAIRole(message.role),
@@ -126,7 +126,7 @@ const openrouter: Plugin<any> = genkitPlugin(
 
 export const ai = genkit({
   plugins: [
-    openrouter(),
+    openrouter,
     googleAI(),
   ],
 });
