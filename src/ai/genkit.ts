@@ -1,6 +1,5 @@
 
 import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
 import {Plugin, genkitPlugin} from 'genkit/plugin';
 import {ModelAction, ModelDefinition} from 'genkit/model';
 import {Request,Response,MessageData,Part} from 'genkit/content';
@@ -127,6 +126,5 @@ const openrouter: Plugin<any> = genkitPlugin(
 export const ai = genkit({
   plugins: [
     openrouter,
-    googleAI(),
   ],
 });
