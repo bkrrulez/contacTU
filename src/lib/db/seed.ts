@@ -32,13 +32,16 @@ async function seed() {
     process.exit(1);
   }
 
+  // --- Admin User Seeding ---
+  const adminEmail = process.env.ADMIN_EMAIL;
   const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) {
-    console.error('ADMIN_PASSWORD environment variable not set. Please set it in your .env.local file.');
+
+  if (!adminEmail || !adminPassword) {
+    console.error('ADMIN_EMAIL and ADMIN_PASSWORD environment variables must be set in your .env.local file.');
     process.exit(1);
   }
+
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
 
   const mockUsers: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry'>[] = [
     {
