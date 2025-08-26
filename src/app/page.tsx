@@ -32,7 +32,7 @@ export default function LoginPage() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@example.com',
+      email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
       password: '',
     },
   });
