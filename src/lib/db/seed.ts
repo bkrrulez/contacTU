@@ -84,6 +84,8 @@ async function seed() {
       notes: 'Key contact for Project Titan.',
       birthday: '1985-05-15',
       subordinateName: 'Assistant Jane',
+      socialMedia: 'https://www.linkedin.com/in/johndoe',
+      website: 'https://acmecorp.com'
     },
     {
       firstName: 'Jane',
@@ -96,6 +98,8 @@ async function seed() {
       notes: null,
       birthday: null,
       subordinateName: null,
+      socialMedia: null,
+      website: null
     },
     {
       firstName: 'Sam',
@@ -108,6 +112,8 @@ async function seed() {
       address: null,
       birthday: null,
       subordinateName: null,
+      socialMedia: null,
+      website: null
     },
   ];
 
@@ -154,6 +160,18 @@ async function seed() {
         await db.insert(contactAssociatedNames).values({
             contactId: newContact.id,
             name: mockContact.subordinateName
+        })
+    }
+    if(mockContact.website) {
+        await db.insert(contactUrls).values({
+            contactId: newContact.id,
+            url: mockContact.website
+        })
+    }
+    if(mockContact.socialMedia) {
+        await db.insert(contactSocialLinks).values({
+            contactId: newContact.id,
+            link: mockContact.socialMedia
         })
     }
   }
