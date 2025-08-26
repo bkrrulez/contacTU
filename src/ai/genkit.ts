@@ -1,8 +1,7 @@
 
 import {genkit} from 'genkit';
 import {Plugin, genkitPlugin} from 'genkit/plugin';
-import {ModelAction, ModelDefinition} from 'genkit/model';
-import {Request,Response,MessageData,Part} from 'genkit/content';
+import {MessageData} from 'genkit/content';
 
 function toOpenAIRole(role: string): string {
   switch (role) {
@@ -41,11 +40,11 @@ function toOpenAIMessages(messages: MessageData[]): any[] {
 
 
 const openrouter: Plugin<any> = genkitPlugin(
-  'openai',
+  'openrouter',
   async (options: any) => ({
     models: {
       'gpt-4o-latest': {
-        name: 'OpenRouter - GPT 4o Latest',
+        name: 'OpenAI GPT-4o (via OpenRouter)',
         versions: ['openai/gpt-4o-latest'],
         supports: {
           multiturn: true,
@@ -83,7 +82,7 @@ const openrouter: Plugin<any> = genkitPlugin(
           
           const openAiResponse = await response.json();
           const choice = openAiResponse.choices[0];
-          const responseCandidates: Response['candidates'] = [];
+          const responseCandidates: any[] = [];
           
           if (choice.message.content) {
             responseCandidates.push({
