@@ -1,90 +1,142 @@
 
 'use server';
 
-import {genkit} from 'genkit';
-import type {ModelPlugin} from 'genkit';
-import {z} from 'genkit';
+import {genkit, ModelPlugin, Part} from 'genkit';
+import {Candidate, GenerationResponse} from 'genkit/coordination';
+
+function toPart(chunk: string): Part {
+  try {
+    const json = JSON.parse(chunk);
+    if (json.error) {
+      throw new Error(json.error.message);
+    }
+    return {text: json.choices[0].delta.content};
+  } catch (e) {
+    // ignore JSON parse errors
+    return {text: ''};
+  }
+}
 
 const openrouter: ModelPlugin = {
   name: 'openrouter',
-
-  async run(request, streamingCallback) {
-    if (streamingCallback) {
-      throw new Error('Streaming not supported');
+  models: {
+    'gpt-4o-latest': {
+      label: 'OpenAI - GPT-4o',
+      supports: {
+        media: false,
+        multiturn: true,
+        tools: false,
+        systemRole: true,
+        output: ['text'],
+      },
+    },
+  },
+  async run(request) {
+    const modelName = request.model.name.startsWith('openrouter/')
+      ? request.model.name.substring('openrouter/'.length)
+      : request.model.name;
+      
+    const model = this.models?.[modelName];
+    if (!model) {
+      throw new Error(`Model ${modelName} not found in openrouter plugin`);
     }
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'http://localhost:9002',
+      'X-Title': 'contacTU',
+    };
     const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
-      throw new Error('OPENROUTER_API_KEY is required');
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
     }
 
-    const modelId = request.model.name.split('/')[1];
+    const messages = request.messages.map(m => ({
+      role: m.role,
+      content: m.content.map(p => p.text).join('')
+    }));
 
-    const openAiRequest = {
-      model: `openai/${modelId}`,
-      messages: request.messages.map((m) => ({
-        role: m.role,
-        content: m.content.map((p) => {
-          if (p.text) {
-            return {type: 'text', text: p.text};
-          }
-          if (p.media) {
-            return {type: 'image_url', image_url: {url: p.media.url}};
-          }
-          throw new Error('Unsupported message part');
-        }),
-      })),
-      max_tokens: request.config?.maxOutputTokens,
-      temperature: request.config?.temperature,
-      top_p: request.config?.topP,
-      stop: request.config?.stopSequences,
-      ...(request.output?.format === 'json' && {response_format: {type: 'json_object'}}),
+    const body = {
+      model: 'openai/gpt-4o-latest', 
+      messages: messages,
+      stream: request.stream,
     };
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'http://localhost:9002',
-        'X-Title': 'contacTU',
-      },
-      body: JSON.stringify(openAiRequest),
+      headers: headers,
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(`OpenRouter API error: ${response.status} ${errorText}`);
     }
 
-    const openAiResponse = await response.json();
-    const choice = openAiResponse.choices[0];
+    if (request.stream) {
+      const stream = response.body as any;
+      let buffer = '';
+      const reader = stream.getReader();
 
-    return {
-      candidates: [
-        {
-          index: 0,
-          finishReason: choice.finish_reason,
-          message: {
-            role: 'model',
-            content: [{text: choice.message.content}],
-          },
+      const decodedStream = new ReadableStream({
+        async start(controller) {
+          try {
+            while (true) {
+              const {done, value} = await reader.read();
+              if (done) {
+                break;
+              }
+              buffer += new TextDecoder().decode(value);
+              const lines = buffer.split('\n\n');
+              for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i];
+                if (line.startsWith('data: ')) {
+                  const chunk = line.substring(6);
+                  if (chunk === '[DONE]') {
+                    controller.close();
+                    return;
+                  }
+                  controller.enqueue(toPart(chunk));
+                }
+              }
+              buffer = lines[lines.length - 1];
+            }
+          } catch (e) {
+            controller.error(e);
+          } finally {
+            controller.close();
+          }
         },
-      ],
-      usage: {
-        inputTokens: openAiResponse.usage.prompt_tokens,
-        outputTokens: openAiResponse.usage.completion_tokens,
-        totalTokens: openAiResponse.usage.total_tokens,
-      },
-    };
+      });
+
+      return {
+        stream: decodedStream,
+      };
+    } else {
+      const jsonResponse = await response.json();
+      const candidate: Candidate = {
+        finish_reason: jsonResponse.choices[0].finish_reason,
+        index: jsonResponse.choices[0].index,
+        message: {
+          role: 'model',
+          content: [{text: jsonResponse.choices[0].message.content}],
+        },
+      };
+      const result: GenerationResponse = {
+        candidates: [candidate],
+        usage: {
+          input_tokens: jsonResponse.usage.prompt_tokens,
+          output_tokens: jsonResponse.usage.completion_tokens,
+          total_tokens: jsonResponse.usage.total_tokens,
+        },
+      };
+      return result;
+    }
   },
 };
 
-
 export const ai = genkit({
-  plugins: [
-    openrouter,
-  ],
+  plugins: [openrouter],
   logLevel: 'debug',
   enableTracing: true,
 });
