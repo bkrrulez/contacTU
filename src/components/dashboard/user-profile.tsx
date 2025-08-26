@@ -1,11 +1,9 @@
-import { db } from '@/lib/db';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export async function UserProfile() {
-  // In a real app, you'd fetch the current user based on session
-  const currentUser = await db.query.users.findFirst();
-  
-  if (!currentUser) {
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import type { User } from '@/lib/types';
+
+export function UserProfile({ user }: { user: Partial<User> | null }) {
+  if (!user || !user.name) {
     return  <Avatar className="h-9 w-9">
         <AvatarFallback>??</AvatarFallback>
     </Avatar>;
@@ -13,8 +11,8 @@ export async function UserProfile() {
 
   return (
     <Avatar className="h-9 w-9">
-        {currentUser.avatar && <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint="person portrait" />}
-        <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+        {user.avatar && <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="person portrait" />}
+        <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
     </Avatar>
   )
 }

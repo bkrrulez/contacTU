@@ -15,25 +15,11 @@ import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AppSidebar } from './sidebar';
 import { SidebarTrigger } from '../ui/sidebar';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { User } from '@/lib/types';
 
-export function AppHeader({ children }: { children: React.ReactNode }) {
-  // In a real app, role would come from a session context.
-  // For now, we'll default to a role that can see most things.
-  // The logic for fetching the user is handled by the UserProfile component passed as a child.
-  const [user, setUser] = useState<User | null>(null);
 
-  // This is a placeholder for where you might fetch user data on the client
-  // or receive it from a provider. For now, we'll just use a default.
-  // In a real app, you might have a global state or context for the user.
-  useEffect(() => {
-    // This is a mock fetching. In a real app, this could be an API call
-    // or data from a client-side session management library.
-    // For the purpose of display in the dropdown, we'll just create a placeholder.
-    setUser({ id: 1, name: 'Admin User', email: 'admin@cardbase.com', role: 'Admin' });
-  }, []);
-
+export function AppHeader({ children, user }: { children: React.ReactNode, user: Partial<User> | null }) {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">

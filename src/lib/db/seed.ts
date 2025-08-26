@@ -83,6 +83,7 @@ async function seed() {
       address: '123 Acme St, Tech City',
       notes: 'Key contact for Project Titan.',
       birthday: '1985-05-15',
+      subordinateName: 'Assistant Jane',
     },
     {
       firstName: 'Jane',
@@ -94,6 +95,7 @@ async function seed() {
       address: '456 Tech Ave, Innovation Valley',
       notes: null,
       birthday: null,
+      subordinateName: null,
     },
     {
       firstName: 'Sam',
@@ -105,6 +107,7 @@ async function seed() {
       notes: 'Met at the design conference.',
       address: null,
       birthday: null,
+      subordinateName: null,
     },
   ];
 
@@ -146,6 +149,12 @@ async function seed() {
           type: phone.type,
         }))
       );
+    }
+    if (mockContact.subordinateName) {
+        await db.insert(contactAssociatedNames).values({
+            contactId: newContact.id,
+            name: mockContact.subordinateName
+        })
     }
   }
 
