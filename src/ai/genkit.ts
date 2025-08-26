@@ -2,25 +2,11 @@
 'use server';
 
 import {genkit} from 'genkit';
-import type {ModelPlugin, ModelReference} from 'genkit';
+import type {ModelPlugin} from 'genkit';
 import {z} from 'genkit';
-
-const Gpt4oLatest = {
-  name: 'openai/gpt-4o-latest',
-  versions: ['openai/gpt-4o-latest'],
-  supports: {
-    media: true,
-    output: ['text', 'json'],
-    tools: false,
-    systemRole: true,
-  },
-} as const;
 
 const openrouter: ModelPlugin = {
   name: 'openrouter',
-  models: {
-    'gpt-4o-latest': Gpt4oLatest,
-  },
 
   async run(request, streamingCallback) {
     if (streamingCallback) {
@@ -32,8 +18,10 @@ const openrouter: ModelPlugin = {
       throw new Error('OPENROUTER_API_KEY is required');
     }
 
+    const modelId = request.model.name.split('/')[1];
+
     const openAiRequest = {
-      model: 'openai/gpt-4o-latest',
+      model: `openai/${modelId}`,
       messages: request.messages.map((m) => ({
         role: m.role,
         content: m.content.map((p) => {
