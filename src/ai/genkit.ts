@@ -1,132 +1,19 @@
 
 import {genkit} from 'genkit';
-import {Plugin, genkitPlugin} from 'genkit/plugin';
-import {MessageData} from 'genkit/content';
-
-function toOpenAIRole(role: string): string {
-  switch (role) {
-    case 'user':
-      return 'user';
-    case 'model':
-      return 'assistant';
-    case 'system':
-      return 'system';
-    case 'tool':
-       return 'tool';
-    default:
-      return 'user';
-  }
-}
-
-function toOpenAIMessages(messages: MessageData[]): any[] {
-    const newMessages = messages.map((message) => {
-        const content: (any)[] = [];
-        message.content.forEach(part => {
-            if (part.text) {
-                content.push({ type: 'text', text: part.text });
-            }
-            if (part.media) {
-                content.push({ type: 'image_url', image_url: { url: part.media.url } });
-            }
-        });
-
-        return {
-            role: toOpenAIRole(message.role),
-            content: content,
-        };
-    });
-    return newMessages.filter(m => m.role !== 'system');
-}
-
-
-const openrouter: Plugin<any> = genkitPlugin(
-  'openrouter',
-  async (options: any) => ({
-    models: {
-      'gpt-4o-latest': {
-        name: 'OpenAI GPT-4o (via OpenRouter)',
-        versions: ['openai/gpt-4o-latest'],
-        supports: {
-          multiturn: true,
-          systemRole: true,
-          media: true,
-          tools: true,
-          output: ['text', 'json'],
-        },
-        run: async (request) => {
-           const modelName = 'openai/gpt-4o-latest';
-           const messages = toOpenAIMessages(request.messages);
-           
-           const openAiRequest = {
-                model: modelName,
-                messages: messages,
-                ...(request.tools && {
-                    tools: request.tools.map(t => ({type: 'function', function: t.definition}))
-                }),
-                ...(request.output?.format === 'json' && { response_format: { type: 'json_object' } }),
-            };
-
-          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            },
-            body: JSON.stringify(openAiRequest),
-          });
-
-          if(!response.ok) {
-              const errorText = await response.text();
-              throw new Error(`OpenRouter request failed: ${response.status} ${response.statusText} - ${errorText}`);
-          }
-          
-          const openAiResponse = await response.json();
-          const choice = openAiResponse.choices[0];
-          const responseCandidates: any[] = [];
-          
-          if (choice.message.content) {
-            responseCandidates.push({
-              index: 0,
-              finishReason: 'stop',
-              message: {
-                role: 'model',
-                content: [{text: choice.message.content}],
-              },
-            });
-          }
-          if (choice.message.tool_calls) {
-            responseCandidates.push({
-              index: 0,
-              finishReason: 'stop',
-              message: {
-                role: 'model',
-                content: choice.message.tool_calls.map((tool: any) => ({
-                  toolRequest: {
-                    name: tool.function.name,
-                    input: JSON.parse(tool.function.arguments),
-                  },
-                })),
-              },
-            });
-          }
-
-          return {
-            candidates: responseCandidates,
-            usage: {
-              inputTokens: openAiResponse.usage.prompt_tokens,
-              outputTokens: openAiResponse.usage.completion_tokens,
-              totalTokens: openAiResponse.usage.total_tokens,
-            },
-          };
-        },
-      },
-    },
-  })
-);
-
+import {openrouter} from 'genkit-plugin-openrouter';
 
 export const ai = genkit({
   plugins: [
-    openrouter,
+    openrouter({
+      apiKey: process.env.OPENROUTER_API_KEY,
+    }),
   ],
+  models: [
+    {
+      name: 'openai/gpt-4o-latest',
+      path: 'openai/gpt-4o-latest'
+    }
+  ],
+  logLevel: 'debug',
+  enableTracing: true,
 });
