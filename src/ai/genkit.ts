@@ -20,7 +20,7 @@ function toOpenAIRole(role: string): string {
 }
 
 function toOpenAIMessages(messages: MessageData[]): any[] {
-    return messages.map((message) => {
+    const newMessages = messages.map((message) => {
         const content: (string | { type: string; text?: string; image_url?: { url: string; }; })[] = [];
         message.content.forEach(part => {
             if (part.text) {
@@ -46,6 +46,7 @@ function toOpenAIMessages(messages: MessageData[]): any[] {
             content: finalContent,
         };
     });
+    return newMessages.filter(m => m.role !== 'system');
 }
 
 
