@@ -32,7 +32,8 @@ export async function sendPasswordResetLink(email: string) {
         resetTokenExpiry: resetTokenExpiry,
     }).where(eq(users.id, existingUser.id));
 
-    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+    const domain = process.env.DOMAIN || 'http://localhost:9002';
+    const resetLink = `${domain}/reset-password?token=${resetToken}`;
     
     const emailHtml = `
         <h1>Password Reset Request</h1>
@@ -50,6 +51,7 @@ export async function sendPasswordResetLink(email: string) {
         });
         return { success: 'If an account with this email exists, a reset link has been sent.' };
     } catch (error) {
+        console.error('Failed to send reset email:', error);
         return { error: 'Failed to send reset email. Please try again later.' };
     }
 }
