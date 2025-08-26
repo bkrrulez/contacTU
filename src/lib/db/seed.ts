@@ -32,7 +32,11 @@ async function seed() {
     process.exit(1);
   }
 
-  const adminPassword = process.env.ADMIN_PASSWORD || 'adminadmin';
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    console.error('ADMIN_PASSWORD environment variable not set. Please set it in your .env.local file.');
+    process.exit(1);
+  }
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
 
