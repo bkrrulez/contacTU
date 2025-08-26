@@ -21,20 +21,29 @@ function toOpenAIRole(role: string): string {
 
 function toOpenAIMessages(messages: MessageData[]): any[] {
     return messages.map((message) => {
-        const content = message.content.map((part) => {
+        const content: (string | { type: string; text?: string; image_url?: { url: string; }; })[] = [];
+        message.content.forEach(part => {
             if (part.text) {
-                return { type: 'text', text: part.text };
+                content.push({ type: 'text', text: part.text });
             }
             if (part.media) {
-                return { type: 'image_url', image_url: { url: part.media.url } };
+                 // OpenRouter expects image_url content to be a string, not an object
+                 // and the content part for images to be an object with type image_url
+                if (Array.isArray(content)) {
+                     content.push({ type: 'image_url', image_url: { url: part.media.url } });
+                }
             }
-            // Add other part types as needed
-            return { type: 'text', text: '' };
-        }).filter(item => item.text || item.image_url);
+        });
+
+        // If there's only one text part, just send the string as per some specs
+        const finalContent = content.length === 1 && typeof content[0] === 'object' && content[0].type === 'text'
+            ? content[0].text
+            : content;
+
 
         return {
             role: toOpenAIRole(message.role),
-            content: content,
+            content: finalContent,
         };
     });
 }
@@ -55,9 +64,12 @@ const openrouter: Plugin<any> = genkitPlugin(
           output: ['text', 'json'],
         },
         run: async (request) => {
+           const modelName = request.config?.version || 'openai/gpt-4o';
+           const messages = toOpenAIMessages(request.messages);
+           
            const openAiRequest = {
-                model: 'openai/gpt-4o',
-                messages: toOpenAIMessages(request.messages),
+                model: modelName,
+                messages: messages,
                 ...(request.tools && {
                     tools: request.tools.map(t => ({type: 'function', function: t.definition}))
                 }),
@@ -80,10 +92,10 @@ const openrouter: Plugin<any> = genkitPlugin(
           
           const openAiResponse = await response.json();
           const choice = openAiResponse.choices[0];
-          const messages: Response['candidates'] = [];
+          const responseCandidates: Response['candidates'] = [];
           
           if (choice.message.content) {
-            messages.push({
+            responseCandidates.push({
               index: 0,
               finishReason: 'stop',
               message: {
@@ -93,7 +105,7 @@ const openrouter: Plugin<any> = genkitPlugin(
             });
           }
           if (choice.message.tool_calls) {
-            messages.push({
+            responseCandidates.push({
               index: 0,
               finishReason: 'stop',
               message: {
@@ -109,7 +121,7 @@ const openrouter: Plugin<any> = genkitPlugin(
           }
 
           return {
-            candidates: messages,
+            candidates: responseCandidates,
             usage: {
               inputTokens: openAiResponse.usage.prompt_tokens,
               outputTokens: openAiResponse.usage.completion_tokens,
