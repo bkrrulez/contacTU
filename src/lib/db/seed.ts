@@ -32,12 +32,12 @@ async function seed() {
     process.exit(1);
   }
 
-  const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'password123', 10);
+  const hashedPassword = await bcrypt.hash(process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'password123', 10);
 
   const mockUsers: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry'>[] = [
     {
       name: 'Admin User',
-      email: process.env.ADMIN_EMAIL || 'admin@example.com',
+      email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
       role: 'Admin',
       avatar: 'https://placehold.co/100x100.png',
       password: hashedPassword,
