@@ -42,6 +42,8 @@ async function seed() {
       console.error('FATAL: ADMIN_EMAIL and ADMIN_PASSWORD environment variables must be set in your .env.local file.');
       process.exit(1);
     }
+    
+    const standardPasswordHash = await bcrypt.hash('password123', 10);
 
     const usersToSeed: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry'>[] = [
       {
@@ -49,28 +51,28 @@ async function seed() {
         email: adminEmail,
         role: 'Admin',
         avatar: 'https://placehold.co/100x100.png',
-        password: await bcrypt.hash(adminPassword, 10), // Hash the admin password
+        password: await bcrypt.hash(adminPassword, 10),
       },
       {
         name: 'Alice Johnson',
         email: 'alice@example.com',
         role: 'Power User',
         avatar: 'https://placehold.co/100x100.png',
-        password: await bcrypt.hash('password123', 10), // Use a standard password for other users
+        password: standardPasswordHash,
       },
       {
         name: 'Bob Williams',
         email: 'bob@example.com',
         role: 'Standard User',
         avatar: 'https://placehold.co/100x100.png',
-        password: await bcrypt.hash('password123', 10),
+        password: standardPasswordHash,
       },
       {
         name: 'Charlie Brown',
         email: 'charlie@example.com',
         role: 'Read-Only',
         avatar: 'https://placehold.co/100x100.png',
-        password: await bcrypt.hash('password123', 10),
+        password: standardPasswordHash,
       },
     ];
 

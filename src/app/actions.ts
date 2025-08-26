@@ -25,23 +25,15 @@ export async function signIn(values: z.infer<typeof loginSchema>) {
     where: eq(users.email, email),
   });
 
-  if (!existingUser) {
+  if (!existingUser || !existingUser.password) {
     return { error: 'Invalid email or password.' };
   }
 
-  // Standard password check
-  if (existingUser.password) {
-    const passwordsMatch = await bcrypt.compare(password, existingUser.password);
-    if (passwordsMatch) {
-      return { success: 'Login successful!' };
-    }
+  const passwordsMatch = await bcrypt.compare(password, existingUser.password);
+
+  if (!passwordsMatch) {
+    return { error: 'Invalid email or password.' };
   }
 
-  // Fallback check for admin user directly against environment variable
-  // This is a temporary diagnostic measure.
-  if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-    return { success: 'Login successful! (Fallback)' };
-  }
-  
-  return { error: 'Invalid email or password.' };
+  return { success: 'Login successful!' };
 }
