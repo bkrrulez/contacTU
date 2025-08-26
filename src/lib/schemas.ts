@@ -1,6 +1,5 @@
 
 import { z } from 'zod';
-import { userRoleEnum } from './db/schema';
 
 export const contactFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -34,6 +33,6 @@ export const userFormSchema = z.object({
     name: z.string().min(1, 'Name is required'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
-    role: userRoleEnum,
+    role: z.enum(['Admin', 'Power User', 'Standard User', 'Read-Only']),
     avatar: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
