@@ -21,29 +21,19 @@ function toOpenAIRole(role: string): string {
 
 function toOpenAIMessages(messages: MessageData[]): any[] {
     const newMessages = messages.map((message) => {
-        const content: (string | { type: string; text?: string; image_url?: { url: string; }; })[] = [];
+        const content: (any)[] = [];
         message.content.forEach(part => {
             if (part.text) {
                 content.push({ type: 'text', text: part.text });
             }
             if (part.media) {
-                 // OpenRouter expects image_url content to be a string, not an object
-                 // and the content part for images to be an object with type image_url
-                if (Array.isArray(content)) {
-                     content.push({ type: 'image_url', image_url: { url: part.media.url } });
-                }
+                content.push({ type: 'image_url', image_url: { url: part.media.url } });
             }
         });
 
-        // If there's only one text part, just send the string as per some specs
-        const finalContent = content.length === 1 && typeof content[0] === 'object' && content[0].type === 'text'
-            ? content[0].text
-            : content;
-
-
         return {
             role: toOpenAIRole(message.role),
-            content: finalContent,
+            content: content,
         };
     });
     return newMessages.filter(m => m.role !== 'system');
