@@ -46,7 +46,7 @@ const openrouter: Plugin<any> = genkitPlugin(
     models: {
       'gpt-4o': {
         name: 'OpenRouter - GPT 4o',
-        versions: ['openai/gpt-4o'],
+        versions: ['openai/gpt-4o-latest'],
         supports: {
           multiturn: true,
           systemRole: true,
@@ -55,7 +55,7 @@ const openrouter: Plugin<any> = genkitPlugin(
           output: ['text', 'json'],
         },
         run: async (request) => {
-           const modelName = request.config?.version || 'openai/gpt-4o';
+           const modelName = 'openai/gpt-4o-latest';
            const messages = toOpenAIMessages(request.messages);
            
            const openAiRequest = {
