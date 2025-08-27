@@ -1,6 +1,4 @@
 
-'use server';
-
 import {genkit, type Plugin} from 'genkit';
 
 const openrouterPlugin: Plugin<any> = {
