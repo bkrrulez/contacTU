@@ -33,6 +33,8 @@ export async function extractContactFromImage(input: ContactExtractionInput): Pr
 
 const extractContactPrompt = ai.definePrompt({
   name: 'extractContactPrompt',
+  input: {schema: ContactExtractionInputSchema},
+  output: {schema: ContactExtractionOutputSchema},
   prompt: `You are an expert at accurately reading business cards and extracting contact information.
 
 Given the image, identify all the business cards present. For each business card, extract all possible contact details.
@@ -47,11 +49,9 @@ Pay close attention to details:
 
 Image to process: {{media url=photoDataUri}}`,
   config: {
+      model: 'googleai/gemini-1.5-pro-latest',
       temperature: 0.1,
   },
-  output: {
-    schema: ContactExtractionOutputSchema
-  }
 });
 
 const extractContactFlow = ai.defineFlow(
