@@ -48,10 +48,6 @@ Pay close attention to details:
 - Do not invent information. If a field is not present on the card, omit it.
 
 Image to process: {{media url=photoDataUri}}`,
-  config: {
-      model: 'googleai/gemini-1.5-pro-latest',
-      temperature: 0.1,
-  },
 });
 
 const extractContactFlow = ai.defineFlow(
@@ -61,7 +57,10 @@ const extractContactFlow = ai.defineFlow(
     outputSchema: ContactExtractionOutputSchema,
   },
   async (input) => {
-      const {output} = await extractContactPrompt(input);
+      const {output} = await extractContactPrompt(input, {
+        model: 'googleai/gemini-1.5-pro-latest',
+        temperature: 0.1,
+      });
       return output!;
   }
 );
