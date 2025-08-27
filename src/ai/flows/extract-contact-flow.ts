@@ -8,8 +8,8 @@
  * - ContactExtractionOutput - The return type for the extractContactFromImage function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { getAi } from '@/ai/genkit';
+import { z } from 'genkit';
 import { ExtractedContactSchema } from '@/lib/schemas';
 
 
@@ -28,15 +28,21 @@ const ContactExtractionOutputSchema = z.object({
 export type ContactExtractionOutput = z.infer<typeof ContactExtractionOutputSchema>;
 
 export async function extractContactFromImage(input: ContactExtractionInput): Promise<ContactExtractionOutput> {
-  return extractContactFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'extractContactPrompt',
-  input: {schema: ContactExtractionInputSchema},
-  output: {schema: ContactExtractionOutputSchema},
-  model: 'openrouter/gpt-4o-latest',
-  prompt: `You are an expert at accurately reading business cards and extracting contact information.
+  const ai = await getAi();
+  
+  const extractContactFlow = ai.defineFlow(
+    {
+      name: 'extractContactFlow',
+      inputSchema: ContactExtractionInputSchema,
+      outputSchema: ContactExtractionOutputSchema,
+    },
+    async (input) => {
+        const prompt = ai.definePrompt({
+          name: 'extractContactPrompt',
+          input: {schema: ContactExtractionInputSchema},
+          output: {schema: ContactExtractionOutputSchema},
+          model: 'openrouter/gpt-4o-latest',
+          prompt: `You are an expert at accurately reading business cards and extracting contact information.
   
 Given the image, identify all the business cards present. For each business card, extract all possible contact details.
 If there are multiple business cards in the image, return an entry for each one in the 'contacts' array.
@@ -49,19 +55,15 @@ Pay close attention to details:
 - Do not invent information. If a field is not present on the card, omit it.
 
 Image to process: {{media url=photoDataUri}}`,
-  config: {
-      temperature: 0.1,
-  }
-});
-
-const extractContactFlow = ai.defineFlow(
-  {
-    name: 'extractContactFlow',
-    inputSchema: ContactExtractionInputSchema,
-    outputSchema: ContactExtractionOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);
+          config: {
+              temperature: 0.1,
+          }
+        });
+        
+        const {output} = await prompt(input);
+        return output!;
+    }
+  );
+  
+  return extractContactFlow(input);
+}

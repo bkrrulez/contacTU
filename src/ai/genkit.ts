@@ -1,10 +1,9 @@
-
 'use server';
 
 import { genkit, type Plugin } from 'genkit';
 
 /**
- * OpenRouter plugin for Genkit
+ * OpenRouter plugin factory
  */
 function openrouterPlugin(): Plugin<any> {
   return {
@@ -18,23 +17,20 @@ function openrouterPlugin(): Plugin<any> {
           }
 
           const apiKey = process.env.OPENROUTER_API_KEY;
-          if (!apiKey) {
-            throw new Error('OPENROUTER_API_KEY is required');
-          }
+          if (!apiKey) throw new Error('OPENROUTER_API_KEY is required');
 
-          // Drop "openrouter/" prefix
+          // Remove the "openrouter/" prefix
           const modelId = request.model.name.split('/')[1];
 
           const openAiRequest = {
             model: modelId,
             messages: request.messages.map(m => ({
               role: m.role,
-              content: m.content.map(p => {
-                if (p.text) return { type: 'text', text: p.text };
-                if (p.media)
-                  return { type: 'image_url', image_url: { url: p.media.url } };
-                throw new Error('Unsupported message part');
-              }),
+              content: m.content.map(p =>
+                p.text
+                  ? { type: 'text', text: p.text }
+                  : { type: 'image_url', image_url: { url: p.media!.url } }
+              ),
             })),
             max_tokens: request.config?.maxOutputTokens,
             temperature: request.config?.temperature,
@@ -60,14 +56,14 @@ function openrouterPlugin(): Plugin<any> {
           );
 
           if (!response.ok) {
-            const errorText = await response.text();
+            const err = await response.text();
             throw new Error(
-              `OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`
+              `OpenRouter API error: ${response.status} ${response.statusText} - ${err}`
             );
           }
 
-          const openAiResponse = await response.json();
-          const choice = openAiResponse.choices[0];
+          const data = await response.json();
+          const choice = data.choices[0];
 
           return {
             candidates: [
@@ -80,11 +76,7 @@ function openrouterPlugin(): Plugin<any> {
                 },
               },
             ],
-            usage: {
-              inputTokens: openAiResponse.usage.prompt_tokens,
-              outputTokens: openAiResponse.usage.completion_tokens,
-              totalTokens: openAiResponse.usage.total_tokens,
-            },
+            usage: data.usage,
           };
         },
       },
@@ -93,10 +85,13 @@ function openrouterPlugin(): Plugin<any> {
 }
 
 /**
- * Global AI client
+ * Async factory to get a Genkit instance
+ * ✅ Safe for Next.js "use server"
  */
-export const ai = genkit({
-  plugins: [openrouterPlugin], // ✅ pass function, not object or promise
-  logLevel: 'debug',
-  enableTracing: true,
-});
+export async function getAi() {
+  return genkit({
+    plugins: [openrouterPlugin()], // pass function, not object
+    logLevel: 'debug',
+    enableTracing: true,
+  });
+}
