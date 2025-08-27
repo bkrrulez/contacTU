@@ -35,17 +35,19 @@ const extractContactPrompt = ai.definePrompt({
   name: 'extractContactPrompt',
   input: {schema: ContactExtractionInputSchema},
   output: {schema: ContactExtractionOutputSchema},
-  prompt: `You are an expert at accurately reading business cards and extracting contact information.
+  prompt: `You are an expert data extraction tool. Your task is to analyze the provided image of a business card and extract all contact information into a structured JSON format.
 
-Given the image, identify all the business cards present. For each business card, extract all possible contact details.
-If there are multiple business cards in the image, return an entry for each one in the 'contacts' array.
+Pay extremely close attention to every detail on the card. You must capture all available information for each of the following fields:
 
-Pay close attention to details:
-- Correctly separate first and last names.
-- Identify all email addresses and phone numbers. For phones, classify them as 'Mobile' or 'Telephone' if possible.
-- Capture the full organization name, the person's title/designation, and their department or team if mentioned.
-- Extract the full address and any website URLs.
-- Do not invent information. If a field is not present on the card, omit it.
+- \`firstName\`: The person's first name.
+- \`lastName\`: The person's last name.
+- \`emails\`: Extract ALL email addresses found on the card.
+- \`phones\`: Extract ALL phone numbers. Classify their \`type\` as "Mobile" or "Telephone" based on any visual cues or labels.
+- \`organizations\`: Extract the company name, the person's job title/designation, team, and department.
+- \`address\`: Extract the FULL and complete mailing address.
+- \`website\`: Extract any website URLs.
+
+Do not invent or assume information. If a field is not present on the card, omit it from the output. If there are multiple business cards, create a separate contact object for each one in the 'contacts' array.
 
 Image to process: {{media url=photoDataUri}}`,
 });
