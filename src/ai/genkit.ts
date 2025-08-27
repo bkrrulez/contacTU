@@ -1,3 +1,4 @@
+
 'use server';
 
 import {genkit, type Plugin} from 'genkit';
@@ -86,7 +87,7 @@ function openrouterPlugin(): Plugin {
 }
 
 export const ai = genkit({
-  plugins: [openrouterPlugin()], // <-- call it here
+  plugins: [openrouterPlugin()],
   logLevel: 'debug',
   enableTracing: true,
 });
