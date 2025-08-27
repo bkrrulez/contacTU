@@ -58,7 +58,7 @@ const extractContactFlow = ai.defineFlow(
   },
   async (input) => {
       const {output} = await extractContactPrompt(input, {
-        model: 'googleai/gemini-1.5-pro-latest',
+        model: 'googleai/gemini-1.5-flash-latest',
         temperature: 0.1,
       });
       return output!;
