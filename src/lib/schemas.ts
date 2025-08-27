@@ -60,5 +60,5 @@ export const ExtractedContactSchema = contactFormSchema.pick({
         department: z.string().optional() 
     })).optional().describe("The contact's organization, including their title/designation, team, and department if available."),
     address: z.string().optional().describe('The full mailing address of the contact or their organization.'),
-    website: z.string().url().optional().describe("The contact's personal or company website URL."),
+    website: z.string().optional().describe("The contact's personal or company website URL. Do not include http/https."),
 });
