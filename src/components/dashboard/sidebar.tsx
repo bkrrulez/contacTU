@@ -10,6 +10,9 @@ import {
   SidebarMenuButton,
   SidebarContent,
   SidebarFooter,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
 import {
   Users,
@@ -19,12 +22,15 @@ import {
   UploadCloud,
   Settings,
   LogOut,
+  ChevronDown,
 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Logo } from '../logo';
 import type { User } from '@/lib/types';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -35,8 +41,12 @@ const navItems = [
 ];
 
 const bottomNavItems = [
-    { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
     { href: '/', icon: LogOut, label: 'Log Out' },
+];
+
+const settingsNavItems = [
+    { href: '/dashboard/settings/organization', label: 'Organization', roles: ['Admin'] },
+    { href: '/dashboard/settings/team', label: 'Team', roles: ['Admin'] },
 ];
 
 export function AppSidebar() {
@@ -45,6 +55,10 @@ export function AppSidebar() {
   // For now, we'll default to a role that can see most things.
   // The header component already fetches and displays the current user's info.
   const userRole = 'Admin';
+
+  const isSettingsRouteActive = settingsNavItems.some(item => pathname.startsWith(item.href));
+  const canViewSettings = settingsNavItems.some(item => !item.roles || item.roles.includes(userRole));
+
 
   return (
     <Sidebar
@@ -58,23 +72,54 @@ export function AppSidebar() {
         </SidebarHeader>
         <div className="flex-1">
             <SidebarMenu className="p-2">
-            {navItems.map((item) => (
-                (!item.roles || item.roles.includes(userRole)) && (
-                <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton
-                    asChild
-                    tooltip={{ children: item.label }}
-                    isActive={pathname === item.href}
-                    className={pathname === item.href ? "shadow-md" : ""}
-                    >
-                    <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                    </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                )
-            ))}
+                {navItems.map((item) => (
+                    (!item.roles || item.roles.includes(userRole)) && (
+                    <SidebarMenuItem key={item.label}>
+                        <SidebarMenuButton
+                        asChild
+                        tooltip={{ children: item.label }}
+                        isActive={pathname === item.href}
+                        className={pathname === item.href ? "shadow-md" : ""}
+                        >
+                        <Link href={item.href}>
+                            <item.icon />
+                            <span>{item.label}</span>
+                        </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    )
+                ))}
+                
+                {canViewSettings && (
+                     <Collapsible asChild defaultOpen={isSettingsRouteActive}>
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton className={cn("justify-between", isSettingsRouteActive && 'shadow-md')}>
+                                    <div className="flex items-center gap-2">
+                                        <Settings />
+                                        <span>Settings</span>
+                                    </div>
+                                    <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                             <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    {settingsNavItems.map(item => (
+                                        (!item.roles || item.roles.includes(userRole)) && (
+                                            <SidebarMenuSubItem key={item.href}>
+                                                <SidebarMenuSubButton asChild isActive={pathname === item.href}>
+                                                    <Link href={item.href}>
+                                                        <span>{item.label}</span>
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                        )
+                                    ))}
+                                </SidebarMenuSub>
+                             </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+                )}
             </SidebarMenu>
         </div>
         <SidebarFooter className="p-2">
