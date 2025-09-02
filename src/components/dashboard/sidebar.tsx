@@ -89,8 +89,11 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                     )
                 ))}
-                
-                {canViewSettings && (
+            </SidebarMenu>
+        </div>
+        <SidebarFooter className="p-2">
+            <Separator className="my-2" />
+             {canViewSettings && (
                      <Collapsible asChild defaultOpen={isSettingsRouteActive}>
                         <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
@@ -120,10 +123,6 @@ export function AppSidebar() {
                         </SidebarMenuItem>
                     </Collapsible>
                 )}
-            </SidebarMenu>
-        </div>
-        <SidebarFooter className="p-2">
-            <Separator className="my-2" />
             <SidebarMenu>
                 {bottomNavItems.map((item) => (
                     <SidebarMenuItem key={item.label}>
