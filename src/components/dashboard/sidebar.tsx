@@ -97,11 +97,9 @@ export function AppSidebar() {
                      <Collapsible asChild defaultOpen={isSettingsRouteActive}>
                         <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
-                                <SidebarMenuButton className={cn("justify-between", isSettingsRouteActive && 'shadow-md')}>
-                                    <div className="flex items-center gap-2">
-                                        <Settings />
-                                        <span>Settings</span>
-                                    </div>
+                                <SidebarMenuButton className={cn("justify-between w-full", isSettingsRouteActive && 'shadow-md')}>
+                                    <Settings />
+                                    <span>Settings</span>
                                     <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
                                 </SidebarMenuButton>
                             </CollapsibleTrigger>
