@@ -22,14 +22,12 @@ import {
   UploadCloud,
   Settings,
   LogOut,
-  ChevronDown,
 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Logo } from '../logo';
 import type { User } from '@/lib/types';
 import { usePathname } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import React from 'react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -94,32 +92,28 @@ export function AppSidebar() {
         <SidebarFooter className="p-2">
             <Separator className="my-2" />
              {canViewSettings && (
-                     <Collapsible asChild defaultOpen={isSettingsRouteActive}>
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton className={cn("justify-between w-full", isSettingsRouteActive && 'shadow-md')}>
-                                    <Settings />
-                                    <span>Settings</span>
-                                    <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                             <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    {settingsNavItems.map(item => (
-                                        (!item.roles || item.roles.includes(userRole)) && (
-                                            <SidebarMenuSubItem key={item.href}>
-                                                <SidebarMenuSubButton asChild isActive={pathname === item.href}>
-                                                    <Link href={item.href}>
-                                                        <span>{item.label}</span>
-                                                    </Link>
-                                                </SidebarMenuSubButton>
-                                            </SidebarMenuSubItem>
-                                        )
-                                    ))}
-                                </SidebarMenuSub>
-                             </CollapsibleContent>
-                        </SidebarMenuItem>
-                    </Collapsible>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            isActive={isSettingsRouteActive}
+                            className={cn("pointer-events-none w-full", isSettingsRouteActive && 'shadow-md')}
+                        >
+                                <Settings />
+                                <span>Settings</span>
+                        </SidebarMenuButton>
+                        <SidebarMenuSub>
+                            {settingsNavItems.map(item => (
+                                (!item.roles || item.roles.includes(userRole)) && (
+                                    <SidebarMenuSubItem key={item.href}>
+                                        <SidebarMenuSubButton asChild isActive={pathname === item.href}>
+                                            <Link href={item.href}>
+                                                <span>{item.label}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                )
+                            ))}
+                        </SidebarMenuSub>
+                    </SidebarMenuItem>
                 )}
             <SidebarMenu>
                 {bottomNavItems.map((item) => (
