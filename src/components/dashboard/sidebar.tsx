@@ -92,29 +92,32 @@ export function AppSidebar() {
         <SidebarFooter className="p-2">
             <Separator className="my-2" />
              {canViewSettings && (
-                    <SidebarMenuItem>
-                        <SidebarMenuButton
-                            isActive={isSettingsRouteActive}
-                            className={cn("pointer-events-none w-full", isSettingsRouteActive && 'shadow-md')}
-                        >
-                                <Settings />
-                                <span>Settings</span>
-                        </SidebarMenuButton>
-                        <SidebarMenuSub>
-                            {settingsNavItems.map(item => (
-                                (!item.roles || item.roles.includes(userRole)) && (
-                                    <SidebarMenuSubItem key={item.href}>
-                                        <SidebarMenuSubButton asChild isActive={pathname === item.href}>
-                                            <Link href={item.href}>
-                                                <span>{item.label}</span>
-                                            </Link>
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                )
-                            ))}
-                        </SidebarMenuSub>
-                    </SidebarMenuItem>
-                )}
+                <div className="space-y-1">
+                    <SidebarMenuButton
+                        isActive={isSettingsRouteActive}
+                        className={cn("pointer-events-none w-full", isSettingsRouteActive && 'bg-primary text-primary-foreground shadow-md')}
+                    >
+                            <Settings />
+                            <span>Settings</span>
+                    </SidebarMenuButton>
+                    <div className="ml-7 flex flex-col gap-1 border-l pl-2">
+                        {settingsNavItems.map(item => (
+                            (!item.roles || item.roles.includes(userRole)) && (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={cn(
+                                        "block rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                                        pathname === item.href && "bg-accent text-accent-foreground"
+                                    )}
+                                >
+                                    {item.label}
+                                </Link>
+                            )
+                        ))}
+                    </div>
+                </div>
+            )}
             <SidebarMenu>
                 {bottomNavItems.map((item) => (
                     <SidebarMenuItem key={item.label}>
