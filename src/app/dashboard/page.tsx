@@ -20,6 +20,8 @@ import { db } from '@/lib/db';
 import type { Contact as ContactType, User } from '@/lib/types';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 const StatCard = ({
   title,
   value,

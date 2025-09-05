@@ -1,8 +1,11 @@
+
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/sidebar';
 import { AppHeader } from '@/components/dashboard/header';
 import { UserProfile } from '@/components/dashboard/user-profile';
 import { db } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 
 export default async function DashboardLayout({
   children,

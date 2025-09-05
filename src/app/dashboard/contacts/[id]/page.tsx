@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ContactDetailsPage({ params }: { params: { id: string } }) {
   const contactId = parseInt(params.id, 10);
   const contact = await getContact(contactId);
