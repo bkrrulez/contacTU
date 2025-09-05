@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { resetPassword } from './actions';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const resetPasswordSchema = z.object({
   password: z.string().min(8, { message: "Password must be at least 8 characters long." }),
@@ -26,7 +27,7 @@ const resetPasswordSchema = z.object({
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
-export default function ResetPasswordPage() {
+function ResetPasswordFormComponent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
   const { toast } = useToast();
@@ -145,4 +146,42 @@ export default function ResetPasswordPage() {
       </Card>
     </div>
   );
+}
+
+
+function ResetPasswordPageSkeleton() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="space-y-1 text-center pt-8 flex items-center justify-center">
+          <Logo />
+        </CardHeader>
+        <CardContent>
+            <CardTitle className="text-center text-2xl font-semibold tracking-tight">Reset Your Password</CardTitle>
+            <CardDescription className="text-center text-sm text-muted-foreground mt-2">
+                Enter a new password for your account.
+            </CardDescription>
+            <div className="space-y-4 mt-6">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <Skeleton className="h-10 w-full" />
+            </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<ResetPasswordPageSkeleton />}>
+      <ResetPasswordFormComponent />
+    </Suspense>
+  )
 }
