@@ -5,8 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Camera, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Camera, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { extractContactFromImage, ExtractedContactSchema } from '@/ai/flows/extract-contact-flow';
 import { z } from 'zod';
@@ -132,7 +131,7 @@ export function VCardScanForm() {
       </Button>
       <Button variant="outline" size="lg" className="h-24" onClick={() => fileInputRef.current?.click()}>
         <ImageIcon className="mr-4 h-8 w-8" />
-        <span className="text-lg">Upload Images</span>
+        <span className="text-lg">Upload Image</span>
       </Button>
       <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
     </div>
