@@ -57,7 +57,7 @@ export function ExportForm() {
     }, [selectedOrgs, data.organizations]);
     
     useEffect(() => {
-        // When available teams change, reset selected teams to 'all' if the current selection is invalid
+        // When available teams change, reset selected teams to 'all' if some selections are no longer valid
         const currentSelectedAreValid = selectedTeams.every(team => team === 'all' || availableTeams.includes(team));
         if (!currentSelectedAreValid) {
             setSelectedTeams(['all']);
@@ -109,7 +109,6 @@ export function ExportForm() {
         { value: 'all', label: 'All Teams' },
         ...availableTeams.map(team => ({ value: team, label: team }))
     ];
-
 
     return (
         <Card>

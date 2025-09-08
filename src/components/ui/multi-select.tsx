@@ -22,23 +22,23 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
   const [open, setOpen] = React.useState(false);
 
   const handleSelect = (value: string) => {
-    let newSelected: string[];
-    
     if (value === 'all') {
-      newSelected = selected.length === options.length ? [] : options.map(o => o.value);
-    } else {
-      if (selected.includes(value)) {
-        newSelected = selected.filter((item) => item !== value);
+      if (selected.length === options.length) {
+        onChange([]);
       } else {
-        newSelected = [...selected, value];
+        onChange(options.map(option => option.value));
       }
+      return;
     }
+
+    const newSelected = selected.includes(value)
+      ? selected.filter((item) => item !== value)
+      : [...selected, value];
     
     onChange(newSelected);
   };
   
   const getSelectedValues = () => {
-    if (selected.length === options.length) return [{ value: 'all', label: 'All' }];
     return options.filter(opt => selected.includes(opt.value));
   }
 
@@ -67,7 +67,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                     <Badge
                         variant="secondary"
                         key={option.value}
-                        className="mr-1"
+                        className="mr-1 mb-1"
                         onClick={(e) => {
                             e.stopPropagation();
                             handleUnselect(option.value);
@@ -90,10 +90,6 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           <CommandList>
             <CommandEmpty>No item found.</CommandEmpty>
             <CommandGroup>
-              <CommandItem onSelect={() => handleSelect('all')}>
-                <Check className={cn('mr-2 h-4 w-4', selected.length === options.length ? 'opacity-100' : 'opacity-0')} />
-                All
-              </CommandItem>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
