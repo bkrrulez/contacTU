@@ -23,7 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -35,7 +35,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { deleteContact } from '@/app/dashboard/contacts/actions';
+import { deleteContact, toggleFavoriteStatus } from '@/app/dashboard/contacts/actions';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -165,6 +165,24 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
     }
   };
 
+  const handleToggleFavorite = async (contact: Contact) => {
+    const result = await toggleFavoriteStatus(contact.id, contact.isFavorite);
+    if (result.success) {
+      toast({
+        title: `Contact ${contact.isFavorite ? 'unmarked' : 'marked'} as favorite`,
+        description: `${contact.firstName} ${contact.lastName} has been updated.`,
+      });
+      // Optionally update local state to reflect change immediately
+      setContacts(contacts.map(c => c.id === contact.id ? {...c, isFavorite: !c.isFavorite} : c));
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: result.error,
+      });
+    }
+  };
+
   const isAllSelected = selectedRows.size > 0 && selectedRows.size === contacts.length;
   const isSomeSelected = selectedRows.size > 0 && !isAllSelected;
 
@@ -209,7 +227,10 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium">{contact.firstName} {contact.lastName}</div>
+                      <div className="font-medium flex items-center gap-2">
+                        {contact.firstName} {contact.lastName}
+                        {contact.isFavorite && <Star className="h-4 w-4 text-amber-400 fill-amber-400" />}
+                      </div>
                       <div className="text-sm text-muted-foreground md:hidden">{contact.organizations?.[0]?.organization}</div>
                     </div>
                   </div>
@@ -232,6 +253,9 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/contacts/${contact.id}/edit`}>Edit</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleFavorite(contact)}>
+                        {contact.isFavorite ? 'Remove from Favorite' : 'Mark as Favorite'}
                       </DropdownMenuItem>
                       <DropdownMenuItem>Share</DropdownMenuItem>
                       <DropdownMenuSeparator />

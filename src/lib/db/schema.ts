@@ -1,5 +1,5 @@
 
-import { pgTable, serial, text, varchar, date, integer, pgEnum, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, date, integer, pgEnum, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
 import { InferSelectModel, relations } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum('user_role', ['Admin', 'Power User', 'Standard User', 'Read-Only']);
@@ -23,6 +23,7 @@ export const contacts = pgTable('contacts', {
     birthday: date('birthday'),
     notes: text('notes'),
     avatar: varchar('avatar', { length: 256 }),
+    isFavorite: boolean('is_favorite').default(false).notNull(),
 });
 
 export const contactOrganizations = pgTable('contact_organizations', {

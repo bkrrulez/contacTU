@@ -196,6 +196,9 @@ export async function deleteContact(id: number) {
     
     revalidatePath('/dashboard/contacts');
     revalidatePath('/dashboard/audit');
+    revalidatePath('/dashboard/favorites');
+    revalidatePath('/dashboard');
+
 
     return { success: true };
 }
@@ -215,4 +218,21 @@ export async function getContact(id: number): Promise<Contact | null> {
         }
     });
     return contact || null;
+}
+
+export async function toggleFavoriteStatus(id: number, isFavorite: boolean) {
+    try {
+        await db.update(contacts)
+            .set({ isFavorite: !isFavorite })
+            .where(eq(contacts.id, id));
+
+        revalidatePath('/dashboard');
+        revalidatePath('/dashboard/contacts');
+        revalidatePath('/dashboard/favorites');
+        revalidatePath(`/dashboard/contacts/${id}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to toggle favorite status:', error);
+        return { success: false, error: 'Failed to update contact.' };
+    }
 }

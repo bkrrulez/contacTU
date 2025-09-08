@@ -10,7 +10,7 @@ import {
   Users,
   Contact,
   Building,
-  LineChart,
+  Star,
   Upload,
   Download,
   ShieldQuestion,
@@ -19,6 +19,8 @@ import { ContactTable } from '@/components/dashboard/contact-table';
 import { db } from '@/lib/db';
 import type { Contact as ContactType, User } from '@/lib/types';
 import Link from 'next/link';
+import { eq } from 'drizzle-orm';
+import { contacts as contactsTable } from '@/lib/db/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,27 +29,37 @@ const StatCard = ({
   value,
   icon: Icon,
   color,
+  href
 }: {
   title: string;
   value: number;
   icon: React.ElementType;
   color?: string;
-}) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <div className={`rounded-full p-2`} style={{ backgroundColor: color ? `${color}1A` : 'var(--primary-10)'}}>
-        <Icon className="h-4 w-4 text-primary" style={{color: color ?? 'var(--primary)'}}/>
-      </div>
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-    </CardContent>
-  </Card>
-);
+  href?: string;
+}) => {
+  const cardContent = (
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          <div className={`rounded-full p-2`} style={{ backgroundColor: color ? `${color}1A` : 'var(--primary-10)'}}>
+            <Icon className="h-4 w-4 text-primary" style={{color: color ?? 'var(--primary)'}}/>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{value}</div>
+        </CardContent>
+      </Card>
+  );
+
+  if (href) {
+    return <Link href={href}>{cardContent}</Link>;
+  }
+
+  return cardContent;
+};
 
 export default async function DashboardPage() {
-  const contacts: ContactType[] = await db.query.contacts.findMany({
+  const allContacts: ContactType[] = await db.query.contacts.findMany({
     with: {
       organizations: true,
       emails: true,
@@ -62,8 +74,8 @@ export default async function DashboardPage() {
   }).then(orgs => new Set(orgs.map(o => o.organization)));
   const currentUser = await db.query.users.findFirst();
 
+  const favoriteContacts = await db.select().from(contactsTable).where(eq(contactsTable.isFavorite, true));
 
-  const recentChanges = 0; // Placeholder
 
   return (
     <div className="space-y-6">
@@ -95,10 +107,10 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Contacts" value={contacts.length} icon={Contact} color="#2563EB" />
+        <StatCard title="Total Contacts" value={allContacts.length} icon={Contact} color="#2563EB" />
         <StatCard title="Active Users" value={users.length} icon={Users} color="#16A34A" />
         <StatCard title="Organizations" value={organizations.size} icon={Building} color="#9333EA" />
-        <StatCard title="Recent Changes" value={recentChanges} icon={LineChart} color="#F59E0B" />
+        <StatCard title="Favorite Contacts" value={favoriteContacts.length} icon={Star} color="#F59E0B" href="/dashboard/favorites" />
       </div>
 
       <div className="grid gap-6">
@@ -110,8 +122,8 @@ export default async function DashboardPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            {contacts.length > 0 ? (
-                <ContactTable contacts={contacts.slice(0, 5)} />
+            {allContacts.length > 0 ? (
+                <ContactTable contacts={allContacts.slice(0, 5)} />
             ): (
                 <div className="text-center text-muted-foreground py-12">
                     No contacts found

@@ -19,6 +19,7 @@ import {
   UploadCloud,
   Settings,
   LogOut,
+  Star,
 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Logo } from '../logo';
@@ -30,6 +31,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/dashboard/contacts', icon: Contact, label: 'Contacts' },
+  { href: '/dashboard/favorites', icon: Star, label: 'Favorites' },
   { href: '/dashboard/users', icon: Users, label: 'User Management', roles: ['Admin', 'Power User'] },
   { href: '/dashboard/audit', icon: FileText, label: 'Audit Logs', roles: ['Admin', 'Power User'] },
   { href: '/dashboard/import', icon: UploadCloud, label: 'Import' },
