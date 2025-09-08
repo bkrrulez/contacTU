@@ -58,6 +58,11 @@ export const userFormSchema = z.object({
     avatar: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 
+export const organizationFormSchema = z.object({
+    name: z.string().min(1, 'Organization name is required'),
+    address: z.string().optional(),
+});
+
 
 export const ExtractedContactSchema = contactFormSchema.pick({
     firstName: true,

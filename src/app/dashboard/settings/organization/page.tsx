@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { db } from '@/lib/db';
 import { contactOrganizations } from '@/lib/db/schema';
-import { desc } from 'drizzle-orm';
+import { desc, sql } from 'drizzle-orm';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -19,13 +19,17 @@ import {
 export const dynamic = 'force-dynamic';
 
 async function getOrganizations() {
-    const organizations = await db.selectDistinctOn([contactOrganizations.organization],{ 
-        name: contactOrganizations.organization,
-        address: contactOrganizations.address
-     })
-        .from(contactOrganizations)
-        .orderBy(desc(contactOrganizations.organization));
-    return organizations;
+    // We need a stable ID for each unique organization name.
+    // We can use the minimum ID for each organization name as a stable identifier.
+    const result: { id: number; name: string; address: string | null }[] = await db.execute(sql`
+        SELECT DISTINCT ON (organization)
+            id,
+            organization as name,
+            address
+        FROM contact_organizations
+        ORDER BY organization, id
+    `);
+    return result;
 }
 
 export default async function OrganizationSettingsPage() {
@@ -59,8 +63,8 @@ export default async function OrganizationSettingsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {organizations.map((org, index) => (
-                                <TableRow key={index}>
+                            {organizations.map((org) => (
+                                <TableRow key={org.id}>
                                     <TableCell>{org.name}</TableCell>
                                     <TableCell>{org.address}</TableCell>
                                      <TableCell>
@@ -73,7 +77,9 @@ export default async function OrganizationSettingsPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={`/dashboard/settings/organization/${org.id}/edit`}>Edit</Link>
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                                             </DropdownMenuContent>
