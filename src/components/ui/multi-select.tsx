@@ -23,19 +23,21 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
 
   const handleSelect = (value: string) => {
     let newSelected: string[];
-
+    
     if (value === 'all') {
-      newSelected = ['all'];
+      // If 'all' is clicked, select either 'all' or nothing if it's already selected.
+      newSelected = selected.length === 1 && selected[0] === 'all' ? [] : ['all'];
     } else {
-      if (selected.includes('all')) {
-        newSelected = [value];
-      } else if (selected.includes(value)) {
-        newSelected = selected.filter((item) => item !== value);
+      // If a specific item is clicked, remove 'all' and toggle the item.
+      const newSelections = selected.filter(item => item !== 'all');
+      if (newSelections.includes(value)) {
+        newSelected = newSelections.filter((item) => item !== value);
       } else {
-        newSelected = [...selected, value];
+        newSelected = [...newSelections, value];
       }
     }
     
+    // If the selection becomes empty, default back to 'all'.
     if (newSelected.length === 0) {
       newSelected = ['all'];
     }
@@ -58,7 +60,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
         >
           <div className="flex gap-1 flex-wrap">
             {isAllSelected ? (
-              <span>{options.find(opt => opt.value === 'all')?.label || placeholder}</span>
+              <span className="text-muted-foreground">{options.find(opt => opt.value === 'all')?.label || placeholder}</span>
             ) : (
                 selectedOptions.map(option => (
                     <Badge
@@ -81,7 +83,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <Command>
           <CommandInput placeholder="Search ..." />
           <CommandList>

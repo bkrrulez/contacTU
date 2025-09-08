@@ -55,15 +55,15 @@ export function ExportForm() {
             });
         return Array.from(teams).sort();
     }, [selectedOrgs, data.organizations]);
-
+    
     useEffect(() => {
-        const validSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
-        if (JSON.stringify(validSelectedTeams) !== JSON.stringify(selectedTeams)) {
+        // When available teams change, reset selected teams to 'all' if the current selection is invalid
+        const currentSelectedAreValid = selectedTeams.every(team => team === 'all' || availableTeams.includes(team));
+        if (!currentSelectedAreValid) {
             setSelectedTeams(['all']);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [availableTeams]);
-    
+    }, [availableTeams, selectedTeams]);
+
 
     const handleExport = async () => {
         setIsExporting(true);
