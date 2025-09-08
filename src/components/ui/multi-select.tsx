@@ -25,28 +25,27 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
     let newSelected: string[];
     
     if (value === 'all') {
-      // If 'all' is clicked, select either 'all' or nothing if it's already selected.
-      newSelected = selected.length === 1 && selected[0] === 'all' ? [] : ['all'];
+      newSelected = selected.length === options.length ? [] : options.map(o => o.value);
     } else {
-      // If a specific item is clicked, remove 'all' and toggle the item.
-      const newSelections = selected.filter(item => item !== 'all');
-      if (newSelections.includes(value)) {
-        newSelected = newSelections.filter((item) => item !== value);
+      if (selected.includes(value)) {
+        newSelected = selected.filter((item) => item !== value);
       } else {
-        newSelected = [...newSelections, value];
+        newSelected = [...selected, value];
       }
-    }
-    
-    // If the selection becomes empty, default back to 'all'.
-    if (newSelected.length === 0) {
-      newSelected = ['all'];
     }
     
     onChange(newSelected);
   };
   
-  const selectedOptions = options.filter(opt => selected.includes(opt.value));
-  const isAllSelected = selected.includes('all');
+  const getSelectedValues = () => {
+    if (selected.length === options.length) return [{ value: 'all', label: 'All' }];
+    return options.filter(opt => selected.includes(opt.value));
+  }
+
+  const handleUnselect = (value: string) => {
+    onChange(selected.filter((s) => s !== value));
+  };
+
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -59,17 +58,19 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           onClick={() => setOpen(!open)}
         >
           <div className="flex gap-1 flex-wrap">
-            {isAllSelected ? (
-              <span className="text-muted-foreground">{options.find(opt => opt.value === 'all')?.label || placeholder}</span>
+            {selected.length === 0 ? (
+                <span className="text-muted-foreground">{placeholder}</span>
+            ) : getSelectedValues().length > 3 ? (
+                <Badge variant="secondary">{getSelectedValues().length} selected</Badge>
             ) : (
-                selectedOptions.map(option => (
+                getSelectedValues().map(option => (
                     <Badge
                         variant="secondary"
                         key={option.value}
                         className="mr-1"
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleSelect(option.value);
+                            handleUnselect(option.value);
                         }}
                     >
                         {option.label}
@@ -89,6 +90,10 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           <CommandList>
             <CommandEmpty>No item found.</CommandEmpty>
             <CommandGroup>
+              <CommandItem onSelect={() => handleSelect('all')}>
+                <Check className={cn('mr-2 h-4 w-4', selected.length === options.length ? 'opacity-100' : 'opacity-0')} />
+                All
+              </CommandItem>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
