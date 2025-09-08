@@ -23,25 +23,42 @@ interface MultiSelectProps {
 export const MultiSelect = ({ options, selected, onChange, className, placeholder = 'Select...', ...props }: MultiSelectProps) => {
   const [open, setOpen] = React.useState(false);
 
-  const handleUnselect = (item: string) => {
-    onChange(selected.filter((i) => i !== item));
-  };
-  
   const handleSelect = (value: string) => {
     if (value === 'all') {
+      if (selected.length === 1 && selected[0] === 'all') {
+        // Do nothing if 'all' is already the only thing selected
+        return;
+      }
+      onChange(['all']);
+      return;
+    }
+    
+    let newSelection = [...selected];
+
+    // If 'all' is currently selected, clear it and start a new selection.
+    if (newSelection.includes('all')) {
+        newSelection = [];
+    }
+
+    if (newSelection.includes(value)) {
+      // If the item is already selected, remove it.
+      newSelection = newSelection.filter((item) => item !== value);
+    } else {
+      // Otherwise, add the new item.
+      newSelection.push(value);
+    }
+
+    // If the selection becomes empty, default back to 'all'.
+    if (newSelection.length === 0) {
       onChange(['all']);
     } else {
-      const newSelection = selected.includes(value)
-        ? selected.filter((item) => item !== value)
-        : [...selected.filter(s => s !== 'all'), value];
-      
-      if (newSelection.length === 0) {
-        onChange(['all']);
-      } else {
-        onChange(newSelection);
-      }
+      onChange(newSelection);
     }
-  }
+  };
+
+  const handleUnselect = (item: string) => {
+    handleSelect(item);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -54,7 +71,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           onClick={() => setOpen(!open)}
         >
           <div className="flex gap-1 flex-wrap">
-            {selected.length > 0 ? (
+            {selected.length > 0 && selected[0] !== 'all' ? (
               options
                 .filter((option) => selected.includes(option.value))
                 .map((option) => (
@@ -76,7 +93,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                   </Badge>
                 ))
             ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
+              options.find(opt => opt.value === 'all')?.label || placeholder
             )}
           </div>
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
@@ -88,18 +105,21 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           <CommandList>
             <CommandEmpty>No item found.</CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  onSelect={() => {
-                    handleSelect(option.value);
-                    setOpen(true);
-                  }}
-                >
-                  <CheckIcon className={cn('mr-2 h-4 w-4', selected.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
-                  {option.label}
-                </CommandItem>
-              ))}
+              {options.map((option) => {
+                const isSelected = selected.includes(option.value)
+                return (
+                    <CommandItem
+                      key={option.value}
+                      onSelect={() => {
+                        handleSelect(option.value);
+                        setOpen(true);
+                      }}
+                    >
+                      <CheckIcon className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
+                      {option.label}
+                    </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

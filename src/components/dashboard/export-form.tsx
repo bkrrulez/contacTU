@@ -114,33 +114,11 @@ export function ExportForm() {
     ];
 
     const handleOrgChange = (newSelection: string[]) => {
-        if (newSelection.length === 0) {
-          setSelectedOrgs(['all']);
-        } else if (newSelection.length > 1 && newSelection.includes('all')) {
-          if (selectedOrgs.includes('all')) {
-            // If 'all' was already selected, a new item was added, so switch to specific selection
-            setSelectedOrgs(newSelection.filter((s) => s !== 'all'));
-          } else {
-            // If a specific item was selected and now 'all' is added, switch to 'all'
-            setSelectedOrgs(['all']);
-          }
-        } else {
-          setSelectedOrgs(newSelection);
-        }
+      setSelectedOrgs(newSelection);
     };
     
     const handleTeamChange = (newSelection: string[]) => {
-       if (newSelection.length === 0) {
-          setSelectedTeams(['all']);
-        } else if (newSelection.length > 1 && newSelection.includes('all')) {
-          if (selectedTeams.includes('all')) {
-            setSelectedTeams(newSelection.filter((s) => s !== 'all'));
-          } else {
-            setSelectedTeams(['all']);
-          }
-        } else {
-          setSelectedTeams(newSelection);
-        }
+       setSelectedTeams(newSelection);
     }
 
     return (
