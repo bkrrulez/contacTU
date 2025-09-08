@@ -33,7 +33,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
 
     newSelected = newSelected.filter(item => item !== 'all');
 
-    if (newSelected.length === 0 && options.some(opt => opt.value === 'all')) {
+    if (newSelected.length === 0 && options.length > 0) {
         onChange(['all']);
     } else {
         onChange(newSelected);
@@ -52,13 +52,12 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
     e.preventDefault();
     e.stopPropagation();
     const newSelected = selected.filter((s) => s !== value);
-    if(newSelected.length === 0 && options.some(opt => opt.value === 'all')) {
+    if(newSelected.length === 0) {
       onChange(['all']);
     } else {
       onChange(newSelected);
     }
   };
-
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -68,6 +67,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           role="combobox"
           aria-expanded={open}
           className={cn('w-full justify-between', selected.length > 1 ? 'h-full' : 'h-10', className)}
+          onClick={() => setOpen(!open)}
         >
           <div className="flex gap-1 flex-wrap items-center">
             {selected.length === 0 ? (
@@ -82,12 +82,14 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                         className="font-normal"
                     >
                         {option.label}
-                        <button
+                        <span
+                            role="button"
+                            aria-label={`Remove ${option.label}`}
                             className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                             onClick={(e) => handleUnselect(e, option.value)}
                         >
                           <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                        </button>
+                        </span>
                     </Badge>
                 ))
             )}
