@@ -114,23 +114,30 @@ export function ExportForm() {
     ];
 
     const handleOrgChange = (newSelection: string[]) => {
-      if (newSelection.length === 0) {
-        setSelectedOrgs(['all']);
-      } else if (newSelection.includes('all')) {
-        setSelectedOrgs(['all']);
-      } else {
-        setSelectedOrgs(newSelection);
-      }
+        if (newSelection.includes('all') && !selectedOrgs.includes('all')) {
+            // User specifically selected 'all'
+            setSelectedOrgs(['all']);
+        } else if (newSelection.includes('all') && newSelection.length > 1) {
+            // User selected another item while 'all' was active
+            setSelectedOrgs(newSelection.filter(s => s !== 'all'));
+        } else if (newSelection.length === 0) {
+            // User deselected the last item
+            setSelectedOrgs(['all']);
+        } else {
+            setSelectedOrgs(newSelection);
+        }
     };
     
     const handleTeamChange = (newSelection: string[]) => {
-       if (newSelection.length === 0) {
-        setSelectedTeams(['all']);
-      } else if (newSelection.includes('all')) {
-        setSelectedTeams(['all']);
-      } else {
-        setSelectedTeams(newSelection);
-      }
+       if (newSelection.includes('all') && !selectedTeams.includes('all')) {
+            setSelectedTeams(['all']);
+        } else if (newSelection.includes('all') && newSelection.length > 1) {
+            setSelectedTeams(newSelection.filter(s => s !== 'all'));
+        } else if (newSelection.length === 0) {
+            setSelectedTeams(['all']);
+        } else {
+            setSelectedTeams(newSelection);
+        }
     }
 
     return (
