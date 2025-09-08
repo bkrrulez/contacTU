@@ -39,7 +39,7 @@ export default function NewContactPage() {
       lastName: '',
       emails: [{ email: '' }],
       phones: [{ phone: '', type: 'Mobile' }],
-      organizations: [{ organization: '', designation: '', team: '', department: '' }],
+      organizations: [{ organization: '', designation: '', team: '', department: '', address: '' }],
       address: '',
       notes: '',
       website: '',
@@ -61,7 +61,7 @@ export default function NewContactPage() {
               ...rest,
               emails: emails && emails.length > 0 ? emails : [{ email: '' }],
               phones: phones && phones.length > 0 ? phones : [{ phone: '', type: 'Mobile' }],
-              organizations: organizations && organizations.length > 0 ? organizations.map(o => ({...o, team: o.team || '', designation: o.designation || '', department: o.department || ''})) : [{ organization: '', designation: '', team: '', department: '' }],
+              organizations: organizations && organizations.length > 0 ? organizations.map(o => ({...o, team: o.team || '', designation: o.designation || '', department: o.department || '', address: o.address || ''})) : [{ organization: '', designation: '', team: '', department: '', address: '' }],
             });
 
             toast({
@@ -275,6 +275,7 @@ export default function NewContactPage() {
                                  <TableHead>Designation</TableHead>
                                  <TableHead>Team</TableHead>
                                  <TableHead>Department</TableHead>
+                                 <TableHead>Address</TableHead>
                                  <TableHead className="w-[50px]"></TableHead>
                                </TableRow>
                            </TableHeader>
@@ -338,6 +339,20 @@ export default function NewContactPage() {
                                         />
                                   </TableCell>
                                   <TableCell>
+                                     <FormField
+                                      control={form.control}
+                                      name={`organizations.${index}.address`}
+                                      render={({ field }) => (
+                                          <FormItem>
+                                          <FormControl>
+                                              <Input placeholder="Org Address" {...field} />
+                                          </FormControl>
+                                          <FormMessage />
+                                          </FormItem>
+                                      )}
+                                      />
+                                  </TableCell>
+                                  <TableCell>
                                     {orgFields.length > 1 && (
                                       <Button variant="ghost" size="icon" onClick={() => removeOrg(index)}>
                                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -348,7 +363,7 @@ export default function NewContactPage() {
                               ))}
                             </TableBody>
                         </Table>
-                         <Button type="button" variant="outline" size="sm" onClick={() => appendOrg({ organization: '', designation: '', team: '', department: '' })}>
+                         <Button type="button" variant="outline" size="sm" onClick={() => appendOrg({ organization: '', designation: '', team: '', department: '', address: '' })}>
                           <PlusCircle className="mr-2 h-4 w-4" /> Add Organization
                         </Button>
                     </div>

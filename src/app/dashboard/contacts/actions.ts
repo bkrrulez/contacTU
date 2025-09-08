@@ -76,6 +76,7 @@ export async function createContact(values: z.infer<typeof contactFormSchema>) {
                 designation: org.designation,
                 team: org.team,
                 department: org.department,
+                address: org.address,
             }))
         );
     }
@@ -154,7 +155,8 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
                 organization: org.organization, 
                 designation: org.designation, 
                 team: org.team, 
-                department: org.department 
+                department: org.department,
+                address: org.address,
             }))
         );
     }

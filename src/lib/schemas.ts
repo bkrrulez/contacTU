@@ -19,6 +19,7 @@ export const contactFormSchema = z.object({
     designation: z.string().optional(),
     team: z.string().min(1, 'Team is required'),
     department: z.string().optional(),
+    address: z.string().optional(),
   })).min(1, 'At least one organization is required'),
 
   address: z.string().optional(),
@@ -77,8 +78,9 @@ export const ExtractedContactSchema = contactFormSchema.pick({
         organization: z.string(), 
         designation: z.string().optional(),
         team: z.string().optional(),
-        department: z.string().optional() 
-    })).optional().describe("The contact's organization, including their title/designation, team, and department if available."),
+        department: z.string().optional(),
+        address: z.string().optional()
+    })).optional().describe("The contact's organization, including their title/designation, team, department and address if available."),
     address: z.string().optional().describe('The full mailing address of the contact or their organization.'),
     website: z.string().optional().describe("The contact's personal or company website URL."),
 });

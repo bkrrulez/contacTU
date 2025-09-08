@@ -33,6 +33,7 @@ export const contactOrganizations = pgTable('contact_organizations', {
   designation: varchar('designation', { length: 256 }),
   team: varchar('team', { length: 256 }).notNull(),
   department: varchar('department', { length: 256 }),
+  address: text('address'),
 });
 
 export const contactEmails = pgTable('contact_emails', {

@@ -19,7 +19,10 @@ import {
 export const dynamic = 'force-dynamic';
 
 async function getOrganizations() {
-    const organizations = await db.selectDistinct({ name: contactOrganizations.organization })
+    const organizations = await db.selectDistinctOn([contactOrganizations.organization],{ 
+        name: contactOrganizations.organization,
+        address: contactOrganizations.address
+     })
         .from(contactOrganizations)
         .orderBy(desc(contactOrganizations.organization));
     return organizations;
@@ -51,6 +54,7 @@ export default async function OrganizationSettingsPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Organization Name</TableHead>
+                                <TableHead>Address</TableHead>
                                 <TableHead className="w-[80px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -58,6 +62,7 @@ export default async function OrganizationSettingsPage() {
                             {organizations.map((org, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{org.name}</TableCell>
+                                    <TableCell>{org.address}</TableCell>
                                      <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
