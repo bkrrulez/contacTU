@@ -57,12 +57,9 @@ export function ExportForm() {
     }, [selectedOrgs, data.organizations]);
 
     useEffect(() => {
-        // When available teams change, reset the team selection if the currently selected teams are no longer valid
         const validSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
-        if (validSelectedTeams.length === 0 && availableTeams.length > 0) {
+        if (JSON.stringify(validSelectedTeams) !== JSON.stringify(selectedTeams)) {
             setSelectedTeams(['all']);
-        } else if (JSON.stringify(validSelectedTeams) !== JSON.stringify(selectedTeams)) {
-            setSelectedTeams(validSelectedTeams);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [availableTeams]);
@@ -113,13 +110,6 @@ export function ExportForm() {
         ...availableTeams.map(team => ({ value: team, label: team }))
     ];
 
-    const handleOrgChange = (newSelection: string[]) => {
-      setSelectedOrgs(newSelection);
-    };
-    
-    const handleTeamChange = (newSelection: string[]) => {
-       setSelectedTeams(newSelection);
-    }
 
     return (
         <Card>
@@ -146,7 +136,7 @@ export function ExportForm() {
                         <MultiSelect
                             options={orgOptions}
                             selected={selectedOrgs}
-                            onChange={handleOrgChange}
+                            onChange={setSelectedOrgs}
                             className="w-full"
                             placeholder="Select organizations..."
                             disabled={isLoading}
@@ -157,7 +147,7 @@ export function ExportForm() {
                         <MultiSelect
                             options={teamOptions}
                             selected={selectedTeams}
-                            onChange={handleTeamChange}
+                            onChange={setSelectedTeams}
                             className="w-full"
                             placeholder="Select teams..."
                             disabled={isLoading || availableTeams.length === 0 || selectedOrgs.length === 0}
