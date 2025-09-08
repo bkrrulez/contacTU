@@ -10,9 +10,6 @@ import {
   SidebarMenuButton,
   SidebarContent,
   SidebarFooter,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
 import {
   Users,

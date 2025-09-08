@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -213,13 +214,14 @@ const Sidebar = React.forwardRef<
     }
 
     if (!open) {
-        return null;
+      return null
     }
 
     return (
       <div
         ref={ref}
-        className={cn("hidden md:block text-foreground transition-all duration-200 ease-in-out w-[var(--sidebar-width)]",
+        className={cn("hidden md:block text-foreground transition-all duration-200 ease-in-out",
+          open ? "w-[var(--sidebar-width)]" : "w-[var(--sidebar-width-icon)]",
           className
         )}
         data-state={state}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -22,44 +23,46 @@ export function VCardScanForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    let stream: MediaStream | null = null;
-    if (mode === 'scan') {
-      const getCameraPermission = async () => {
-        try {
-          // First try to get the environment camera
-          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-          setHasCameraPermission(true);
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-        } catch (e) {
-            console.log('Could not get environment camera, trying default camera', e);
-            // If that fails, try to get any camera
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                setHasCameraPermission(true);
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-            } catch (error) {
-                console.error('Error accessing camera:', error);
-                setHasCameraPermission(false);
-                toast({
-                    variant: 'destructive',
-                    title: 'Camera Access Denied',
-                    description: 'Please enable camera permissions in your browser settings to use this feature.',
-                });
-                setMode('idle');
-            }
-        }
-      };
+    if (mode !== 'scan') {
+      return;
+    }
 
-      getCameraPermission();
-      
-      // Cleanup
-      return () => {
-        stream?.getTracks().forEach(track => track.stop());
+    let stream: MediaStream | null = null;
+    const getCameraPermission = async () => {
+      try {
+        // First try to get the environment camera
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        setHasCameraPermission(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (e) {
+          console.log('Could not get environment camera, trying default camera', e);
+          // If that fails, try to get any camera
+          try {
+              stream = await navigator.mediaDevices.getUserMedia({ video: true });
+              setHasCameraPermission(true);
+              if (videoRef.current) {
+                  videoRef.current.srcObject = stream;
+              }
+          } catch (error) {
+              console.error('Error accessing camera:', error);
+              setHasCameraPermission(false);
+              toast({
+                  variant: 'destructive',
+                  title: 'Camera Access Denied',
+                  description: 'Please enable camera permissions in your browser settings to use this feature.',
+              });
+              setMode('idle');
+          }
       }
+    };
+
+    getCameraPermission();
+    
+    // Cleanup
+    return () => {
+      stream?.getTracks().forEach(track => track.stop());
     }
   }, [mode, toast]);
   
@@ -149,7 +152,7 @@ export function VCardScanForm() {
           )}
           <video ref={videoRef} className="w-full aspect-video rounded-md bg-black" autoPlay muted playsInline />
           <div className="flex justify-center gap-4">
-            <Button size="lg" onClick={handleCapture} disabled={isLoading || hasCameraPermission === false}>
+            <Button size="lg" onClick={handleCapture} disabled={isLoading || hasCameraPermission !== true}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Camera className="mr-2 h-4 w-4" />}
                 Capture and Process
             </Button>
