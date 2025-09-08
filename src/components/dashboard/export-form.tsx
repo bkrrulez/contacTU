@@ -31,6 +31,7 @@ export function ExportForm() {
                setData(result);
                // By default, select "All Organizations"
                setSelectedOrgs(['all']);
+               setSelectedTeams(['all']);
             }
             setIsLoading(false);
         }).catch(err => {
@@ -46,7 +47,7 @@ export function ExportForm() {
             data.organizations.forEach(org => {
                 org.teams.forEach(team => allTeams.add(team));
             });
-            return Array.from(allTeams);
+            return Array.from(allTeams).sort();
         }
         
         const teams = new Set<string>();
@@ -55,12 +56,17 @@ export function ExportForm() {
             .forEach(org => {
                 org.teams.forEach(team => teams.add(team));
             });
-        return Array.from(teams);
+        return Array.from(teams).sort();
     }, [selectedOrgs, data.organizations]);
 
     useEffect(() => {
         // Reset selected teams if they are no longer available in the new org selection
-        setSelectedTeams(prevTeams => prevTeams.filter(team => availableTeams.includes(team) || team === 'all'));
+        const newSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
+        if (newSelectedTeams.length === 0 && availableTeams.length > 0) {
+            setSelectedTeams(['all']);
+        } else {
+            setSelectedTeams(newSelectedTeams);
+        }
     }, [availableTeams]);
     
 
@@ -110,24 +116,30 @@ export function ExportForm() {
     ];
 
     const handleOrgChange = (newSelection: string[]) => {
-        // If 'all' is selected, it should be the only selection.
         if (newSelection.includes('all') && !selectedOrgs.includes('all')) {
+            // If 'all' is newly selected, make it the only selection
             setSelectedOrgs(['all']);
-        // If a specific org is selected, 'all' should be deselected.
         } else if (newSelection.length > 1 && newSelection.includes('all')) {
+            // If a specific org is added while 'all' is selected, deselect 'all'
             setSelectedOrgs(newSelection.filter(item => item !== 'all'));
+        } else if (newSelection.length === 0) {
+            // If all selections are cleared, default back to 'all'
+            setSelectedOrgs(['all']);
         } else {
             setSelectedOrgs(newSelection);
         }
     };
     
     const handleTeamChange = (newSelection: string[]) => {
-       // If 'all' is selected, it should be the only selection.
-        if (newSelection.includes('all') && !selectedTeams.includes('all')) {
+       if (newSelection.includes('all') && !selectedTeams.includes('all')) {
+            // If 'all' is newly selected, make it the only selection
             setSelectedTeams(['all']);
-        // If a specific team is selected, 'all' should be deselected.
         } else if (newSelection.length > 1 && newSelection.includes('all')) {
+            // If a specific team is added while 'all' is selected, deselect 'all'
             setSelectedTeams(newSelection.filter(item => item !== 'all'));
+        } else if (newSelection.length === 0) {
+            // If all selections are cleared, default back to 'all'
+            setSelectedTeams(['all']);
         } else {
             setSelectedTeams(newSelection);
         }
@@ -172,7 +184,7 @@ export function ExportForm() {
                             onChange={handleTeamChange}
                             className="w-full"
                             placeholder="Select teams..."
-                            disabled={isLoading || availableTeams.length === 0}
+                            disabled={isLoading || availableTeams.length === 0 || selectedOrgs.length === 0}
                         />
                     </div>
                 </div>
