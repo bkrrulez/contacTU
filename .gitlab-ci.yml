@@ -1,4 +1,4 @@
-image: alpine:3.19   # ✅ Base image so runner has something to start
+image: alpine:3.19   # Base image for GitLab runner
 
 stages:
   - deploy
@@ -42,13 +42,15 @@ deploy_to_server:
         # Backup Docker volume (assuming 'contacTU_data' is defined in docker-compose.yml)
         docker run --rm -v contacTU_data:/volume -v \$BACKUP_DIR:/backup busybox sh -c \"cp -a /volume /backup/\"
 
-        echo '>>> Pulling latest code and building new image'
+        echo '>>> Pulling latest code'
         cd $APP_PATH
         git config pull.rebase true
         git pull origin main
 
         IMAGE_TAG=$IMAGE_NAME:\$TIMESTAMP
-        docker build -t \$IMAGE_TAG .
+
+        echo '>>> Building Docker image (production with only prod dependencies)'
+        docker build --target production -t \$IMAGE_TAG .
         docker tag \$IMAGE_TAG $IMAGE_NAME:latest
 
         echo '>>> Stopping old containers'

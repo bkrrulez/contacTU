@@ -23,9 +23,13 @@ FROM node:20-slim AS production
 
 WORKDIR /app
 
-# Copy over the built application from the 'base' stage
+# Install only production dependencies
+COPY package*.json ./
+RUN npm install --production
+
+# Copy the built application from the 'base' stage
 COPY --from=base /app/.next ./.next
-COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/public ./public
 COPY --from=base /app/package.json ./package.json
 
 # 7. Expose the port the app runs on
