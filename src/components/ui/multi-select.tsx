@@ -14,7 +14,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 interface MultiSelectProps {
   options: { label: string; value: string; icon?: React.ComponentType<{ className?: string }> }[];
   selected: string[];
-  onChange: React.Dispatch<React.SetStateAction<string[]>>;
+  onChange: (selected: string[]) => void;
   className?: string;
   placeholder?: string;
   disabled?: boolean;
@@ -26,6 +26,22 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
   const handleUnselect = (item: string) => {
     onChange(selected.filter((i) => i !== item));
   };
+  
+  const handleSelect = (value: string) => {
+    if (value === 'all') {
+      onChange(['all']);
+    } else {
+      const newSelection = selected.includes(value)
+        ? selected.filter((item) => item !== value)
+        : [...selected.filter(s => s !== 'all'), value];
+      
+      if (newSelection.length === 0) {
+        onChange(['all']);
+      } else {
+        onChange(newSelection);
+      }
+    }
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -76,11 +92,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                 <CommandItem
                   key={option.value}
                   onSelect={() => {
-                    onChange(
-                      selected.includes(option.value)
-                        ? selected.filter((item) => item !== option.value)
-                        : [...selected, option.value]
-                    );
+                    handleSelect(option.value);
                     setOpen(true);
                   }}
                 >
