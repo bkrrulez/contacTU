@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -10,10 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Search, PanelLeft } from 'lucide-react';
+import { Search } from 'lucide-react';
 import Link from 'next/link';
-import { AppSidebar } from './sidebar';
 import { SidebarTrigger } from '../ui/sidebar';
 import React from 'react';
 import type { User } from '@/lib/types';
@@ -24,17 +23,11 @@ export function AppHeader({ children, user }: { children: React.ReactNode, user:
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <div className="flex items-center gap-4 md:hidden">
-        <Sheet>
-            <SheetTrigger asChild>
-              <Button size="icon" variant="outline">
-                <PanelLeft className="h-5 w-5" />
+        <SidebarTrigger asChild>
+            <Button size="icon" variant="outline">
                 <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-[260px] sm:w-[300px]">
-              <AppSidebar />
-            </SheetContent>
-        </Sheet>
+            </Button>
+        </SidebarTrigger>
       </div>
 
       <div className="w-full flex-1">
