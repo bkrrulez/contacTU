@@ -13,7 +13,7 @@ export default function ImportPage() {
           <p className="text-muted-foreground">Add contacts to your database from external files or by scanning.</p>
         </div>
       <Tabs defaultValue="csv">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
           <TabsTrigger value="csv">CSV / Excel</TabsTrigger>
           <TabsTrigger value="vcard">vCard File</TabsTrigger>
           <TabsTrigger value="scan">Scan/Upload vCard</TabsTrigger>

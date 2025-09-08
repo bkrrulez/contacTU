@@ -9,6 +9,7 @@ import { Camera, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { extractContactFromImage, ExtractedContactSchema } from '@/ai/flows/extract-contact-flow';
 import { z } from 'zod';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type ExtractedContact = z.infer<typeof ExtractedContactSchema>;
 
@@ -17,43 +18,31 @@ export function VCardScanForm() {
   const { toast } = useToast();
   const [mode, setMode] = useState<'idle' | 'scan'>('idle');
   const [isLoading, setIsLoading] = useState(false);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
-    if (stream && videoRef.current) {
-        videoRef.current.srcObject = stream;
-    }
-    // Cleanup stream when component unmounts or mode changes
-    return () => {
-        stream?.getTracks().forEach(track => track.stop());
-    }
-  }, [stream]);
+    const getCameraPermission = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({video: true});
+        setHasCameraPermission(true);
 
-  const handleStartScan = async () => {
-    try {
-      // First try to get the environment camera
-      const cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .catch(async (e) => {
-            console.log('Could not get environment camera, trying default camera', e);
-            // If that fails, try to get any camera
-            return await navigator.mediaDevices.getUserMedia({ video: true });
-        });
-      
-      setStream(cameraStream);
-      setMode('scan');
-
-    } catch (error) {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (error) {
         console.error('Error accessing camera:', error);
-        toast({
-            variant: 'destructive',
-            title: 'Camera Access Denied',
-            description: 'Please enable camera permissions in your browser settings to use this feature.',
-        });
-        setMode('idle');
+        setHasCameraPermission(false);
+        // We will show an inline alert instead of a toast
+      }
+    };
+
+    if (mode === 'scan') {
+        getCameraPermission();
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
 
   const processImageAndRedirect = async (imageDataUri: string) => {
@@ -84,8 +73,10 @@ export function VCardScanForm() {
     } finally {
         setIsLoading(false);
         setMode('idle');
-        stream?.getTracks().forEach(track => track.stop());
-        setStream(null);
+        if (videoRef.current && videoRef.current.srcObject) {
+            const stream = videoRef.current.srcObject as MediaStream;
+            stream.getTracks().forEach(track => track.stop());
+        }
     }
   };
 
@@ -119,13 +110,15 @@ export function VCardScanForm() {
 
   const handleCancelScan = () => {
       setMode('idle');
-      stream?.getTracks().forEach(track => track.stop());
-      setStream(null);
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
   }
 
   const renderIdleState = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Button variant="outline" size="lg" className="h-24" onClick={handleStartScan}>
+      <Button variant="outline" size="lg" className="h-24" onClick={() => setMode('scan')}>
         <Camera className="mr-4 h-8 w-8" />
         <span className="text-lg">Scan vCard</span>
       </Button>
@@ -140,8 +133,16 @@ export function VCardScanForm() {
   const renderScanState = () => (
       <div className="space-y-4">
           <video ref={videoRef} className="w-full aspect-video rounded-md bg-black" autoPlay muted playsInline />
+          { !hasCameraPermission && (
+              <Alert variant="destructive">
+                  <AlertTitle>Camera Access Denied</AlertTitle>
+                  <AlertDescription>
+                    Please enable camera permissions in your browser settings to use this feature.
+                  </AlertDescription>
+              </Alert>
+          )}
           <div className="flex justify-center gap-4">
-            <Button size="lg" onClick={handleCapture} disabled={isLoading}>
+            <Button size="lg" onClick={handleCapture} disabled={isLoading || !hasCameraPermission}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Camera className="mr-2 h-4 w-4" />}
                 Capture and Process
             </Button>
