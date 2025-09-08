@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Check, XCircle, ChevronDown } from 'lucide-react';
+import { Check, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,27 +23,40 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
 
   const handleSelect = (value: string) => {
     if (value === 'all') {
-      if (selected.length === options.length) {
-        onChange([]);
-      } else {
-        onChange(options.map(option => option.value));
-      }
+      onChange(selected.includes('all') ? [] : ['all']);
       return;
     }
-
-    const newSelected = selected.includes(value)
+    
+    let newSelected = selected.includes(value)
       ? selected.filter((item) => item !== value)
       : [...selected, value];
-    
-    onChange(newSelected);
+
+    newSelected = newSelected.filter(item => item !== 'all');
+
+    if (newSelected.length === 0 && options.length > 0) {
+        onChange(['all']);
+    } else {
+        onChange(newSelected);
+    }
   };
   
   const getSelectedValues = () => {
+    if (selected.includes('all')) {
+        const allOption = options.find(opt => opt.value === 'all');
+        return allOption ? [allOption] : [];
+    }
     return options.filter(opt => selected.includes(opt.value));
   }
 
-  const handleUnselect = (value: string) => {
-    onChange(selected.filter((s) => s !== value));
+  const handleUnselect = (e: React.MouseEvent, value: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newSelected = selected.filter((s) => s !== value);
+    if(newSelected.length === 0) {
+      onChange(['all']);
+    } else {
+      onChange(newSelected);
+    }
   };
 
 
@@ -60,7 +73,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           <div className="flex gap-1 flex-wrap">
             {selected.length === 0 ? (
                 <span className="text-muted-foreground">{placeholder}</span>
-            ) : getSelectedValues().length > 3 ? (
+            ) : getSelectedValues().length > 3 && !selected.includes('all') ? (
                 <Badge variant="secondary">{getSelectedValues().length} selected</Badge>
             ) : (
                 getSelectedValues().map(option => (
@@ -68,14 +81,11 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                         variant="secondary"
                         key={option.value}
                         className="mr-1 mb-1"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleUnselect(option.value);
-                        }}
+                        onClick={(e) => handleUnselect(e, option.value)}
                     >
                         {option.label}
                         <span className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                          <XCircle className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                          <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                         </span>
                     </Badge>
                 ))
@@ -94,6 +104,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                 <CommandItem
                   key={option.value}
                   onSelect={() => handleSelect(option.value)}
+                  style={{cursor: 'pointer'}}
                 >
                   <Check className={cn('mr-2 h-4 w-4', selected.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
                   {option.label}

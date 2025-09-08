@@ -56,15 +56,6 @@ export function ExportForm() {
         return Array.from(teams).sort();
     }, [selectedOrgs, data.organizations]);
     
-    useEffect(() => {
-        // When available teams change, reset selected teams to 'all' if some selections are no longer valid
-        const currentSelectedAreValid = selectedTeams.every(team => team === 'all' || availableTeams.includes(team));
-        if (!currentSelectedAreValid) {
-            setSelectedTeams(['all']);
-        }
-    }, [availableTeams, selectedTeams]);
-
-
     const handleExport = async () => {
         setIsExporting(true);
         try {
