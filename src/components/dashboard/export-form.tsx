@@ -22,16 +22,13 @@ export function ExportForm() {
     const [data, setData] = useState<OrgAndTeamData>({ organizations: [] });
     
     const [fileType, setFileType] = useState<'xlsx' | 'csv'>('xlsx');
-    const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
-    const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+    const [selectedOrgs, setSelectedOrgs] = useState<string[]>(['all']);
+    const [selectedTeams, setSelectedTeams] = useState<string[]>(['all']);
     
     useEffect(() => {
         getExportData().then(result => {
             if(result) {
                setData(result);
-               // By default, select "All Organizations"
-               setSelectedOrgs(['all']);
-               setSelectedTeams(['all']);
             }
             setIsLoading(false);
         }).catch(err => {
@@ -60,13 +57,14 @@ export function ExportForm() {
     }, [selectedOrgs, data.organizations]);
 
     useEffect(() => {
-        // Reset selected teams if they are no longer available in the new org selection
-        const newSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
-        if (newSelectedTeams.length === 0 && availableTeams.length > 0) {
+        // When available teams change, reset the team selection if the currently selected teams are no longer valid
+        const validSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
+        if (validSelectedTeams.length === 0) {
             setSelectedTeams(['all']);
-        } else {
-            setSelectedTeams(newSelectedTeams);
+        } else if(JSON.stringify(validSelectedTeams) !== JSON.stringify(selectedTeams)) {
+            setSelectedTeams(validSelectedTeams);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [availableTeams]);
     
 
@@ -116,14 +114,13 @@ export function ExportForm() {
     ];
 
     const handleOrgChange = (newSelection: string[]) => {
-        if (newSelection.includes('all') && !selectedOrgs.includes('all')) {
-            // If 'all' is newly selected, make it the only selection
+        if (newSelection.length === 0) {
             setSelectedOrgs(['all']);
-        } else if (newSelection.length > 1 && newSelection.includes('all')) {
-            // If a specific org is added while 'all' is selected, deselect 'all'
+            return;
+        }
+        if (newSelection.includes('all') && selectedOrgs.includes('all') && newSelection.length > 1) {
             setSelectedOrgs(newSelection.filter(item => item !== 'all'));
-        } else if (newSelection.length === 0) {
-            // If all selections are cleared, default back to 'all'
+        } else if (newSelection.includes('all')) {
             setSelectedOrgs(['all']);
         } else {
             setSelectedOrgs(newSelection);
@@ -131,18 +128,17 @@ export function ExportForm() {
     };
     
     const handleTeamChange = (newSelection: string[]) => {
-       if (newSelection.includes('all') && !selectedTeams.includes('all')) {
-            // If 'all' is newly selected, make it the only selection
-            setSelectedTeams(['all']);
-        } else if (newSelection.length > 1 && newSelection.includes('all')) {
-            // If a specific team is added while 'all' is selected, deselect 'all'
-            setSelectedTeams(newSelection.filter(item => item !== 'all'));
-        } else if (newSelection.length === 0) {
-            // If all selections are cleared, default back to 'all'
-            setSelectedTeams(['all']);
-        } else {
-            setSelectedTeams(newSelection);
-        }
+       if (newSelection.length === 0) {
+           setSelectedTeams(['all']);
+           return;
+       }
+       if (newSelection.includes('all') && selectedTeams.includes('all') && newSelection.length > 1) {
+           setSelectedTeams(newSelection.filter(item => item !== 'all'));
+       } else if (newSelection.includes('all')) {
+           setSelectedTeams(['all']);
+       } else {
+           setSelectedTeams(newSelection);
+       }
     }
 
     return (
