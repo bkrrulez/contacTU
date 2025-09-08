@@ -22,8 +22,8 @@ export function ExportForm() {
     const [data, setData] = useState<OrgAndTeamData>({ organizations: [] });
     
     const [fileType, setFileType] = useState<'xlsx' | 'csv'>('xlsx');
-    const [selectedOrgs, setSelectedOrgs] = useState<string[]>(['all']);
-    const [selectedTeams, setSelectedTeams] = useState<string[]>(['all']);
+    const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
+    const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
     
     useEffect(() => {
         getExportData().then(result => {
@@ -39,8 +39,8 @@ export function ExportForm() {
     }, [toast]);
     
     const availableTeams = useMemo(() => {
-        if (selectedOrgs.includes('all')) {
-            const allTeams = new Set<string>();
+        if (selectedOrgs.length === 0) {
+             const allTeams = new Set<string>();
             data.organizations.forEach(org => {
                 org.teams.forEach(team => allTeams.add(team));
             });
@@ -57,9 +57,9 @@ export function ExportForm() {
     }, [selectedOrgs, data.organizations]);
     
      useEffect(() => {
-        const newSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
+        const newSelectedTeams = selectedTeams.filter(team => availableTeams.includes(team));
         if (JSON.stringify(newSelectedTeams) !== JSON.stringify(selectedTeams)) {
-            setSelectedTeams(newSelectedTeams.length > 0 ? newSelectedTeams : ['all']);
+            setSelectedTeams(newSelectedTeams);
         }
     }, [availableTeams, selectedTeams]);
 
@@ -99,15 +99,10 @@ export function ExportForm() {
         }
     }
 
-    const orgOptions = [
-        { value: 'all', label: 'All Organizations' },
-        ...data.organizations.map(org => ({ value: org.name, label: org.name }))
-    ];
+    const orgOptions = data.organizations.map(org => ({ value: org.name, label: org.name }));
+    const teamOptions = availableTeams.map(team => ({ value: team, label: team }));
 
-    const teamOptions = [
-        { value: 'all', label: 'All Teams' },
-        ...availableTeams.map(team => ({ value: team, label: team }))
-    ];
+    const isExportDisabled = isExporting || isLoading || selectedOrgs.length === 0;
 
     return (
         <Card>
@@ -130,7 +125,7 @@ export function ExportForm() {
                         </Select>
                     </div>
                     <div>
-                        <label className="text-sm font-medium mb-2 block">Organization</label>
+                        <label className="text-sm font-medium mb-2 block">Organization <span className="text-destructive">*</span></label>
                         <MultiSelect
                             options={orgOptions}
                             selected={selectedOrgs}
@@ -148,14 +143,14 @@ export function ExportForm() {
                             onChange={setSelectedTeams}
                             className="w-full"
                             placeholder="Select teams..."
-                            disabled={isLoading || availableTeams.length === 0 || selectedOrgs.length === 0}
+                            disabled={isLoading || availableTeams.length === 0}
                         />
                     </div>
                 </div>
 
             </CardContent>
             <CardFooter>
-                 <Button onClick={handleExport} disabled={isExporting || isLoading}>
+                 <Button onClick={handleExport} disabled={isExportDisabled}>
                     {isExporting ? (
                         <>
                             <Download className="mr-2 h-4 w-4 animate-pulse" />

@@ -22,42 +22,22 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
   const [open, setOpen] = React.useState(false);
 
   const handleSelect = (value: string) => {
-    if (value === 'all') {
-      onChange(selected.includes('all') ? [] : ['all']);
-      return;
-    }
-    
-    let newSelected = selected.includes(value)
-      ? selected.filter((item) => item !== value)
-      : [...selected, value];
-
-    newSelected = newSelected.filter(item => item !== 'all');
-
-    if (newSelected.length === 0 && options.length > 0) {
-        onChange(['all']);
-    } else {
-        onChange(newSelected);
-    }
+    onChange(
+      selected.includes(value)
+        ? selected.filter((item) => item !== value)
+        : [...selected, value]
+    );
   };
   
-  const getSelectedValues = () => {
-    if (selected.includes('all')) {
-        const allOption = options.find(opt => opt.value === 'all');
-        return allOption ? [allOption] : [];
-    }
-    return options.filter(opt => selected.includes(opt.value));
-  }
-
   const handleUnselect = (e: React.MouseEvent, value: string) => {
     e.preventDefault();
     e.stopPropagation();
-    const newSelected = selected.filter((s) => s !== value);
-    if(newSelected.length === 0) {
-      onChange(['all']);
-    } else {
-      onChange(newSelected);
-    }
+    onChange(selected.filter((s) => s !== value));
   };
+
+  const getSelectedValues = () => {
+    return options.filter(option => selected.includes(option.value));
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -72,8 +52,8 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           <div className="flex gap-1 flex-wrap items-center">
             {selected.length === 0 ? (
                 <span className="text-muted-foreground font-normal">{placeholder}</span>
-            ) : getSelectedValues().length > 3 && !selected.includes('all') ? (
-                <Badge variant="secondary" className="font-normal">{getSelectedValues().length} selected</Badge>
+            ) : getSelectedValues().length > 3 ? (
+                <Badge variant="secondary" className="font-normal">{selected.length} selected</Badge>
             ) : (
                 getSelectedValues().map(option => (
                     <Badge
@@ -84,9 +64,15 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                         {option.label}
                         <span
                             role="button"
+                            tabIndex={0}
                             aria-label={`Remove ${option.label}`}
                             className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                             onClick={(e) => handleUnselect(e, option.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    handleUnselect(e as any, option.value);
+                                }
+                            }}
                         >
                           <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                         </span>

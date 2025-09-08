@@ -77,10 +77,10 @@ export async function exportContacts(values: z.infer<typeof exportSchema>) {
         
 
      const conditions = [];
-     if (!organizations.includes('all') && organizations.length > 0) {
+     if (organizations.length > 0) {
         conditions.push(inArray(contactOrganizations.organization, organizations));
      }
-     if (!teams.includes('all') && teams.length > 0) {
+     if (teams.length > 0) {
         conditions.push(inArray(contactOrganizations.team, teams));
      }
 
