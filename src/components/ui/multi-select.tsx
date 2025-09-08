@@ -52,17 +52,13 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
     e.preventDefault();
     e.stopPropagation();
     const newSelected = selected.filter((s) => s !== value);
-    if(newSelected.length === 0) {
+    if(newSelected.length === 0 && options.length > 0) {
       onChange(['all']);
     } else {
       onChange(newSelected);
     }
   };
 
-  // Handle click on CommandItem directly
-  const handleItemClick = (value: string) => {
-    handleSelect(value);
-  };
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -109,19 +105,10 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer"
+                  className="cursor-pointer flex items-center"
                 >
-                  <div 
-                    className="flex items-center w-full"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleItemClick(option.value);
-                    }}
-                  >
                     <Check className={cn('mr-2 h-4 w-4', selected.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
                     {option.label}
-                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>
