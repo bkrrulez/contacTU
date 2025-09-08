@@ -17,7 +17,7 @@ export const contactFormSchema = z.object({
   organizations: z.array(z.object({
     organization: z.string().min(1, 'Organization is required'),
     designation: z.string().optional(),
-    team: z.string().min(1, 'Team is required'),
+    team: z.string().optional(),
     department: z.string().optional(),
     address: z.string().optional(),
   })).min(1, 'At least one organization is required'),

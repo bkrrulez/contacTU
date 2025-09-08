@@ -72,7 +72,7 @@ export default async function TeamSettingsPage() {
                                     <TableCell>{team.team}</TableCell>
                                     <TableCell className="flex flex-wrap gap-1">
                                         {team.organizations.map(org => (
-                                            <Badge key={org} variant="secondary">{org}</Badge>
+                                            org && <Badge key={org} variant="secondary">{org}</Badge>
                                         ))}
                                     </TableCell>
                                      <TableCell>
@@ -85,7 +85,9 @@ export default async function TeamSettingsPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={`/dashboard/settings/team/${encodeURIComponent(team.team)}/edit`}>Edit</Link>
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                                             </DropdownMenuContent>
