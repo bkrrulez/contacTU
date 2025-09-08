@@ -89,7 +89,7 @@ export default async function DashboardPage() {
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/dashboard/import">
-              <Upload className="mr-2 h-4 w-4" />
+              <Download className="mr-2 h-4 w-4" />
               Import
             </Link>
           </Button>
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
             </Link>
           </Button>
           <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
+            <Upload className="mr-2 h-4 w-4" />
             Export
           </Button>
         </div>
