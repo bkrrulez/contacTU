@@ -59,9 +59,9 @@ export function ExportForm() {
     useEffect(() => {
         // When available teams change, reset the team selection if the currently selected teams are no longer valid
         const validSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
-        if (validSelectedTeams.length === 0) {
+        if (validSelectedTeams.length === 0 && availableTeams.length > 0) {
             setSelectedTeams(['all']);
-        } else if(JSON.stringify(validSelectedTeams) !== JSON.stringify(selectedTeams)) {
+        } else if (JSON.stringify(validSelectedTeams) !== JSON.stringify(selectedTeams)) {
             setSelectedTeams(validSelectedTeams);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,29 +114,32 @@ export function ExportForm() {
     ];
 
     const handleOrgChange = (newSelection: string[]) => {
-        if (newSelection.includes('all') && !selectedOrgs.includes('all')) {
-            // User specifically selected 'all'
+        if (newSelection.length === 0) {
+          setSelectedOrgs(['all']);
+        } else if (newSelection.length > 1 && newSelection.includes('all')) {
+          if (selectedOrgs.includes('all')) {
+            // If 'all' was already selected, a new item was added, so switch to specific selection
+            setSelectedOrgs(newSelection.filter((s) => s !== 'all'));
+          } else {
+            // If a specific item was selected and now 'all' is added, switch to 'all'
             setSelectedOrgs(['all']);
-        } else if (newSelection.includes('all') && newSelection.length > 1) {
-            // User selected another item while 'all' was active
-            setSelectedOrgs(newSelection.filter(s => s !== 'all'));
-        } else if (newSelection.length === 0) {
-            // User deselected the last item
-            setSelectedOrgs(['all']);
+          }
         } else {
-            setSelectedOrgs(newSelection);
+          setSelectedOrgs(newSelection);
         }
     };
     
     const handleTeamChange = (newSelection: string[]) => {
-       if (newSelection.includes('all') && !selectedTeams.includes('all')) {
+       if (newSelection.length === 0) {
+          setSelectedTeams(['all']);
+        } else if (newSelection.length > 1 && newSelection.includes('all')) {
+          if (selectedTeams.includes('all')) {
+            setSelectedTeams(newSelection.filter((s) => s !== 'all'));
+          } else {
             setSelectedTeams(['all']);
-        } else if (newSelection.includes('all') && newSelection.length > 1) {
-            setSelectedTeams(newSelection.filter(s => s !== 'all'));
-        } else if (newSelection.length === 0) {
-            setSelectedTeams(['all']);
+          }
         } else {
-            setSelectedTeams(newSelection);
+          setSelectedTeams(newSelection);
         }
     }
 
