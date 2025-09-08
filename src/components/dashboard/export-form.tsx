@@ -114,30 +114,32 @@ export function ExportForm() {
     ];
 
     const handleOrgChange = (newSelection: string[]) => {
-        if (newSelection.length === 0) {
-            setSelectedOrgs(['all']);
-            return;
-        }
-        if (newSelection.includes('all') && selectedOrgs.includes('all') && newSelection.length > 1) {
-            setSelectedOrgs(newSelection.filter(item => item !== 'all'));
-        } else if (newSelection.includes('all')) {
-            setSelectedOrgs(['all']);
-        } else {
-            setSelectedOrgs(newSelection);
-        }
+      const allWasSelected = selectedOrgs.includes('all');
+      const allIsSelected = newSelection.includes('all');
+
+      if (allIsSelected && !allWasSelected) {
+        setSelectedOrgs(['all']);
+      } else if (allIsSelected && newSelection.length > 1) {
+        setSelectedOrgs(newSelection.filter((v) => v !== 'all'));
+      } else if (newSelection.length === 0) {
+        setSelectedOrgs(['all']);
+      } else {
+        setSelectedOrgs(newSelection);
+      }
     };
     
     const handleTeamChange = (newSelection: string[]) => {
-       if (newSelection.length === 0) {
-           setSelectedTeams(['all']);
-           return;
-       }
-       if (newSelection.includes('all') && selectedTeams.includes('all') && newSelection.length > 1) {
-           setSelectedTeams(newSelection.filter(item => item !== 'all'));
-       } else if (newSelection.includes('all')) {
-           setSelectedTeams(['all']);
+       const allWasSelected = selectedTeams.includes('all');
+       const allIsSelected = newSelection.includes('all');
+
+       if (allIsSelected && !allWasSelected) {
+         setSelectedTeams(['all']);
+       } else if (allIsSelected && newSelection.length > 1) {
+         setSelectedTeams(newSelection.filter((v) => v !== 'all'));
+       } else if (newSelection.length === 0) {
+         setSelectedTeams(['all']);
        } else {
-           setSelectedTeams(newSelection);
+         setSelectedTeams(newSelection);
        }
     }
 
