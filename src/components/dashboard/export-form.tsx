@@ -57,14 +57,17 @@ export function ExportForm() {
     }, [selectedOrgs, data.organizations]);
     
      useEffect(() => {
+        // If the available teams change, filter the selected teams to only include available ones.
         const newSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
-        if (newSelectedTeams.length === 0) {
+        // If no teams are left selected (and 'all' wasn't one of them), default back to 'all'
+        if (newSelectedTeams.length === 0 && availableTeams.length > 0) {
             setSelectedTeams(['all']);
         } else if (newSelectedTeams.length < selectedTeams.length) {
+            // Only update if there's an actual change to avoid loops
             setSelectedTeams(newSelectedTeams);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedOrgs, availableTeams]);
+    }, [availableTeams]);
 
 
     const handleExport = async () => {

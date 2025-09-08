@@ -22,24 +22,21 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
   const [open, setOpen] = React.useState(false);
 
   const handleSelect = (value: string) => {
-    let newSelected: string[];
-    
     if (value === 'all') {
-      newSelected = selected.includes('all') ? [] : ['all'];
-    } else {
-      if (selected.includes('all')) {
-        newSelected = [value];
-      } else {
-        newSelected = selected.includes(value)
-          ? selected.filter((item) => item !== value)
-          : [...selected, value];
-      }
+      onChange(selected.includes('all') ? [] : ['all']);
+      return;
     }
+    
+    let newSelected = selected.includes(value)
+      ? selected.filter((item) => item !== value)
+      : [...selected, value];
 
-    if (newSelected.length === 0) {
-      onChange(['all']);
+    newSelected = newSelected.filter(item => item !== 'all');
+
+    if (newSelected.length === 0 && options.find(opt => opt.value === 'all')) {
+        onChange(['all']);
     } else {
-      onChange(newSelected);
+        onChange(newSelected);
     }
   };
   
@@ -54,7 +51,12 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
   const handleUnselect = (e: React.MouseEvent, value: string) => {
     e.preventDefault();
     e.stopPropagation();
-    handleSelect(value);
+    const newSelected = selected.filter((s) => s !== value);
+    if(newSelected.length === 0 && options.find(opt => opt.value === 'all')) {
+      onChange(['all']);
+    } else {
+      onChange(newSelected);
+    }
   };
 
   return (
@@ -103,9 +105,14 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
                   className="cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSelect(option.value);
+                  }}
                 >
-                    <Check className={cn('mr-2 h-4 w-4', selected.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
-                    {option.label}
+                  <Check className={cn('mr-2 h-4 w-4', selected.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
+                  {option.label}
                 </CommandItem>
               ))}
             </CommandGroup>
