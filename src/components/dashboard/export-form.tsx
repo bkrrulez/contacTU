@@ -56,16 +56,15 @@ export function ExportForm() {
         return Array.from(teams).sort();
     }, [selectedOrgs, data.organizations]);
     
-    useEffect(() => {
-        // When selected organizations change, filter selected teams to only those available
+     useEffect(() => {
         const newSelectedTeams = selectedTeams.filter(team => team === 'all' || availableTeams.includes(team));
         if (newSelectedTeams.length === 0) {
             setSelectedTeams(['all']);
-        } else if (newSelectedTeams.length !== selectedTeams.length) {
+        } else if (newSelectedTeams.length < selectedTeams.length) {
             setSelectedTeams(newSelectedTeams);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [availableTeams]);
+    }, [selectedOrgs, availableTeams]);
 
 
     const handleExport = async () => {

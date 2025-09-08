@@ -22,19 +22,24 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
   const [open, setOpen] = React.useState(false);
 
   const handleSelect = (value: string) => {
-    if (value === 'all') {
-      onChange(selected.includes('all') ? [] : ['all']);
-      return;
-    }
+    let newSelected: string[];
     
-    let newSelected = selected.includes(value)
-      ? selected.filter((item) => item !== value)
-      : [...selected.filter(item => item !== 'all'), value];
+    if (value === 'all') {
+      newSelected = selected.includes('all') ? [] : ['all'];
+    } else {
+      if (selected.includes('all')) {
+        newSelected = [value];
+      } else {
+        newSelected = selected.includes(value)
+          ? selected.filter((item) => item !== value)
+          : [...selected, value];
+      }
+    }
 
     if (newSelected.length === 0) {
-        onChange(['all']);
+      onChange(['all']);
     } else {
-        onChange(newSelected);
+      onChange(newSelected);
     }
   };
   
@@ -49,12 +54,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
   const handleUnselect = (e: React.MouseEvent, value: string) => {
     e.preventDefault();
     e.stopPropagation();
-    const newSelected = selected.filter((s) => s !== value);
-    if(newSelected.length === 0) {
-      onChange(['all']);
-    } else {
-      onChange(newSelected);
-    }
+    handleSelect(value);
   };
 
   return (
@@ -81,9 +81,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                         onClick={(e) => handleUnselect(e, option.value)}
                     >
                         {option.label}
-                        <span className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                           onClick={(e) => handleUnselect(e, option.value)}
-                        >
+                        <span className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                           <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                         </span>
                     </Badge>
