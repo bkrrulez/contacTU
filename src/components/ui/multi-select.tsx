@@ -29,11 +29,9 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
     
     let newSelected = selected.includes(value)
       ? selected.filter((item) => item !== value)
-      : [...selected, value];
+      : [...selected.filter(item => item !== 'all'), value];
 
-    newSelected = newSelected.filter(item => item !== 'all');
-
-    if (newSelected.length === 0 && options.length > 0) {
+    if (newSelected.length === 0) {
         onChange(['all']);
     } else {
         onChange(newSelected);
@@ -52,13 +50,12 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
     e.preventDefault();
     e.stopPropagation();
     const newSelected = selected.filter((s) => s !== value);
-    if(newSelected.length === 0 && options.length > 0) {
+    if(newSelected.length === 0) {
       onChange(['all']);
     } else {
       onChange(newSelected);
     }
   };
-
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -84,7 +81,9 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                         onClick={(e) => handleUnselect(e, option.value)}
                     >
                         {option.label}
-                        <span className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                        <span className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                           onClick={(e) => handleUnselect(e, option.value)}
+                        >
                           <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                         </span>
                     </Badge>
@@ -105,7 +104,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer flex items-center"
+                  className="cursor-pointer"
                 >
                     <Check className={cn('mr-2 h-4 w-4', selected.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
                     {option.label}
