@@ -60,7 +60,7 @@ export function ExportForm() {
 
     useEffect(() => {
         // Reset selected teams if they are no longer available in the new org selection
-        setSelectedTeams(prevTeams => prevTeams.filter(team => availableTeams.includes(team)));
+        setSelectedTeams(prevTeams => prevTeams.filter(team => availableTeams.includes(team) || team === 'all'));
     }, [availableTeams]);
     
 
@@ -109,25 +109,27 @@ export function ExportForm() {
         ...availableTeams.map(team => ({ value: team, label: team }))
     ];
 
-    const handleOrgChange = (values: string[]) => {
-        if (values.includes('all') && selectedOrgs.length < values.length) {
+    const handleOrgChange = (newSelection: string[]) => {
+        // If 'all' is selected, it should be the only selection.
+        if (newSelection.includes('all') && !selectedOrgs.includes('all')) {
             setSelectedOrgs(['all']);
-        } else if (values.length > 1 && values.includes('all')) {
-             setSelectedOrgs(values.filter(v => v !== 'all'));
+        // If a specific org is selected, 'all' should be deselected.
+        } else if (newSelection.length > 1 && newSelection.includes('all')) {
+            setSelectedOrgs(newSelection.filter(item => item !== 'all'));
+        } else {
+            setSelectedOrgs(newSelection);
         }
-        else {
-            setSelectedOrgs(values);
-        }
-    }
+    };
     
-    const handleTeamChange = (values: string[]) => {
-        if (values.includes('all') && selectedTeams.length < values.length) {
+    const handleTeamChange = (newSelection: string[]) => {
+       // If 'all' is selected, it should be the only selection.
+        if (newSelection.includes('all') && !selectedTeams.includes('all')) {
             setSelectedTeams(['all']);
-        } else if (values.length > 1 && values.includes('all')) {
-             setSelectedTeams(values.filter(v => v !== 'all'));
-        }
-        else {
-            setSelectedTeams(values);
+        // If a specific team is selected, 'all' should be deselected.
+        } else if (newSelection.length > 1 && newSelection.includes('all')) {
+            setSelectedTeams(newSelection.filter(item => item !== 'all'));
+        } else {
+            setSelectedTeams(newSelection);
         }
     }
 
