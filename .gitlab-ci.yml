@@ -1,3 +1,5 @@
+image: alpine:3.19   # ✅ Base image so runner has something to start
+
 stages:
   - deploy
   - rollback
@@ -12,7 +14,8 @@ variables:
   IMAGE_NAME: yourdockerhubusername/contactu_app
 
 before_script:
-  - apk add --no-cache openssh-client bash git docker-compose
+  # Install needed tools in the job container
+  - apk add --no-cache openssh-client bash git docker-cli docker-compose
   - eval $(ssh-agent -s)
   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   - mkdir -p ~/.ssh
@@ -36,7 +39,7 @@ deploy_to_server:
         # Backup .env file
         cp $APP_PATH/.env \"\$BACKUP_DIR/.env.backup\"
 
-        # Backup Docker volumes (assuming named volume 'contacTU_data')
+        # Backup Docker volume (assuming 'contacTU_data' is defined in docker-compose.yml)
         docker run --rm -v contacTU_data:/volume -v \$BACKUP_DIR:/backup busybox sh -c \"cp -a /volume /backup/\"
 
         echo '>>> Pulling latest code and building new image'
@@ -44,15 +47,15 @@ deploy_to_server:
         git config pull.rebase true
         git pull origin main
 
-        # Build and tag with timestamp
         IMAGE_TAG=$IMAGE_NAME:\$TIMESTAMP
         docker build -t \$IMAGE_TAG .
         docker tag \$IMAGE_TAG $IMAGE_NAME:latest
 
-        # Stop and remove current containers
-        docker compose down
+        echo '>>> Stopping old containers'
+        docker compose down --remove-orphans || true
+        docker rm -f contacTU_app contacTU_db || true
 
-        # Start containers with new image
+        echo '>>> Starting containers with new image'
         docker compose up -d --build
 
         echo '>>> Cleanup old backups, keeping only last 2'
@@ -90,8 +93,8 @@ cleanup:
   script:
     - |
       ssh $DEPLOY_USER@$SERVER_IP "
-        echo '>>> Docker cleanup: system prune and dangling volumes only'
-        docker system prune -af
+        echo '>>> Docker cleanup: pruning dangling images & volumes only'
+        docker image prune -f
         docker volume prune -f
       "
   when: always
