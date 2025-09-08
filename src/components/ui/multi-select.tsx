@@ -33,7 +33,7 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
 
     newSelected = newSelected.filter(item => item !== 'all');
 
-    if (newSelected.length === 0 && options.find(opt => opt.value === 'all')) {
+    if (newSelected.length === 0 && options.some(opt => opt.value === 'all')) {
         onChange(['all']);
     } else {
         onChange(newSelected);
@@ -52,12 +52,13 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
     e.preventDefault();
     e.stopPropagation();
     const newSelected = selected.filter((s) => s !== value);
-    if(newSelected.length === 0 && options.find(opt => opt.value === 'all')) {
+    if(newSelected.length === 0 && options.some(opt => opt.value === 'all')) {
       onChange(['all']);
     } else {
       onChange(newSelected);
     }
   };
+
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -67,25 +68,26 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
           role="combobox"
           aria-expanded={open}
           className={cn('w-full justify-between', selected.length > 1 ? 'h-full' : 'h-10', className)}
-          onClick={() => setOpen(!open)}
         >
-          <div className="flex gap-1 flex-wrap">
+          <div className="flex gap-1 flex-wrap items-center">
             {selected.length === 0 ? (
-                <span className="text-muted-foreground">{placeholder}</span>
+                <span className="text-muted-foreground font-normal">{placeholder}</span>
             ) : getSelectedValues().length > 3 && !selected.includes('all') ? (
-                <Badge variant="secondary">{getSelectedValues().length} selected</Badge>
+                <Badge variant="secondary" className="font-normal">{getSelectedValues().length} selected</Badge>
             ) : (
                 getSelectedValues().map(option => (
                     <Badge
                         variant="secondary"
                         key={option.value}
-                        className="mr-1 mb-1"
-                        onClick={(e) => handleUnselect(e, option.value)}
+                        className="font-normal"
                     >
                         {option.label}
-                        <span className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                        <button
+                            className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                            onClick={(e) => handleUnselect(e, option.value)}
+                        >
                           <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                        </span>
+                        </button>
                     </Badge>
                 ))
             )}
@@ -105,11 +107,6 @@ export const MultiSelect = ({ options, selected, onChange, className, placeholde
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
                   className="cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSelect(option.value);
-                  }}
                 >
                   <Check className={cn('mr-2 h-4 w-4', selected.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
                   {option.label}
