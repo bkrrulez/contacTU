@@ -10,31 +10,11 @@ export default function SettingsPage() {
           <h1 className="text-2xl font-bold tracking-tight font-headline">Settings</h1>
           <p className="text-muted-foreground">Configure application settings and data management.</p>
         </div>
-      <Tabs defaultValue="export">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="export">Export</TabsTrigger>
+      <Tabs defaultValue="deduplication">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="deduplication">Deduplication</TabsTrigger>
           <TabsTrigger value="privacy">Privacy</TabsTrigger>
         </TabsList>
-        <TabsContent value="export">
-          <Card>
-            <CardHeader>
-              <CardTitle>Export Contacts</CardTitle>
-              <CardDescription>Download your entire contact database in various formats.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p>Select a format and click export to begin the download.</p>
-            </CardContent>
-            <CardFooter className="gap-2">
-                <Button>
-                    <Download className="mr-2 h-4 w-4" /> Export as CSV
-                </Button>
-                <Button variant="outline">
-                    <Download className="mr-2 h-4 w-4" /> Export as vCard
-                </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
         <TabsContent value="deduplication">
           <Card>
             <CardHeader>

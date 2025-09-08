@@ -99,10 +99,6 @@ export default async function DashboardPage() {
               Manage Duplicates
             </Link>
           </Button>
-          <Button variant="outline">
-            <Upload className="mr-2 h-4 w-4" />
-            Export
-          </Button>
         </div>
       </div>
 
