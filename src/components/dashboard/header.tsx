@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { SidebarTrigger } from '../ui/sidebar';
 import React from 'react';
@@ -25,6 +25,7 @@ export function AppHeader({ children, user }: { children: React.ReactNode, user:
       <div className="flex items-center gap-4 md:hidden">
         <SidebarTrigger asChild>
             <Button size="icon" variant="outline">
+                <PanelLeft />
                 <span className="sr-only">Toggle Menu</span>
             </Button>
         </SidebarTrigger>
