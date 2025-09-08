@@ -1,5 +1,5 @@
 
-import { pgTable, serial, text, varchar, date, integer, pgEnum, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, date, integer, pgEnum, timestamp, jsonb } from 'drizzle-orm/pg-core';
 import { InferSelectModel, relations } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum('user_role', ['Admin', 'Power User', 'Standard User', 'Read-Only']);
@@ -67,11 +67,23 @@ export const contactAssociatedNames = pgTable('contact_associated_names', {
     name: varchar('name', { length: 256 }).notNull(),
 });
 
+export const auditLogActionEnum = pgEnum('audit_log_action', ['create', 'update', 'delete']);
+
+export const auditLogs = pgTable('audit_logs', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+    action: auditLogActionEnum('action').notNull(),
+    entityType: varchar('entity_type', { length: 50 }).notNull(), // e.g., 'contact'
+    entityId: integer('entity_id').notNull(),
+    details: jsonb('details'), // To store what changed, e.g., { "contactName": "John Doe" }
+    timestamp: timestamp('timestamp', { withTimezone: true }).defaultNow().notNull(),
+});
+
 
 // RELATIONS
 
 export const usersRelations = relations(users, ({ many }) => ({
-    // define relations here
+    auditLogs: many(auditLogs),
 }));
 
 export const contactsRelations = relations(contacts, ({ many }) => ({
@@ -81,6 +93,13 @@ export const contactsRelations = relations(contacts, ({ many }) => ({
     urls: many(contactUrls),
     socialLinks: many(contactSocialLinks),
     associatedNames: many(contactAssociatedNames),
+}));
+
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+    user: one(users, {
+        fields: [auditLogs.userId],
+        references: [users.id],
+    }),
 }));
 
 export const contactOrganizationsRelations = relations(contactOrganizations, ({ one }) => ({
@@ -134,3 +153,4 @@ export type ContactPhoneSchema = InferSelectModel<typeof contactPhones>;
 export type ContactUrlSchema = InferSelectModel<typeof contactUrls>;
 export type ContactSocialLinkSchema = InferSelectModel<typeof contactSocialLinks>;
 export type ContactAssociatedNameSchema = InferSelectModel<typeof contactAssociatedNames>;
+export type AuditLogSchema = InferSelectModel<typeof auditLogs>;

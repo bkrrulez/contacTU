@@ -3,12 +3,31 @@
 
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { contacts, contactEmails, contactPhones, contactOrganizations, contactUrls, contactSocialLinks, contactAssociatedNames } from '@/lib/db/schema';
+import { contacts, contactEmails, contactPhones, contactOrganizations, contactUrls, contactSocialLinks, contactAssociatedNames, auditLogs } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import type { Contact } from '@/lib/types';
 import { contactFormSchema } from '@/lib/schemas';
 
+
+async function createAuditLog(
+    action: 'create' | 'update' | 'delete', 
+    entityId: number, 
+    details: Record<string, any>
+) {
+    // In a real app, you would get the current user's ID from the session.
+    // For now, we'll hardcode it to the first user (Admin).
+    const currentUser = await db.query.users.findFirst();
+    const userId = currentUser?.id;
+
+    await db.insert(auditLogs).values({
+        userId,
+        action,
+        entityType: 'contact',
+        entityId,
+        details,
+    });
+}
 
 export async function createContact(values: z.infer<typeof contactFormSchema>) {
     const validatedFields = contactFormSchema.safeParse(values);
@@ -81,8 +100,11 @@ export async function createContact(values: z.infer<typeof contactFormSchema>) {
             name: subordinateName,
         })
     }
+    
+    await createAuditLog('create', newContact.id, { contactName: `${firstName} ${lastName}` });
 
     revalidatePath('/dashboard/contacts');
+    revalidatePath('/dashboard/audit');
 
     return { success: true, contact: newContact };
 }
@@ -152,12 +174,32 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
         await db.insert(contactAssociatedNames).values({ contactId: id, name: subordinateName });
     }
 
+    await createAuditLog('update', id, { contactName: `${firstName} ${lastName}` });
+
     revalidatePath('/dashboard/contacts');
     revalidatePath(`/dashboard/contacts/${id}`);
     revalidatePath(`/dashboard/contacts/${id}/edit`);
+    revalidatePath('/dashboard/audit');
 
     return { success: true };
 }
+
+export async function deleteContact(id: number) {
+    const contactToDelete = await db.query.contacts.findFirst({ where: eq(contacts.id, id) });
+    if (!contactToDelete) {
+        throw new Error('Contact not found');
+    }
+
+    await db.delete(contacts).where(eq(contacts.id, id));
+
+    await createAuditLog('delete', id, { contactName: `${contactToDelete.firstName} ${contactToDelete.lastName}` });
+    
+    revalidatePath('/dashboard/contacts');
+    revalidatePath('/dashboard/audit');
+
+    return { success: true };
+}
+
 
 export async function getContact(id: number): Promise<Contact | null> {
     if (isNaN(id)) return null;

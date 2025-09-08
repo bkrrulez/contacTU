@@ -25,6 +25,19 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { deleteContact } from '@/app/dashboard/contacts/actions';
+import { useToast } from '@/hooks/use-toast';
+
 
 interface ContactTableProps {
   contacts: Contact[];
@@ -33,9 +46,12 @@ interface ContactTableProps {
 type SortKey = 'name' | 'organization' | 'email' | 'phone';
 
 export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
+  const { toast } = useToast();
   const [selectedRows, setSelectedRows] = React.useState<Set<number>>(new Set());
   const [contacts, setContacts] = React.useState(initialContacts);
   const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>({ key: 'name', direction: 'ascending' });
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  const [contactToDelete, setContactToDelete] = React.useState<Contact | null>(null);
 
   React.useEffect(() => {
     setContacts(initialContacts);
@@ -97,7 +113,7 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   };
 
   const renderHeader = (key: SortKey, label: string, className?: string) => (
-    <TableHead className={cn('cursor-pointer', className)} onDoubleClick={() => handleSort(key)}>
+    <TableHead className={cn('cursor-pointer', className)} onClick={() => handleSort(key)}>
       <div className="flex items-center">
         {label}
         {getSortIndicator(key)}
@@ -123,6 +139,32 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
     setSelectedRows(newSelectedRows);
   };
 
+  const openDeleteDialog = (contact: Contact) => {
+    setContactToDelete(contact);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (contactToDelete) {
+      try {
+        await deleteContact(contactToDelete.id);
+        toast({
+          title: 'Contact Deleted',
+          description: `${contactToDelete.firstName} ${contactToDelete.lastName} has been deleted.`,
+        });
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to delete contact.',
+        });
+      } finally {
+        setShowDeleteDialog(false);
+        setContactToDelete(null);
+      }
+    }
+  };
+
   const isAllSelected = selectedRows.size > 0 && selectedRows.size === contacts.length;
   const isSomeSelected = selectedRows.size > 0 && !isAllSelected;
 
@@ -131,6 +173,7 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   }
   
   return (
+      <>
         <Table>
           <TableHeader>
             <TableRow>
@@ -192,7 +235,10 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                       </DropdownMenuItem>
                       <DropdownMenuItem>Share</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => openDeleteDialog(contact)}
+                      >
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -202,5 +248,21 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
             ))}
           </TableBody>
         </Table>
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the contact
+                for {contactToDelete?.firstName} {contactToDelete?.lastName}.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm}>Continue</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
   );
 }
