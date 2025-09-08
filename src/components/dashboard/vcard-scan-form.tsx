@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Camera, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { extractContactFromImage, ExtractedContactSchema } from '@/ai/flows/extract-contact-flow';
+import { extractContactFromImage } from '@/ai/flows/extract-contact-flow';
+import { ExtractedContactSchema } from '@/lib/schemas';
 import { z } from 'zod';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
