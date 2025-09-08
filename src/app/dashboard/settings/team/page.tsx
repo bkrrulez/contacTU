@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { db } from '@/lib/db';
 import { contactOrganizations } from '@/lib/db/schema';
-import { desc } from 'drizzle-orm';
+import { desc, sql } from 'drizzle-orm';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -15,14 +15,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 
 export const dynamic = 'force-dynamic';
 
 async function getTeams() {
-    const teams = await db.selectDistinct({ name: contactOrganizations.team })
-        .from(contactOrganizations)
-        .orderBy(desc(contactOrganizations.team));
-    return teams;
+    const result: { team: string, organizations: string[] }[] = await db.execute(sql`
+        SELECT 
+            team, 
+            array_agg(DISTINCT organization) as organizations
+        FROM 
+            contact_organizations
+        WHERE
+            team IS NOT NULL AND team != ''
+        GROUP BY 
+            team
+        ORDER BY 
+            team
+    `);
+    return result;
 }
 
 export default async function TeamSettingsPage() {
@@ -36,7 +47,7 @@ export default async function TeamSettingsPage() {
                     <p className="text-muted-foreground">Manage all teams in the system.</p>
                 </div>
                 <Button asChild>
-                    <Link href="#">
+                    <Link href="/dashboard/settings/team/new">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Add Team
                     </Link>
@@ -51,13 +62,19 @@ export default async function TeamSettingsPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Team Name</TableHead>
+                                <TableHead>Organizations</TableHead>
                                 <TableHead className="w-[80px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {teams.map((team, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{team.name}</TableCell>
+                                    <TableCell>{team.team}</TableCell>
+                                    <TableCell className="flex flex-wrap gap-1">
+                                        {team.organizations.map(org => (
+                                            <Badge key={org} variant="secondary">{org}</Badge>
+                                        ))}
+                                    </TableCell>
                                      <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>

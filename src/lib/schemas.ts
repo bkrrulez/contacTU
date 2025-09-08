@@ -63,6 +63,11 @@ export const organizationFormSchema = z.object({
     address: z.string().optional(),
 });
 
+export const teamFormSchema = z.object({
+    teamName: z.string().min(1, 'Team name is required'),
+    organizations: z.array(z.string()).min(1, 'At least one organization must be selected'),
+});
+
 
 export const ExtractedContactSchema = contactFormSchema.pick({
     firstName: true,
