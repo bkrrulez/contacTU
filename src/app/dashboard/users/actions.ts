@@ -7,7 +7,7 @@ import { users, contactOrganizations } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import { userFormSchema } from '@/lib/schemas';
-import { and, isNotNull, ne } from 'drizzle-orm';
+import { and, isNotNull, ne, sql } from 'drizzle-orm';
 
 
 export async function createUser(values: z.infer<typeof userFormSchema>) {
@@ -40,9 +40,21 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
 
 
 export async function getOrganizationsForUserForm() {
-    const result = await db.selectDistinct({ organization: contactOrganizations.organization })
-        .from(contactOrganizations)
-        .where(and(isNotNull(contactOrganizations.organization), ne(contactOrganizations.organization, '')));
-
+    const result: { organization: string }[] = await db.execute(sql`
+        SELECT DISTINCT organization 
+        FROM contact_organizations 
+        WHERE organization IS NOT NULL AND organization != ''
+        ORDER BY organization
+    `);
     return result.map(r => r.organization);
+}
+
+export async function getTeamsForUserForm() {
+    const result: { team: string }[] = await db.execute(sql`
+        SELECT DISTINCT team 
+        FROM contact_organizations 
+        WHERE team IS NOT NULL AND team != ''
+        ORDER BY team
+    `);
+    return result.map(r => r.team);
 }
