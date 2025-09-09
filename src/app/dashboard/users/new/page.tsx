@@ -45,9 +45,14 @@ export default function NewUserPage() {
   const watchRole = form.watch('role');
 
   useEffect(() => {
-      if(watchRole === 'Admin') {
-          form.setValue('organizations', ['All Organizations']);
+    if (watchRole === 'Admin') {
+      form.setValue('organizations', ['All Organizations']);
+    } else {
+      // If the role is switched away from Admin and 'All Organizations' was selected, clear it.
+      if (form.getValues('organizations').includes('All Organizations')) {
+        form.setValue('organizations', []);
       }
+    }
   }, [watchRole, form]);
 
   const onSubmit = async (data: UserFormValues) => {
