@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { User } from '@/lib/types';
@@ -55,6 +56,7 @@ export function UserTable({ users }: UserTableProps) {
               <TableHead>Name</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead className="hidden lg:table-cell">Organizations</TableHead>
               <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -80,6 +82,13 @@ export function UserTable({ users }: UserTableProps) {
                   <Badge variant={roleVariant[userRoles[user.id] as User['role']]}>
                     {userRoles[user.id]}
                   </Badge>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                   <div className="flex flex-wrap gap-1">
+                        {user.organizations?.map(org => (
+                            <Badge key={org} variant="secondary" className="font-normal">{org}</Badge>
+                        ))}
+                   </div>
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>

@@ -53,6 +53,7 @@ async function seed() {
         role: 'Admin',
         avatar: 'https://placehold.co/100x100.png',
         password: adminPasswordHash,
+        organizations: ['All Organizations'],
       },
       {
         name: 'Alice Johnson',
@@ -60,6 +61,7 @@ async function seed() {
         role: 'Power User',
         avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
+        organizations: ['Acme Corp', 'Tech Solutions'],
       },
       {
         name: 'Bob Williams',
@@ -67,6 +69,7 @@ async function seed() {
         role: 'Standard User',
         avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
+        organizations: ['WebWeavers'],
       },
       {
         name: 'Charlie Brown',
@@ -74,6 +77,7 @@ async function seed() {
         role: 'Read-Only',
         avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
+        organizations: ['All Organizations'],
       },
     ];
 

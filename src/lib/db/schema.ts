@@ -11,7 +11,7 @@ export const users = pgTable('users', {
   password: varchar('password', { length: 256 }),
   role: userRoleEnum('role').notNull(),
   avatar: varchar('avatar', { length: 256 }),
-  organizations: jsonb('organizations').default([]), // ['All Organizations'] or ['Org A', 'Org B']
+  organizations: jsonb('organizations').$type<string[]>().default([]),
   resetToken: varchar('reset_token', { length: 256 }),
   resetTokenExpiry: timestamp('reset_token_expiry', { withTimezone: true }),
 });
