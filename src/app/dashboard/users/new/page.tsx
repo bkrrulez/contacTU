@@ -10,18 +10,25 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { createUser } from '../actions';
+import { createUser, getTeams } from '../actions';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { userFormSchema } from '@/lib/schemas';
 import { userRoleEnum } from '@/lib/db/schema';
+import { useEffect, useState } from 'react';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
 export default function NewUserPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [teams, setTeams] = useState<string[]>([]);
+
+  useEffect(() => {
+    getTeams().then(setTeams);
+  }, []);
   
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -30,9 +37,18 @@ export default function NewUserPage() {
       email: '',
       password: '',
       role: 'Standard User',
+      teams: [],
       avatar: '',
     },
   });
+
+  const watchRole = form.watch('role');
+
+  useEffect(() => {
+      if(watchRole === 'Admin') {
+          form.setValue('teams', ['All Teams']);
+      }
+  }, [watchRole, form]);
 
   const onSubmit = async (data: UserFormValues) => {
     try {
@@ -51,6 +67,8 @@ export default function NewUserPage() {
       });
     }
   };
+
+  const teamOptions = [{ value: 'All Teams', label: 'All Teams' }, ...teams.map(team => ({ value: team, label: team }))];
 
   return (
     <div className="space-y-4">
@@ -83,54 +101,76 @@ export default function NewUserPage() {
                                 </FormItem>
                             )}
                         />
-                         <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
-                                <FormControl>
-                                    <Input type="email" placeholder="name@example.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
-                                <FormControl>
-                                    <Input type="password" placeholder="********" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="role"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Role <span className="text-destructive">*</span></FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <div className="grid md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
                                     <FormControl>
-                                        <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                        </SelectTrigger>
+                                        <Input type="email" placeholder="name@example.com" {...field} />
                                     </FormControl>
-                                    <SelectContent>
-                                        {userRoleEnum.enumValues.map((role) => (
-                                            <SelectItem key={role} value={role}>{role}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
+                                    <FormControl>
+                                        <Input type="password" placeholder="********" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="role"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Role <span className="text-destructive">*</span></FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                            <SelectValue placeholder="Select a role" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {userRoleEnum.enumValues.map((role) => (
+                                                <SelectItem key={role} value={role}>{role}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="teams"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Team</FormLabel>
+                                    <MultiSelect
+                                        options={teamOptions}
+                                        selected={field.value}
+                                        onChange={field.onChange}
+                                        className="w-full"
+                                        placeholder="Select teams..."
+                                        disabled={watchRole === 'Admin'}
+                                    />
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                                />
+                        </div>
                         <FormField
                             control={form.control}
                             name="avatar"

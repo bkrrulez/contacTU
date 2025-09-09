@@ -55,6 +55,7 @@ export const userFormSchema = z.object({
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     role: z.enum(['Admin', 'Power User', 'Standard User', 'Read-Only']),
+    teams: z.array(z.string()).min(1, 'At least one team must be selected'),
     avatar: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 
