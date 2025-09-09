@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { createUser, getTeams } from '../actions';
+import { createUser, getOrganizationsForUserForm } from '../actions';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,10 +24,10 @@ type UserFormValues = z.infer<typeof userFormSchema>;
 export default function NewUserPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [teams, setTeams] = useState<string[]>([]);
+  const [organizations, setOrganizations] = useState<string[]>([]);
 
   useEffect(() => {
-    getTeams().then(setTeams);
+    getOrganizationsForUserForm().then(setOrganizations);
   }, []);
   
   const form = useForm<UserFormValues>({
@@ -37,7 +37,7 @@ export default function NewUserPage() {
       email: '',
       password: '',
       role: 'Standard User',
-      teams: [],
+      organizations: [],
       avatar: '',
     },
   });
@@ -46,7 +46,7 @@ export default function NewUserPage() {
 
   useEffect(() => {
       if(watchRole === 'Admin') {
-          form.setValue('teams', ['All Teams']);
+          form.setValue('organizations', ['All Organizations']);
       }
   }, [watchRole, form]);
 
@@ -68,7 +68,7 @@ export default function NewUserPage() {
     }
   };
 
-  const teamOptions = [{ value: 'All Teams', label: 'All Teams' }, ...teams.map(team => ({ value: team, label: team }))];
+  const organizationOptions = [{ value: 'All Organizations', label: 'All Organizations' }, ...organizations.map(org => ({ value: org, label: org }))];
 
   return (
     <div className="space-y-4">
@@ -154,16 +154,16 @@ export default function NewUserPage() {
                             />
                              <FormField
                                 control={form.control}
-                                name="teams"
+                                name="organizations"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Team</FormLabel>
+                                    <FormLabel>Organizations</FormLabel>
                                     <MultiSelect
-                                        options={teamOptions}
+                                        options={organizationOptions}
                                         selected={field.value}
                                         onChange={field.onChange}
                                         className="w-full"
-                                        placeholder="Select teams..."
+                                        placeholder="Select organizations..."
                                         disabled={watchRole === 'Admin'}
                                     />
                                     <FormMessage />

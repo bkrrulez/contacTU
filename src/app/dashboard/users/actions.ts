@@ -18,7 +18,7 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
     }
 
     const { 
-        name, email, password, role, avatar, teams
+        name, email, password, role, avatar, organizations
     } = validatedFields.data;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -29,7 +29,7 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
         password: hashedPassword,
         role,
         avatar,
-        teams
+        organizations
     }).returning();
 
 
@@ -39,10 +39,10 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
 }
 
 
-export async function getTeams() {
-    const result = await db.selectDistinct({ team: contactOrganizations.team })
+export async function getOrganizationsForUserForm() {
+    const result = await db.selectDistinct({ organization: contactOrganizations.organization })
         .from(contactOrganizations)
-        .where(and(isNotNull(contactOrganizations.team), ne(contactOrganizations.team, '')));
+        .where(and(isNotNull(contactOrganizations.organization), ne(contactOrganizations.organization, '')));
 
-    return result.map(r => r.team);
+    return result.map(r => r.organization);
 }
