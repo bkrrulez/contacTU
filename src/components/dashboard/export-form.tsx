@@ -132,7 +132,6 @@ export function ExportForm() {
                             onChange={setSelectedOrgs}
                             className="w-full"
                             placeholder="Select organizations..."
-                            disabled={isLoading}
                         />
                     </div>
                     <div>
@@ -143,7 +142,6 @@ export function ExportForm() {
                             onChange={setSelectedTeams}
                             className="w-full"
                             placeholder="Select teams..."
-                            disabled={isLoading || availableTeams.length === 0}
                         />
                     </div>
                 </div>
