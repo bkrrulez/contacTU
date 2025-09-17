@@ -60,7 +60,7 @@ export function UserTable({ users }: UserTableProps) {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      {user.avatar && <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="person portrait" />}
+                      {user.profilePicture && <AvatarImage src={user.profilePicture} alt={user.name} data-ai-hint="person portrait" />}
                       <AvatarFallback>
                         {user.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>

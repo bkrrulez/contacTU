@@ -47,7 +47,7 @@ export default function NewUserPage() {
       password: '',
       role: 'Standard User',
       organizations: [],
-      avatar: '',
+      profilePicture: '',
     },
   });
 
@@ -65,7 +65,7 @@ export default function NewUserPage() {
   
   const handleCroppedImage = (croppedImage: string | null) => {
     if (croppedImage) {
-      form.setValue('avatar', croppedImage);
+      form.setValue('profilePicture', croppedImage);
       setAvatarPreview(croppedImage);
     }
     setIsCropDialogOpen(false);

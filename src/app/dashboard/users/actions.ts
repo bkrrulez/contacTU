@@ -20,7 +20,7 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
     }
 
     const { 
-        name, email, password, role, avatar, organizations
+        name, email, password, role, profilePicture, organizations
     } = validatedFields.data;
 
     if (!password) {
@@ -36,8 +36,8 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
         role,
     };
 
-    if (avatar) {
-        insertData.avatar = avatar;
+    if (profilePicture) {
+        insertData.profilePicture = profilePicture;
     }
 
     const [newUser] = await db.insert(users).values(insertData).returning();
@@ -122,7 +122,7 @@ export async function updateUser(id: number, values: z.infer<typeof userFormSche
         throw new Error('Invalid fields');
     }
 
-    const { name, email, password, role, avatar, organizations: orgNames } = validatedFields.data;
+    const { name, email, password, role, profilePicture, organizations: orgNames } = validatedFields.data;
 
     const updateData: Partial<typeof users.$inferInsert> = { name, email, role };
 
@@ -130,8 +130,8 @@ export async function updateUser(id: number, values: z.infer<typeof userFormSche
         updateData.password = await bcrypt.hash(password, 10);
     }
     
-    if (avatar && avatar.startsWith('data:image/')) {
-        updateData.avatar = avatar;
+    if (profilePicture && profilePicture.startsWith('data:image/')) {
+        updateData.profilePicture = profilePicture;
     }
 
 

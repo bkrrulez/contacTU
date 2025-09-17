@@ -101,7 +101,7 @@ async function seed() {
     const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
     const standardPasswordHash = await bcrypt.hash('password123', 10);
 
-    const usersToSeed: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry' | 'avatar'>[] = [
+    const usersToSeed: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry' | 'profilePicture'>[] = [
       {
         name: 'Admin User',
         email: adminEmail,
@@ -167,7 +167,7 @@ async function seed() {
         emails: [{ email: 'john.doe@acmecorp.com' }],
         phones: [{ phone: '123-456-7890', type: 'Telephone' as const }, { phone: '098-765-4321', type: 'Mobile' as const }],
         organizations: [{ organizationId: orgMap.get('Acme Corp')!, teamId: teamMap.get('Platform')!, designation: 'Lead Engineer', department: 'Engineering' }],
-        avatar: 'https://picsum.photos/seed/1/100/100',
+        profilePicture: 'https://picsum.photos/seed/1/100/100',
         address: '123 Acme St, Tech City',
         notes: 'Key contact for Project Titan.',
         birthday: '1985-05-15',
@@ -181,7 +181,7 @@ async function seed() {
         emails: [{ email: 'jane.smith@techsolutions.io' }],
         phones: [{ phone: '234-567-8901', type: 'Telephone' as const }],
         organizations: [{ organizationId: orgMap.get('Tech Solutions')!, teamId: teamMap.get('Core Products')!, designation: 'Project Manager', department: 'Product' }],
-        avatar: 'https://picsum.photos/seed/2/100/100',
+        profilePicture: 'https://picsum.photos/seed/2/100/100',
         address: '456 Tech Ave, Innovation Valley',
         notes: null,
         birthday: null,
@@ -195,7 +195,7 @@ async function seed() {
         emails: [{ email: 'sam.wilson@webweavers.dev' }],
         phones: [{ phone: '345-678-9012', type: 'Mobile' as const }],
         organizations: [{ organizationId: orgMap.get('WebWeavers')!, teamId: teamMap.get('Marketing')!, designation: 'UX/UI Designer', department: 'Design' }],
-        avatar: 'https://picsum.photos/seed/3/100/100',
+        profilePicture: 'https://picsum.photos/seed/3/100/100',
         notes: 'Met at the design conference.',
         address: null,
         birthday: null,
@@ -212,7 +212,7 @@ async function seed() {
         address: mockContact.address,
         birthday: mockContact.birthday,
         notes: mockContact.notes,
-        avatar: mockContact.avatar,
+        profilePicture: mockContact.profilePicture,
       }).returning();
 
       if (mockContact.organizations) {

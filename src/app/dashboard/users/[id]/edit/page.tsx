@@ -54,7 +54,7 @@ export default function EditUserPage() {
       password: '',
       role: 'Standard User',
       organizations: [],
-      avatar: '',
+      profilePicture: '',
     },
   });
 
@@ -69,10 +69,10 @@ export default function EditUserPage() {
             password: '',
             role: data.role,
             organizations: data.organizationNames,
-            avatar: data.avatar ?? '',
+            profilePicture: data.profilePicture ?? '',
           });
-          if (data.avatar) {
-            setAvatarPreview(data.avatar);
+          if (data.profilePicture) {
+            setAvatarPreview(data.profilePicture);
           }
         }
         setIsLoading(false);
@@ -94,7 +94,7 @@ export default function EditUserPage() {
   
   const handleCroppedImage = (croppedImage: string | null) => {
     if (croppedImage) {
-      form.setValue('avatar', croppedImage);
+      form.setValue('profilePicture', croppedImage);
       setAvatarPreview(croppedImage);
     }
     setIsCropDialogOpen(false);

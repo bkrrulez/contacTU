@@ -11,7 +11,7 @@ export function UserProfile({ user }: { user: Partial<User> | null }) {
 
   return (
     <Avatar className="h-9 w-9">
-        {user.avatar && <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="person portrait" />}
+        {user.profilePicture && <AvatarImage src={user.profilePicture} alt={user.name} data-ai-hint="person portrait" />}
         <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
     </Avatar>
   )

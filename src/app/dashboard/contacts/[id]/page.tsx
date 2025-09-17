@@ -59,7 +59,7 @@ export default async function ContactDetailsPage({ params }: { params: { id: str
            <Card>
              <CardContent className="pt-6 flex flex-col items-center text-center">
                 <Avatar className="h-24 w-24 mb-4">
-                    {contact.avatar && <AvatarImage src={contact.avatar} alt={`${contact.firstName} ${contact.lastName}`} data-ai-hint="person portrait" />}
+                    {contact.profilePicture && <AvatarImage src={contact.profilePicture} alt={`${contact.firstName} ${contact.lastName}`} data-ai-hint="person portrait" />}
                     <AvatarFallback className="text-3xl">
                         {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
                     </AvatarFallback>

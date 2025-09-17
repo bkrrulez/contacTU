@@ -10,7 +10,7 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 256 }).notNull().unique(),
   password: varchar('password', { length: 256 }),
   role: userRoleEnum('role').notNull(),
-  avatar: text('avatar'),
+  profilePicture: text('profile_picture'),
   resetToken: varchar('reset_token', { length: 256 }),
   resetTokenExpiry: timestamp('reset_token_expiry', { withTimezone: true }),
 });
@@ -49,7 +49,7 @@ export const contacts = pgTable('contacts', {
     address: text('address'),
     birthday: date('birthday'),
     notes: text('notes'),
-    avatar: varchar('avatar', { length: 256 }),
+    profilePicture: text('profile_picture'),
     isFavorite: boolean('is_favorite').default(false).notNull(),
 });
 
