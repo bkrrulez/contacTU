@@ -4,11 +4,13 @@
 
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { users, organizations as orgsTable, teams as teamsTable, users_to_organizations } from '@/lib/db/schema';
+import { users, organizations as orgsTable, users_to_organizations } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import { userFormSchema } from '@/lib/schemas';
-import { inArray } from 'drizzle-orm';
+import { inArray, eq } from 'drizzle-orm';
+import type { User } from '@/lib/types';
+
 
 export async function createUser(values: z.infer<typeof userFormSchema>) {
     const validatedFields = userFormSchema.safeParse(values);
@@ -21,6 +23,10 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
         name, email, password, role, avatar, organizations
     } = validatedFields.data;
 
+    if (!password) {
+        throw new Error('Password is required for new users');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const [newUser] = await db.insert(users).values({
@@ -31,28 +37,26 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
         avatar,
     }).returning();
     
-    if (organizations.length > 0) {
-        let orgIdsToInsert: number[];
+    let orgIdsToInsert: number[];
 
-        if (organizations.includes('All Organizations')) {
-            const allOrgs = await db.query.organizations.findMany({ columns: { id: true } });
-            orgIdsToInsert = allOrgs.map(org => org.id);
-        } else {
-            const selectedOrgs = await db.query.organizations.findMany({
-                where: inArray(orgsTable.name, organizations),
-                columns: { id: true }
-            });
-            orgIdsToInsert = selectedOrgs.map(org => org.id);
-        }
+    if (organizations.includes('All Organizations')) {
+        const allOrgs = await db.query.organizations.findMany({ columns: { id: true } });
+        orgIdsToInsert = allOrgs.map(org => org.id);
+    } else {
+        const selectedOrgs = await db.query.organizations.findMany({
+            where: inArray(orgsTable.name, organizations),
+            columns: { id: true }
+        });
+        orgIdsToInsert = selectedOrgs.map(org => org.id);
+    }
 
-        if (orgIdsToInsert.length > 0) {
-            await db.insert(users_to_organizations).values(
-                orgIdsToInsert.map(orgId => ({
-                    userId: newUser.id,
-                    organizationId: orgId,
-                }))
-            );
-        }
+    if (orgIdsToInsert.length > 0) {
+        await db.insert(users_to_organizations).values(
+            orgIdsToInsert.map(orgId => ({
+                userId: newUser.id,
+                organizationId: orgId,
+            }))
+        );
     }
 
     revalidatePath('/dashboard/users');
@@ -69,9 +73,87 @@ export async function getOrganizationsForUserForm() {
     return result.map(r => r.name);
 }
 
-export async function getTeamsForUserForm() {
-     const result = await db.query.teams.findMany({
-        orderBy: (teams, { asc }) => [asc(teams.name)],
+
+export async function getUser(id: number): Promise<(User & { organizationNames: string[] }) | null> {
+    if (isNaN(id)) return null;
+
+    const user = await db.query.users.findFirst({
+        where: eq(users.id, id),
+        with: {
+            usersToOrganizations: {
+                with: {
+                    organization: {
+                        columns: { name: true }
+                    }
+                }
+            }
+        }
     });
-    return result.map(r => r.name);
+
+    if (!user) return null;
+    
+    const allOrgs = await db.query.organizations.findMany({ columns: { id: true }});
+    const userOrgs = user.usersToOrganizations;
+    
+    let organizationNames: string[];
+    if (userOrgs.length === allOrgs.length) {
+        organizationNames = ['All Organizations'];
+    } else {
+        organizationNames = userOrgs.map(uto => uto.organization.name);
+    }
+
+
+    return {
+        ...user,
+        organizationNames: organizationNames,
+    };
+}
+
+
+export async function updateUser(id: number, values: z.infer<typeof userFormSchema>) {
+    const validatedFields = userFormSchema.safeParse(values);
+
+    if (!validatedFields.success) {
+        throw new Error('Invalid fields');
+    }
+
+    const { name, email, password, role, avatar, organizations: orgNames } = validatedFields.data;
+
+    const updateData: Partial<typeof users.$inferInsert> = { name, email, role, avatar };
+
+    if (password) {
+        updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    await db.update(users).set(updateData).where(eq(users.id, id));
+
+    // Clear existing org associations for the user
+    await db.delete(users_to_organizations).where(eq(users_to_organizations.userId, id));
+
+    let orgIdsToInsert: number[];
+
+    if (orgNames.includes('All Organizations')) {
+        const allOrgs = await db.query.organizations.findMany({ columns: { id: true } });
+        orgIdsToInsert = allOrgs.map(org => org.id);
+    } else {
+        const selectedOrgs = await db.query.organizations.findMany({
+            where: inArray(orgsTable.name, orgNames),
+            columns: { id: true }
+        });
+        orgIdsToInsert = selectedOrgs.map(org => org.id);
+    }
+
+    if (orgIdsToInsert.length > 0) {
+        await db.insert(users_to_organizations).values(
+            orgIdsToInsert.map(orgId => ({
+                userId: id,
+                organizationId: orgId,
+            }))
+        );
+    }
+
+    revalidatePath('/dashboard/users');
+    revalidatePath(`/dashboard/users/${id}/edit`);
+
+    return { success: true };
 }

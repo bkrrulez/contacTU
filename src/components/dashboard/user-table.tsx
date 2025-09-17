@@ -17,8 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
@@ -26,6 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
 import React from 'react';
 
 interface UserTableProps {
@@ -40,13 +39,6 @@ const roleVariant: { [key in User['role']]: 'default' | 'secondary' | 'destructi
 };
 
 export function UserTable({ users }: UserTableProps) {
-  const [userRoles, setUserRoles] = React.useState<Record<number, User['role']>>(
-    users.reduce((acc, user) => ({ ...acc, [user.id]: user.role }), {})
-  );
-
-  const handleRoleChange = (userId: number, role: string) => {
-    setUserRoles(prev => ({ ...prev, [userId]: role as User['role'] }));
-  };
   
   return (
     <Card>
@@ -80,8 +72,8 @@ export function UserTable({ users }: UserTableProps) {
                 </TableCell>
                 <TableCell className="hidden md:table-cell">{user.email}</TableCell>
                 <TableCell>
-                  <Badge variant={roleVariant[userRoles[user.id] as User['role']]}>
-                    {userRoles[user.id]}
+                  <Badge variant={roleVariant[user.role]}>
+                    {user.role}
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
@@ -100,14 +92,10 @@ export function UserTable({ users }: UserTableProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Edit User</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup value={userRoles[user.id]} onValueChange={(role) => handleRoleChange(user.id, role)}>
-                          <DropdownMenuRadioItem value="Admin">Admin</DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="Power User">Power User</DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="Standard User">Standard User</DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="Read-Only">Read-Only</DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                          <Link href={`/dashboard/users/${user.id}/edit`}>Edit</Link>
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-destructive">
                         Delete User

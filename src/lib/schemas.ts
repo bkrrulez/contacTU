@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 
 export const contactFormSchema = z.object({
@@ -53,7 +52,7 @@ export const contactFormSchema = z.object({
 export const userFormSchema = z.object({
     name: z.string().min(1, 'Name is required'),
     email: z.string().email('Invalid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
     role: z.enum(['Admin', 'Power User', 'Standard User', 'Read-Only']),
     organizations: z.array(z.string()).min(1, 'At least one organization must be selected'),
     avatar: z.string().url('Invalid URL').optional().or(z.literal('')),

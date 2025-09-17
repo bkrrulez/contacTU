@@ -1,17 +1,16 @@
 
-
 'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { createUser, getOrganizationsForUserForm } from '../actions';
+import { getOrganizationsForUserForm, getUser, updateUser } from '../../actions';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,13 +18,19 @@ import { userFormSchema } from '@/lib/schemas';
 import { userRoleEnum } from '@/lib/db/schema';
 import { useEffect, useState } from 'react';
 import { MultiSelect } from '@/components/ui/multi-select';
+import type { User } from '@/lib/types';
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
-export default function NewUserPage() {
+export default function EditUserPage() {
   const router = useRouter();
+  const params = useParams();
+  const userId = parseInt(params.id as string, 10);
   const { toast } = useToast();
+  
+  const [user, setUser] = useState<(User & { organizationNames: string[] }) | null>(null);
   const [organizationOptions, setOrganizationOptions] = useState<{ value: string, label: string }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     getOrganizationsForUserForm().then(orgNames => {
@@ -46,29 +51,39 @@ export default function NewUserPage() {
     },
   });
 
+  useEffect(() => {
+    if (userId) {
+      getUser(userId).then(data => {
+        if (data) {
+          setUser(data);
+          form.reset({
+            name: data.name,
+            email: data.email,
+            password: '',
+            role: data.role,
+            organizations: data.organizationNames,
+            avatar: data.avatar ?? '',
+          });
+        }
+        setIsLoading(false);
+      });
+    }
+  }, [userId, form]);
+
   const watchRole = form.watch('role');
 
   useEffect(() => {
     if (watchRole === 'Admin') {
       form.setValue('organizations', ['All Organizations']);
-    } else {
-      // If the role is switched away from Admin and 'All Organizations' was selected, clear it.
-      if (form.getValues('organizations').includes('All Organizations')) {
-        form.setValue('organizations', []);
-      }
     }
   }, [watchRole, form]);
 
   const onSubmit = async (data: UserFormValues) => {
     try {
-      if (!data.password) {
-          form.setError('password', { type: 'manual', message: 'Password is required for new users' });
-          return;
-      }
-      await createUser(data);
+      await updateUser(userId, data);
       toast({
-        title: 'User Created',
-        description: `${data.name} has been added.`,
+        title: 'User Updated',
+        description: `${data.name} has been updated.`,
       });
       router.push('/dashboard/users');
     } catch (error) {
@@ -76,11 +91,18 @@ export default function NewUserPage() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Something went wrong while creating the user.',
+        description: 'Something went wrong while updating the user.',
       });
     }
   };
 
+  if (isLoading) {
+      return <div>Loading...</div>;
+  }
+
+  if (!user) {
+      return <div>User not found.</div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -92,8 +114,8 @@ export default function NewUserPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight font-headline">Add New User</h1>
-            <p className="text-muted-foreground">Fill out the form to add a new user.</p>
+            <h1 className="text-2xl font-bold tracking-tight font-headline">Edit User: {user.name}</h1>
+            <p className="text-muted-foreground">Modify the details for this user.</p>
           </div>
         </div>
         <Form {...form}>
@@ -132,9 +154,9 @@ export default function NewUserPage() {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
+                                    <FormLabel>New Password</FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="********" {...field} />
+                                        <Input type="password" placeholder="Leave blank to keep current" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
@@ -200,7 +222,7 @@ export default function NewUserPage() {
                     <CardFooter className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => router.push('/dashboard/users')}>Cancel</Button>
                         <Button type="submit" disabled={form.formState.isSubmitting}>
-                            {form.formState.isSubmitting ? 'Creating...' : 'Create User'}
+                            {form.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </CardFooter>
                 </Card>
