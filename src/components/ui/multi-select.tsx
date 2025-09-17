@@ -44,11 +44,21 @@ export function MultiSelect({
     if (disabled) return;
 
     if (value === 'All Organizations') {
+      // If "All Organizations" is clicked, toggle it. 
+      // If it's being selected, clear other selections.
       onChange(selected.includes('All Organizations') ? [] : ['All Organizations']);
     } else {
-      const newSelection = selected.includes(value)
-        ? selected.filter((item) => item !== value)
-        : [...selected.filter(item => item !== 'All Organizations'), value]; // Ensure "All" is removed
+      // If an individual item is clicked
+      let newSelection: string[];
+      if (selected.includes('All Organizations')) {
+        // If "All" was selected, start a new selection with just the clicked item
+        newSelection = [value];
+      } else {
+        // Otherwise, toggle the item in the current selection
+        newSelection = selected.includes(value)
+          ? selected.filter((item) => item !== value)
+          : [...selected, value];
+      }
       onChange(newSelection);
     }
   };
@@ -92,9 +102,8 @@ export function MultiSelect({
         {otherOptions.map((option) => (
           <DropdownMenuCheckboxItem
             key={option.value}
-            checked={selected.includes(option.value)}
+            checked={isAllSelected || selected.includes(option.value)}
             onCheckedChange={() => handleToggle(option.value)}
-            disabled={isAllSelected}
             onSelect={(e) => e.preventDefault()}
           >
             {option.label}
