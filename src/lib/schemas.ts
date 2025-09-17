@@ -55,7 +55,7 @@ export const userFormSchema = z.object({
     password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
     role: z.enum(['Admin', 'Power User', 'Standard User', 'Read-Only']),
     organizations: z.array(z.string()).min(1, 'At least one organization must be selected'),
-    avatar: z.string().optional().or(z.literal('')),
+    avatar: z.string().optional(),
 });
 
 export const organizationFormSchema = z.object({

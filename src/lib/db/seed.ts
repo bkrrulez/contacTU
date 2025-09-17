@@ -101,33 +101,29 @@ async function seed() {
     const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
     const standardPasswordHash = await bcrypt.hash('password123', 10);
 
-    const usersToSeed: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry'>[] = [
+    const usersToSeed: Omit<UserSchema, 'id' | 'resetToken' | 'resetTokenExpiry' | 'avatar'>[] = [
       {
         name: 'Admin User',
         email: adminEmail,
         role: 'Admin',
-        avatar: 'https://placehold.co/100x100.png',
         password: adminPasswordHash,
       },
       {
         name: 'Alice Johnson',
         email: 'alice@example.com',
         role: 'Power User',
-        avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
       },
       {
         name: 'Bob Williams',
         email: 'bob@example.com',
         role: 'Standard User',
-        avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
       },
       {
         name: 'Charlie Brown',
         email: 'charlie@example.com',
         role: 'Read-Only',
-        avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
       },
     ];
