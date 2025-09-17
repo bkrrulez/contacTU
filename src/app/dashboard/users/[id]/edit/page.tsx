@@ -12,13 +12,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { getOrganizationsForUserForm, getUser, updateUser } from '../../actions';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, User as UserIcon, Upload } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { userFormSchema } from '@/lib/schemas';
 import { userRoleEnum } from '@/lib/db/schema';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { MultiSelect } from '@/components/ui/multi-select';
 import type { User } from '@/lib/types';
+import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
@@ -31,6 +33,8 @@ export default function EditUserPage() {
   const [user, setUser] = useState<(User & { organizationNames: string[] }) | null>(null);
   const [organizationOptions, setOrganizationOptions] = useState<{ value: string, label: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   useEffect(() => {
     getOrganizationsForUserForm().then(orgNames => {
@@ -64,11 +68,28 @@ export default function EditUserPage() {
             organizations: data.organizationNames,
             avatar: data.avatar ?? '',
           });
+          if (data.avatar) {
+            setAvatarPreview(data.avatar);
+          }
         }
         setIsLoading(false);
       });
     }
   }, [userId, form]);
+  
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        form.setValue('avatar', base64String);
+        setAvatarPreview(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   const watchRole = form.watch('role');
 
@@ -198,26 +219,39 @@ export default function EditUserPage() {
                                         onChange={field.onChange}
                                         className="w-full"
                                         placeholder="Select organizations..."
-                                        disabled={watchRole === 'Admin'}
                                     />
                                     <FormMessage />
                                     </FormItem>
                                 )}
                                 />
                         </div>
-                        <FormField
-                            control={form.control}
-                            name="avatar"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Avatar URL</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://example.com/avatar.png" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <FormItem>
+                          <FormLabel>Profile Picture</FormLabel>
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-20 w-20">
+                                <AvatarImage src={avatarPreview ?? undefined} />
+                                <AvatarFallback className="text-2xl">
+                                    <UserIcon className="h-8 w-8" />
+                                </AvatarFallback>
+                            </Avatar>
+                            <FormControl>
+                                <>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        ref={fileInputRef} 
+                                        onChange={handleAvatarChange}
+                                        className="hidden" 
+                                    />
+                                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Upload Picture
+                                    </Button>
+                                </>
+                            </FormControl>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => router.push('/dashboard/users')}>Cancel</Button>
