@@ -44,11 +44,8 @@ export function MultiSelect({
     if (disabled) return;
 
     if (value === 'All Organizations') {
-      // If "All Organizations" is selected, deselect all others and select only "All".
-      // If it's being deselected, clear the selection.
       onChange(selected.includes('All Organizations') ? [] : ['All Organizations']);
     } else {
-      // If another option is selected
       const newSelection = selected.includes(value)
         ? selected.filter((item) => item !== value)
         : [...selected.filter(item => item !== 'All Organizations'), value]; // Ensure "All" is removed
@@ -85,6 +82,7 @@ export function MultiSelect({
                 <DropdownMenuCheckboxItem
                     checked={isAllSelected}
                     onCheckedChange={() => handleToggle(allOrganizationsOption.value)}
+                    onSelect={(e) => e.preventDefault()}
                 >
                     {allOrganizationsOption.label}
                 </DropdownMenuCheckboxItem>
@@ -97,6 +95,7 @@ export function MultiSelect({
             checked={selected.includes(option.value)}
             onCheckedChange={() => handleToggle(option.value)}
             disabled={isAllSelected}
+            onSelect={(e) => e.preventDefault()}
           >
             {option.label}
           </DropdownMenuCheckboxItem>
