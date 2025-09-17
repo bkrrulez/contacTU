@@ -19,6 +19,11 @@ import bcrypt from 'bcryptjs';
 
 async function seed() {
   console.log('Seeding database...');
+
+  if (!process.env.DATABASE_URL) {
+    console.error('FATAL: DATABASE_URL environment variable is not set.');
+    process.exit(1);
+  }
   
   try {
     console.log('Clearing existing data...');
@@ -85,11 +90,11 @@ async function seed() {
 
   // --- User Seeding ---
   try {
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
 
     if (!adminEmail || !adminPassword) {
-      console.error('FATAL: ADMIN_EMAIL and ADMIN_PASSWORD environment variables must be set in your .env.local file.');
+      console.error('FATAL: NEXT_PUBLIC_ADMIN_EMAIL and NEXT_PUBLIC_ADMIN_PASSWORD environment variables must be set.');
       process.exit(1);
     }
     
