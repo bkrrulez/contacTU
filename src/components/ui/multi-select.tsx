@@ -44,8 +44,8 @@ export function MultiSelect({
     if (disabled) return;
 
     if (value === 'All Organizations') {
-      // If "All Organizations" is clicked, toggle it. 
-      // If it's being selected, clear other selections.
+      // If "All Organizations" is clicked, toggle it.
+      // If it's being selected, it becomes the only selection.
       onChange(selected.includes('All Organizations') ? [] : ['All Organizations']);
     } else {
       // If an individual item is clicked
