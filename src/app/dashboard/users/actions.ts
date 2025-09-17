@@ -36,7 +36,8 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
         role,
     };
 
-    if (avatar) {
+    // Only add avatar to insert data if it's a new image upload
+    if (avatar && avatar.startsWith('data:image/')) {
         insertData.avatar = avatar;
     }
 
@@ -130,8 +131,9 @@ export async function updateUser(id: number, values: z.infer<typeof userFormSche
         updateData.password = await bcrypt.hash(password, 10);
     }
     
-    // Only include avatar in update if it's provided. An empty string will clear it.
-    if (avatar !== undefined) {
+    // Only include avatar in update if it's a new Base64 string.
+    // This prevents overwriting an existing avatar with an empty string.
+    if (avatar && avatar.startsWith('data:image/')) {
         updateData.avatar = avatar;
     }
 
