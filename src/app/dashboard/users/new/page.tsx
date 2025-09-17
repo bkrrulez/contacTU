@@ -19,7 +19,7 @@ import { userRoleEnum } from '@/lib/db/schema';
 import { useEffect, useState, useRef } from 'react';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import Image from 'next/image';
+import { ImageCropDialog } from '@/components/dashboard/image-crop-dialog';
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
@@ -27,8 +27,10 @@ export default function NewUserPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [organizationOptions, setOrganizationOptions] = useState<{ value: string, label: string }[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isCropDialogOpen, setIsCropDialogOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getOrganizationsForUserForm().then(orgNames => {
@@ -54,13 +56,25 @@ export default function NewUserPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result as string;
-        form.setValue('avatar', base64String);
-        setAvatarPreview(base64String);
+        setImageToCrop(reader.result as string);
+        setIsCropDialogOpen(true);
       };
       reader.readAsDataURL(file);
     }
   };
+  
+  const handleCroppedImage = (croppedImage: string | null) => {
+    if (croppedImage) {
+      form.setValue('avatar', croppedImage);
+      setAvatarPreview(croppedImage);
+    }
+    setIsCropDialogOpen(false);
+    setImageToCrop(null);
+    if(fileInputRef.current) {
+        fileInputRef.current.value = '';
+    }
+  };
+
 
   const watchRole = form.watch('role');
 
@@ -68,7 +82,6 @@ export default function NewUserPage() {
     if (watchRole === 'Admin') {
       form.setValue('organizations', ['All Organizations']);
     } else {
-      // If the role is switched away from Admin and 'All Organizations' was selected, clear it.
       if (form.getValues('organizations').includes('All Organizations')) {
         form.setValue('organizations', []);
       }
@@ -99,142 +112,150 @@ export default function NewUserPage() {
 
 
   return (
-    <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" asChild>
-            <Link href="/dashboard/users">
-                <ArrowLeft className="h-4 w-4" />
-                <span className="sr-only">Back to Users</span>
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight font-headline">Add New User</h1>
-            <p className="text-muted-foreground">Fill out the form to add a new user.</p>
+    <>
+      <ImageCropDialog
+        isOpen={isCropDialogOpen}
+        onClose={() => handleCroppedImage(null)}
+        imageSrc={imageToCrop}
+        onSave={handleCroppedImage}
+      />
+      <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" asChild>
+              <Link href="/dashboard/users">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Back to Users</span>
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight font-headline">Add New User</h1>
+              <p className="text-muted-foreground">Fill out the form to add a new user.</p>
+            </div>
           </div>
-        </div>
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-                <Card>
-                    <CardContent className="pt-6 grid gap-6">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
-                                <FormControl>
-                                    <Input placeholder="John Doe" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <div className="grid md:grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
-                                    <FormControl>
-                                        <Input type="email" placeholder="name@example.com" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
-                                    <FormControl>
-                                        <Input type="password" placeholder="********" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="role"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Role <span className="text-destructive">*</span></FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                            <SelectValue placeholder="Select a role" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {userRoleEnum.enumValues.map((role) => (
-                                                <SelectItem key={role} value={role}>{role}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={form.control}
-                                name="organizations"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Organizations</FormLabel>
-                                    <MultiSelect
-                                        options={organizationOptions}
-                                        selected={field.value}
-                                        onChange={field.onChange}
-                                        className="w-full"
-                                        placeholder="Select organizations..."
-                                    />
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                                />
-                        </div>
-                        <FormItem>
-                          <FormLabel>Profile Picture</FormLabel>
-                          <div className="flex items-center gap-4">
-                             <Avatar className="h-20 w-20">
-                                <AvatarImage src={avatarPreview ?? undefined} />
-                                <AvatarFallback className="text-2xl">
-                                    <UserIcon className="h-8 w-8" />
-                                </AvatarFallback>
-                            </Avatar>
-                            <FormControl>
-                                <>
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        ref={fileInputRef} 
-                                        onChange={handleAvatarChange}
-                                        className="hidden" 
-                                    />
-                                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-                                        <Upload className="mr-2 h-4 w-4" />
-                                        Upload Picture
-                                    </Button>
-                                </>
-                            </FormControl>
+          <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <Card>
+                      <CardContent className="pt-6 grid gap-6">
+                          <FormField
+                              control={form.control}
+                              name="name"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
+                                  <FormControl>
+                                      <Input placeholder="John Doe" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                          <div className="grid md:grid-cols-2 gap-4">
+                              <FormField
+                                  control={form.control}
+                                  name="email"
+                                  render={({ field }) => (
+                                      <FormItem>
+                                      <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                                      <FormControl>
+                                          <Input type="email" placeholder="name@example.com" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
+                              <FormField
+                                  control={form.control}
+                                  name="password"
+                                  render={({ field }) => (
+                                      <FormItem>
+                                      <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
+                                      <FormControl>
+                                          <Input type="password" placeholder="********" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
                           </div>
-                          <FormMessage />
-                        </FormItem>
-                    </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => router.push('/dashboard/users')}>Cancel</Button>
-                        <Button type="submit" disabled={form.formState.isSubmitting}>
-                            {form.formState.isSubmitting ? 'Creating...' : 'Create User'}
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </form>
-        </Form>
-    </div>
+                          <div className="grid md:grid-cols-2 gap-4">
+                              <FormField
+                                  control={form.control}
+                                  name="role"
+                                  render={({ field }) => (
+                                      <FormItem>
+                                      <FormLabel>Role <span className="text-destructive">*</span></FormLabel>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                          <FormControl>
+                                              <SelectTrigger>
+                                              <SelectValue placeholder="Select a role" />
+                                              </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                              {userRoleEnum.enumValues.map((role) => (
+                                                  <SelectItem key={role} value={role}>{role}</SelectItem>
+                                              ))}
+                                          </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
+                              <FormField
+                                  control={form.control}
+                                  name="organizations"
+                                  render={({ field }) => (
+                                      <FormItem>
+                                      <FormLabel>Organizations</FormLabel>
+                                      <MultiSelect
+                                          options={organizationOptions}
+                                          selected={field.value}
+                                          onChange={field.onChange}
+                                          className="w-full"
+                                          placeholder="Select organizations..."
+                                      />
+                                      <FormMessage />
+                                      </FormItem>
+                                  )}
+                                  />
+                          </div>
+                          <FormItem>
+                            <FormLabel>Profile Picture</FormLabel>
+                            <div className="flex items-center gap-4">
+                              <Avatar className="h-20 w-20">
+                                  <AvatarImage src={avatarPreview ?? undefined} />
+                                  <AvatarFallback className="text-2xl">
+                                      <UserIcon className="h-8 w-8" />
+                                  </AvatarFallback>
+                              </Avatar>
+                              <FormControl>
+                                  <>
+                                      <input 
+                                          type="file" 
+                                          accept="image/*" 
+                                          ref={fileInputRef} 
+                                          onChange={handleAvatarChange}
+                                          className="hidden" 
+                                      />
+                                      <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                          <Upload className="mr-2 h-4 w-4" />
+                                          Upload Picture
+                                      </Button>
+                                  </>
+                              </FormControl>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                      </CardContent>
+                      <CardFooter className="flex justify-end gap-2">
+                          <Button type="button" variant="outline" onClick={() => router.push('/dashboard/users')}>Cancel</Button>
+                          <Button type="submit" disabled={form.formState.isSubmitting}>
+                              {form.formState.isSubmitting ? 'Creating...' : 'Create User'}
+                          </Button>
+                      </CardFooter>
+                  </Card>
+              </form>
+          </Form>
+      </div>
+    </>
   );
 }

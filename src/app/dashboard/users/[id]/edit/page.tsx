@@ -21,6 +21,7 @@ import { MultiSelect } from '@/components/ui/multi-select';
 import type { User } from '@/lib/types';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ImageCropDialog } from '@/components/dashboard/image-crop-dialog';
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
@@ -33,8 +34,10 @@ export default function EditUserPage() {
   const [user, setUser] = useState<(User & { organizationNames: string[] }) | null>(null);
   const [organizationOptions, setOrganizationOptions] = useState<{ value: string, label: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isCropDialogOpen, setIsCropDialogOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getOrganizationsForUserForm().then(orgNames => {
@@ -82,11 +85,22 @@ export default function EditUserPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result as string;
-        form.setValue('avatar', base64String);
-        setAvatarPreview(base64String);
+        setImageToCrop(reader.result as string);
+        setIsCropDialogOpen(true);
       };
       reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleCroppedImage = (croppedImage: string | null) => {
+    if (croppedImage) {
+      form.setValue('avatar', croppedImage);
+      setAvatarPreview(croppedImage);
+    }
+    setIsCropDialogOpen(false);
+    setImageToCrop(null);
+    if(fileInputRef.current) {
+        fileInputRef.current.value = '';
     }
   };
 
@@ -126,6 +140,13 @@ export default function EditUserPage() {
   }
 
   return (
+    <>
+    <ImageCropDialog
+        isOpen={isCropDialogOpen}
+        onClose={() => handleCroppedImage(null)}
+        imageSrc={imageToCrop}
+        onSave={handleCroppedImage}
+      />
     <div className="space-y-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" asChild>
@@ -263,5 +284,6 @@ export default function EditUserPage() {
             </form>
         </Form>
     </div>
+    </>
   );
 }
