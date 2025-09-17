@@ -44,17 +44,18 @@ export function MultiSelect({
     if (disabled) return;
 
     if (value === 'All Organizations') {
-      // If "All Organizations" is clicked, toggle it.
-      // If it's being selected, it becomes the only selection.
+      // If "All Organizations" is clicked:
+      // - If it's already selected, clear the selection.
+      // - If it's not selected, make it the *only* selection.
       onChange(selected.includes('All Organizations') ? [] : ['All Organizations']);
     } else {
-      // If an individual item is clicked
+      // If an individual item is clicked:
       let newSelection: string[];
       if (selected.includes('All Organizations')) {
-        // If "All" was selected, start a new selection with just the clicked item
+        // If "All" was selected, start a new selection with just the clicked item.
         newSelection = [value];
       } else {
-        // Otherwise, toggle the item in the current selection
+        // Otherwise, toggle the item in the current selection.
         newSelection = selected.includes(value)
           ? selected.filter((item) => item !== value)
           : [...selected, value];
@@ -62,8 +63,9 @@ export function MultiSelect({
       onChange(newSelection);
     }
   };
-
+  
   const isAllSelected = allOrganizationsOption ? selected.includes(allOrganizationsOption.value) : false;
+  const isAnyOtherSelected = otherOptions.some(o => selected.includes(o.value));
 
   const displayValue =
     selected.length > 2
