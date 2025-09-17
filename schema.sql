@@ -1,29 +1,31 @@
--- Drop existing tables in reverse order of dependency to avoid foreign key constraints
-DROP TABLE IF EXISTS "users_to_organizations";
-DROP TABLE IF EXISTS "teams_to_organizations";
-DROP TABLE IF EXISTS "audit_logs";
-DROP TABLE IF EXISTS "contact_associated_names";
-DROP TABLE IF EXISTS "contact_social_links";
-DROP TABLE IF EXISTS "contact_urls";
-DROP TABLE IF EXISTS "contact_phones";
-DROP TABLE IF EXISTS "contact_emails";
-DROP TABLE IF EXISTS "contact_organizations";
-DROP TABLE IF EXISTS "contacts";
-DROP TABLE IF EXISTS "users";
-DROP TABLE IF EXISTS "teams";
-DROP TABLE IF EXISTS "organizations";
+-- Drop existing tables in reverse order of creation to handle dependencies
+DROP TABLE IF EXISTS "users_to_organizations" CASCADE;
+DROP TABLE IF EXISTS "teams_to_organizations" CASCADE;
+DROP TABLE IF EXISTS "contact_organizations" CASCADE;
+DROP TABLE IF EXISTS "contact_associated_names" CASCADE;
+DROP TABLE IF EXISTS "contact_social_links" CASCADE;
+DROP TABLE IF EXISTS "contact_urls" CASCADE;
+DROP TABLE IF EXISTS "contact_emails" CASCADE;
+DROP TABLE IF EXISTS "contact_phones" CASCADE;
+DROP TABLE IF EXISTS "audit_logs" CASCADE;
+DROP TABLE IF EXISTS "contacts" CASCADE;
+DROP TABLE IF EXISTS "users" CASCADE;
+DROP TABLE IF EXISTS "teams" CASCADE;
+DROP TABLE IF EXISTS "organizations" CASCADE;
 
--- Drop custom enum types
+-- Drop existing enums
 DROP TYPE IF EXISTS "user_role";
 DROP TYPE IF EXISTS "phone_type";
 DROP TYPE IF EXISTS "audit_log_action";
 
--- Create custom enum types
+
+-- Create Enums
 CREATE TYPE "user_role" AS ENUM ('Admin', 'Power User', 'Standard User', 'Read-Only');
 CREATE TYPE "phone_type" AS ENUM ('Telephone', 'Mobile');
 CREATE TYPE "audit_log_action" AS ENUM ('create', 'update', 'delete');
 
--- Create tables
+
+-- Create Tables
 CREATE TABLE "users" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(256) NOT NULL,
@@ -31,8 +33,8 @@ CREATE TABLE "users" (
 	"password" varchar(256),
 	"role" "user_role" NOT NULL,
 	"avatar" varchar(256),
-	"resetToken" varchar(256),
-	"resetTokenExpiry" timestamp with time zone,
+	"reset_token" varchar(256),
+	"reset_token_expiry" timestamp with time zone,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 
@@ -50,15 +52,15 @@ CREATE TABLE "teams" (
 );
 
 CREATE TABLE "teams_to_organizations" (
-	"teamId" integer NOT NULL,
-	"organizationId" integer NOT NULL,
-	CONSTRAINT "teams_to_organizations_teamId_organizationId_pk" PRIMARY KEY("teamId","organizationId")
+	"team_id" integer NOT NULL,
+	"organization_id" integer NOT NULL,
+	CONSTRAINT "teams_to_organizations_team_id_organization_id_pk" PRIMARY KEY("team_id","organization_id")
 );
 
 CREATE TABLE "users_to_organizations" (
-	"userId" integer NOT NULL,
-	"organizationId" integer NOT NULL,
-	CONSTRAINT "users_to_organizations_userId_organizationId_pk" PRIMARY KEY("userId","organizationId")
+	"user_id" integer NOT NULL,
+	"organization_id" integer NOT NULL,
+	CONSTRAINT "users_to_organizations_user_id_organization_id_pk" PRIMARY KEY("user_id","organization_id")
 );
 
 CREATE TABLE "contacts" (
@@ -122,81 +124,82 @@ CREATE TABLE "audit_logs" (
 	"timestamp" timestamp with time zone DEFAULT now() NOT NULL
 );
 
--- Add foreign key constraints
+
+-- Add Foreign Key Constraints
 DO $$ BEGIN
- ALTER TABLE "teams_to_organizations" ADD CONSTRAINT "teams_to_organizations_teamId_teams_id_fk" FOREIGN KEY ("teamId") REFERENCES "teams"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "teams_to_organizations" ADD CONSTRAINT "teams_to_organizations_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "teams_to_organizations" ADD CONSTRAINT "teams_to_organizations_organizationId_organizations_id_fk" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "teams_to_organizations" ADD CONSTRAINT "teams_to_organizations_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "users_to_organizations" ADD CONSTRAINT "users_to_organizations_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "users_to_organizations" ADD CONSTRAINT "users_to_organizations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "users_to_organizations" ADD CONSTRAINT "users_to_organizations_organizationId_organizations_id_fk" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "users_to_organizations" ADD CONSTRAINT "users_to_organizations_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "contact_organizations" ADD CONSTRAINT "contact_organizations_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "contacts"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "contact_organizations" ADD CONSTRAINT "contact_organizations_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "contact_organizations" ADD CONSTRAINT "contact_organizations_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "contact_organizations" ADD CONSTRAINT "contact_organizations_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "contact_organizations" ADD CONSTRAINT "contact_organizations_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "teams"("id") ON DELETE set null ON UPDATE no action;
+ ALTER TABLE "contact_organizations" ADD CONSTRAINT "contact_organizations_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "contact_emails" ADD CONSTRAINT "contact_emails_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "contacts"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "contact_emails" ADD CONSTRAINT "contact_emails_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "contact_phones" ADD CONSTRAINT "contact_phones_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "contacts"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "contact_phones" ADD CONSTRAINT "contact_phones_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "contact_urls" ADD CONSTRAINT "contact_urls_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "contacts"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "contact_urls" ADD CONSTRAINT "contact_urls_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "contact_social_links" ADD CONSTRAINT "contact_social_links_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "contacts"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "contact_social_links" ADD CONSTRAINT "contact_social_links_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "contact_associated_names" ADD CONSTRAINT "contact_associated_names_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "contacts"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "contact_associated_names" ADD CONSTRAINT "contact_associated_names_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE set null ON UPDATE no action;
+ ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
