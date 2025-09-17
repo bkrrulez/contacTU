@@ -32,24 +32,27 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
     }).returning();
     
     if (organizations.length > 0) {
-        const allOrgs = await db.query.organizations.findMany();
         let orgIdsToInsert: number[];
 
         if (organizations.includes('All Organizations')) {
+            const allOrgs = await db.query.organizations.findMany({ columns: { id: true } });
             orgIdsToInsert = allOrgs.map(org => org.id);
         } else {
             const selectedOrgs = await db.query.organizations.findMany({
                 where: inArray(orgsTable.name, organizations),
+                columns: { id: true }
             });
             orgIdsToInsert = selectedOrgs.map(org => org.id);
         }
 
-        await db.insert(users_to_organizations).values(
-            orgIdsToInsert.map(orgId => ({
-                userId: newUser.id,
-                organizationId: orgId,
-            }))
-        );
+        if (orgIdsToInsert.length > 0) {
+            await db.insert(users_to_organizations).values(
+                orgIdsToInsert.map(orgId => ({
+                    userId: newUser.id,
+                    organizationId: orgId,
+                }))
+            );
+        }
     }
 
     revalidatePath('/dashboard/users');
@@ -61,6 +64,7 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
 export async function getOrganizationsForUserForm() {
     const result = await db.query.organizations.findMany({
         orderBy: (orgs, { asc }) => [asc(orgs.name)],
+        columns: { name: true }
     });
     return result.map(r => r.name);
 }
