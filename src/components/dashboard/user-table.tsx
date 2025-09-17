@@ -26,9 +26,10 @@ import { MoreHorizontal } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import React from 'react';
+import type { OrganizationSchema } from '@/lib/db/schema';
 
 interface UserTableProps {
-  users: User[];
+  users: (User & { organizations: OrganizationSchema[] })[];
 }
 
 const roleVariant: { [key in User['role']]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
@@ -79,7 +80,7 @@ export function UserTable({ users }: UserTableProps) {
                 <TableCell className="hidden lg:table-cell">
                    <div className="flex flex-wrap gap-1">
                         {user.organizations?.map(org => (
-                            <Badge key={org.id} variant="secondary" className="font-normal">{org.name}</Badge>
+                            <Badge key={org.id} variant={org.name === 'All Organizations' ? 'default' : 'secondary'} className="font-normal">{org.name}</Badge>
                         ))}
                    </div>
                 </TableCell>

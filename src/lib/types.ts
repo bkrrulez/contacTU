@@ -1,3 +1,4 @@
+
 import type { 
     ContactSchema, 
     UserSchema,
@@ -12,7 +13,7 @@ import type {
 } from './db/schema';
 
 export type User = UserSchema & {
-    organizations?: { organization: OrganizationSchema }[];
+    usersToOrganizations: { organization: OrganizationSchema }[];
 };
 
 export type ContactOrganization = ContactOrganizationSchema & {

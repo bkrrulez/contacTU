@@ -6,10 +6,14 @@ import { UserTable } from '@/components/dashboard/user-table';
 import { db } from '@/lib/db';
 import Link from 'next/link';
 import type { User } from '@/lib/types';
+import { organizations as orgsTable } from '@/lib/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 export default async function UsersPage() {
+  const allOrganizations = await db.query.organizations.findMany({ columns: { id: true } });
+  const totalOrgs = allOrganizations.length;
+
   const users: User[] = await db.query.users.findMany({
     with: {
         usersToOrganizations: {
@@ -21,10 +25,19 @@ export default async function UsersPage() {
   });
 
   // Map organizations to the top-level user object for easier access in the client component
-  const usersWithOrgs = users.map(user => ({
-      ...user,
-      organizations: user.usersToOrganizations.map(uto => uto.organization),
-  }));
+  const usersWithOrgs = users.map(user => {
+      const userOrgCount = user.usersToOrganizations.length;
+      let organizations = user.usersToOrganizations.map(uto => uto.organization);
+
+      if (userOrgCount > 0 && userOrgCount === totalOrgs) {
+        organizations = [{ id: -1, name: 'All Organizations', address: null }]; // Special placeholder
+      }
+      
+      return {
+          ...user,
+          organizations: organizations,
+      };
+  });
 
   return (
     <div className="space-y-4">
