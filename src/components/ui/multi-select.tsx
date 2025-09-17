@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -36,26 +37,26 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
-  const handleToggle = (value: string) => {
-    if (disabled) return;
-    onChange(
-      selected.includes(value)
-        ? selected.filter((item) => item !== value)
-        : [...selected, value]
-    );
-  };
-  
-  const handleToggleAll = () => {
-    if (disabled) return;
-    if (selected.length === options.length) {
-      onChange([]);
-    } else {
-      onChange(options.map(o => o.value));
-    }
-  }
-  
   const allOrganizationsOption = options.find(o => o.value === 'All Organizations');
   const otherOptions = options.filter(o => o.value !== 'All Organizations');
+
+  const handleToggle = (value: string) => {
+    if (disabled) return;
+
+    if (value === 'All Organizations') {
+      // If "All Organizations" is selected, deselect all others and select only "All".
+      // If it's being deselected, clear the selection.
+      onChange(selected.includes('All Organizations') ? [] : ['All Organizations']);
+    } else {
+      // If another option is selected
+      const newSelection = selected.includes(value)
+        ? selected.filter((item) => item !== value)
+        : [...selected.filter(item => item !== 'All Organizations'), value]; // Ensure "All" is removed
+      onChange(newSelection);
+    }
+  };
+
+  const isAllSelected = allOrganizationsOption ? selected.includes(allOrganizationsOption.value) : false;
 
   const displayValue =
     selected.length > 2
@@ -82,11 +83,8 @@ export function MultiSelect({
         {allOrganizationsOption && (
             <>
                 <DropdownMenuCheckboxItem
-                    checked={selected.includes(allOrganizationsOption.value) || selected.length === options.length}
-                    onCheckedChange={() => {
-                        const isAllSelected = selected.length === options.length || selected.includes('All Organizations');
-                        onChange(isAllSelected ? [] : options.map(o => o.value));
-                    }}
+                    checked={isAllSelected}
+                    onCheckedChange={() => handleToggle(allOrganizationsOption.value)}
                 >
                     {allOrganizationsOption.label}
                 </DropdownMenuCheckboxItem>
@@ -98,6 +96,7 @@ export function MultiSelect({
             key={option.value}
             checked={selected.includes(option.value)}
             onCheckedChange={() => handleToggle(option.value)}
+            disabled={isAllSelected}
           >
             {option.label}
           </DropdownMenuCheckboxItem>
