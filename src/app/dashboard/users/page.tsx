@@ -1,14 +1,31 @@
 
+
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserTable } from '@/components/dashboard/user-table';
 import { db } from '@/lib/db';
 import Link from 'next/link';
+import type { User } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
 export default async function UsersPage() {
-  const users = await db.query.users.findMany();
+  const users: User[] = await db.query.users.findMany({
+    with: {
+        usersToOrganizations: {
+            with: {
+                organization: true
+            }
+        }
+    }
+  });
+
+  // Map organizations to the top-level user object for easier access in the client component
+  const usersWithOrgs = users.map(user => ({
+      ...user,
+      organizations: user.usersToOrganizations.map(uto => uto.organization),
+  }));
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -23,7 +40,7 @@ export default async function UsersPage() {
           </Link>
         </Button>
       </div>
-      <UserTable users={users} />
+      <UserTable users={usersWithOrgs} />
     </div>
   );
 }

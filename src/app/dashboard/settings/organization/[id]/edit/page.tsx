@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -14,7 +15,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { organizationFormSchema } from '@/lib/schemas';
-import type { ContactOrganizationSchema } from '@/lib/db/schema';
+import type { OrganizationSchema } from '@/lib/db/schema';
 import { getOrganization, updateOrganization } from '../../actions';
 
 type OrganizationFormValues = z.infer<typeof organizationFormSchema>;
@@ -25,7 +26,7 @@ export default function EditOrganizationPage() {
   const params = useParams();
   const { toast } = useToast();
   const organizationId = parseInt(params.id as string, 10);
-  const [organization, setOrganization] = useState<ContactOrganizationSchema | null>(null);
+  const [organization, setOrganization] = useState<OrganizationSchema | null>(null);
   
   const form = useForm<OrganizationFormValues>({
     resolver: zodResolver(organizationFormSchema),
@@ -41,7 +42,7 @@ export default function EditOrganizationPage() {
         if (data) {
           setOrganization(data);
           form.reset({
-            name: data.organization,
+            name: data.name,
             address: data.address ?? '',
           });
         }
@@ -83,7 +84,7 @@ export default function EditOrganizationPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight font-headline">Edit Organization</h1>
-            <p className="text-muted-foreground">Modify the details for {organization.organization}.</p>
+            <p className="text-muted-foreground">Modify the details for {organization.name}.</p>
           </div>
         </div>
         <Form {...form}>

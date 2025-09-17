@@ -1,10 +1,9 @@
 
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { db } from '@/lib/db';
-import { contactOrganizations } from '@/lib/db/schema';
-import { desc, sql } from 'drizzle-orm';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -19,16 +18,9 @@ import {
 export const dynamic = 'force-dynamic';
 
 async function getOrganizations() {
-    // We need a stable ID for each unique organization name.
-    // We can use the minimum ID for each organization name as a stable identifier.
-    const result: { id: number; name: string; address: string | null }[] = await db.execute(sql`
-        SELECT DISTINCT ON (organization)
-            id,
-            organization as name,
-            address
-        FROM contact_organizations
-        ORDER BY organization, id
-    `);
+    const result = await db.query.organizations.findMany({
+        orderBy: (orgs, { asc }) => [asc(orgs.name)],
+    });
     return result;
 }
 

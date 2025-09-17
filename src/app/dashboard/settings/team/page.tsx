@@ -1,10 +1,9 @@
 
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { db } from '@/lib/db';
-import { contactOrganizations } from '@/lib/db/schema';
-import { desc, sql } from 'drizzle-orm';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -16,24 +15,34 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import type { TeamSchema } from '@/lib/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-async function getTeams() {
-    const result: { team: string, organizations: string[] }[] = await db.execute(sql`
-        SELECT 
-            team, 
-            array_agg(DISTINCT organization) as organizations
-        FROM 
-            contact_organizations
-        WHERE
-            team IS NOT NULL AND team != ''
-        GROUP BY 
-            team
-        ORDER BY 
-            team
-    `);
-    return result;
+type TeamWithOrgs = TeamSchema & {
+    organizations: { name: string }[];
+}
+
+async function getTeams(): Promise<TeamWithOrgs[]> {
+    const teams = await db.query.teams.findMany({
+        with: {
+            teamsToOrganizations: {
+                with: {
+                    organization: {
+                        columns: {
+                            name: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: (teams, { asc }) => [asc(teams.name)]
+    });
+
+    return teams.map(team => ({
+        ...team,
+        organizations: team.teamsToOrganizations.map(tto => tto.organization)
+    }))
 }
 
 export default async function TeamSettingsPage() {
@@ -67,12 +76,12 @@ export default async function TeamSettingsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {teams.map((team, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{team.team}</TableCell>
+                            {teams.map((team) => (
+                                <TableRow key={team.id}>
+                                    <TableCell>{team.name}</TableCell>
                                     <TableCell className="flex flex-wrap gap-1">
                                         {team.organizations.map(org => (
-                                            org && <Badge key={org} variant="secondary">{org}</Badge>
+                                            org && <Badge key={org.name} variant="secondary">{org.name}</Badge>
                                         ))}
                                     </TableCell>
                                      <TableCell>
@@ -86,7 +95,7 @@ export default async function TeamSettingsPage() {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                 <DropdownMenuItem asChild>
-                                                    <Link href={`/dashboard/settings/team/${encodeURIComponent(team.team)}/edit`}>Edit</Link>
+                                                    <Link href={`/dashboard/settings/team/${encodeURIComponent(team.name)}/edit`}>Edit</Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>

@@ -1,4 +1,5 @@
 
+
 import {
   Card,
   CardContent,
@@ -61,17 +62,18 @@ const StatCard = ({
 export default async function DashboardPage() {
   const allContacts: ContactType[] = await db.query.contacts.findMany({
     with: {
-      organizations: true,
+      organizations: {
+        with: {
+            organization: true,
+            team: true,
+        }
+      },
       emails: true,
       phones: true,
     },
   });
   const users: User[] = await db.query.users.findMany();
-  const organizations = await db.query.contactOrganizations.findMany({
-    columns: {
-      organization: true
-    }
-  }).then(orgs => new Set(orgs.map(o => o.organization)));
+  const organizations = await db.query.organizations.findMany();
   const currentUser = await db.query.users.findFirst();
 
   const favoriteContacts = await db.select().from(contactsTable).where(eq(contactsTable.isFavorite, true));
@@ -105,7 +107,7 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Contacts" value={allContacts.length} icon={Contact} color="#2563EB" />
         <StatCard title="Active Users" value={users.length} icon={Users} color="#16A34A" />
-        <StatCard title="Organizations" value={organizations.size} icon={Building} color="#9333EA" />
+        <StatCard title="Organizations" value={organizations.length} icon={Building} color="#9333EA" />
         <StatCard title="Favorite Contacts" value={favoriteContacts.length} icon={Star} color="#F59E0B" href="/dashboard/favorites" />
       </div>
 

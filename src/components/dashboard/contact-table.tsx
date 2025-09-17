@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -74,8 +75,8 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
           bValue = `${b.firstName} ${b.lastName}`;
           break;
         case 'organization':
-          aValue = a.organizations?.[0]?.organization;
-          bValue = b.organizations?.[0]?.organization;
+          aValue = a.organizations?.[0]?.organization.name;
+          bValue = b.organizations?.[0]?.organization.name;
           break;
         case 'email':
           aValue = a.emails?.[0]?.email;
@@ -231,11 +232,11 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                         {contact.firstName} {contact.lastName}
                         {contact.isFavorite && <Star className="h-4 w-4 text-amber-400 fill-amber-400" />}
                       </div>
-                      <div className="text-sm text-muted-foreground md:hidden">{contact.organizations?.[0]?.organization}</div>
+                      <div className="text-sm text-muted-foreground md:hidden">{contact.organizations?.[0]?.organization.name}</div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell">{contact.organizations?.[0]?.organization}</TableCell>
+                <TableCell className="hidden md:table-cell">{contact.organizations?.[0]?.organization.name}</TableCell>
                 <TableCell className="hidden lg:table-cell">{contact.emails?.[0]?.email}</TableCell>
                 <TableCell>{contact.phones?.[0]?.phone}</TableCell>
                 <TableCell>

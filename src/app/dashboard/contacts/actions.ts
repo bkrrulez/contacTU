@@ -1,11 +1,12 @@
 
+
 'use server';
 
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { contacts, contactEmails, contactPhones, contactOrganizations, contactUrls, contactSocialLinks, contactAssociatedNames, auditLogs } from '@/lib/db/schema';
+import { contacts, contactEmails, contactPhones, contactOrganizations, contactUrls, contactSocialLinks, contactAssociatedNames, auditLogs, organizations as orgsTable, teams as teamsTable } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
-import { eq } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import type { Contact } from '@/lib/types';
 import { contactFormSchema } from '@/lib/schemas';
 
@@ -28,6 +29,42 @@ async function createAuditLog(
         details,
     });
 }
+
+// Helper to get or create organization and team IDs
+async function getOrCreateOrgAndTeam(orgName: string, teamName?: string | null): Promise<{ organizationId: number, teamId: number | null }> {
+    let organizationId: number;
+    let teamId: number | null = null;
+
+    // Handle Organization
+    const existingOrg = await db.query.organizations.findFirst({ where: eq(orgsTable.name, orgName) });
+    if (existingOrg) {
+        organizationId = existingOrg.id;
+    } else {
+        const [newOrg] = await db.insert(orgsTable).values({ name: orgName }).returning();
+        organizationId = newOrg.id;
+    }
+
+    // Handle Team
+    if (teamName) {
+        const existingTeam = await db.query.teams.findFirst({ where: eq(teamsTable.name, teamName) });
+        if (existingTeam) {
+            teamId = existingTeam.id;
+        } else {
+            const [newTeam] = await db.insert(teamsTable).values({ name: teamName }).returning();
+            teamId = newTeam.id;
+        }
+
+        // Ensure team is associated with the organization
+        await db.execute(sql`
+            INSERT INTO teams_to_organizations ("teamId", "organizationId")
+            VALUES (${teamId}, ${organizationId})
+            ON CONFLICT DO NOTHING;
+        `);
+    }
+
+    return { organizationId, teamId };
+}
+
 
 export async function createContact(values: z.infer<typeof contactFormSchema>) {
     const validatedFields = contactFormSchema.safeParse(values);
@@ -69,16 +106,16 @@ export async function createContact(values: z.infer<typeof contactFormSchema>) {
     }
 
     if (organizations?.length) {
-        await db.insert(contactOrganizations).values(
-            organizations.map(org => ({
+        for (const org of organizations) {
+            const { organizationId, teamId } = await getOrCreateOrgAndTeam(org.organization, org.team);
+            await db.insert(contactOrganizations).values({
                 contactId: newContact.id,
-                organization: org.organization,
+                organizationId,
+                teamId,
                 designation: org.designation,
-                team: org.team,
                 department: org.department,
-                address: org.address,
-            }))
-        );
+            });
+        }
     }
 
     if (website) {
@@ -131,8 +168,7 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
         birthday: birthday ? birthday.toISOString().split('T')[0] : undefined,
     }).where(eq(contacts.id, id));
 
-    // For simplicity, we'll clear and re-insert related data.
-    // In a real app, you might want to do a more sophisticated diff and update.
+    // Clear and re-insert related data
     await db.delete(contactEmails).where(eq(contactEmails.contactId, id));
     if (emails?.length) {
         await db.insert(contactEmails).values(
@@ -149,16 +185,16 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
     
     await db.delete(contactOrganizations).where(eq(contactOrganizations.contactId, id));
     if (organizations?.length) {
-        await db.insert(contactOrganizations).values(
-            organizations.map(org => ({ 
-                contactId: id, 
-                organization: org.organization, 
-                designation: org.designation, 
-                team: org.team, 
+        for (const org of organizations) {
+            const { organizationId, teamId } = await getOrCreateOrgAndTeam(org.organization, org.team);
+            await db.insert(contactOrganizations).values({
+                contactId: id,
+                organizationId,
+                teamId,
+                designation: org.designation,
                 department: org.department,
-                address: org.address,
-            }))
-        );
+            });
+        }
     }
 
     await db.delete(contactUrls).where(eq(contactUrls.contactId, id));
@@ -211,7 +247,12 @@ export async function getContact(id: number): Promise<Contact | null> {
     const contact = await db.query.contacts.findFirst({
         where: (contacts, { eq }) => eq(contacts.id, id),
         with: {
-            organizations: true,
+            organizations: {
+                with: {
+                    organization: true,
+                    team: true
+                }
+            },
             emails: true,
             phones: true,
             urls: true,

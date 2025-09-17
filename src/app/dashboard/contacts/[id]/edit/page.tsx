@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -71,7 +72,7 @@ export default function EditContactPage() {
             lastName: data.lastName,
             emails: data.emails?.length ? data.emails.map(e => ({ email: e.email })) : [{email: ''}],
             phones: data.phones?.length ? data.phones.map(p => ({ phone: p.phone, type: p.type as 'Mobile' | 'Telephone' })) : [{phone: '', type: 'Mobile'}],
-            organizations: data.organizations?.length ? data.organizations.map(o => ({ organization: o.organization, designation: o.designation || '', team: o.team, department: o.department || '', address: o.address || '' })) : [{organization: '', designation: '', team: '', department: '', address: ''}],
+            organizations: data.organizations?.length ? data.organizations.map(o => ({ organization: o.organization.name, designation: o.designation || '', team: o.team?.name || '', department: o.department || '' })) : [{organization: '', designation: '', team: '', department: ''}],
             address: data.address ?? '',
             notes: data.notes ?? '',
             website: data.urls?.[0]?.url ?? '',
@@ -273,7 +274,6 @@ export default function EditContactPage() {
                                  <TableHead>Designation</TableHead>
                                  <TableHead>Team</TableHead>
                                  <TableHead>Department</TableHead>
-                                 <TableHead>Address</TableHead>
                                  <TableHead className="w-[50px]"></TableHead>
                                </TableRow>
                            </TableHeader>
@@ -336,20 +336,6 @@ export default function EditContactPage() {
                                         )}
                                         />
                                   </TableCell>
-                                   <TableCell>
-                                       <FormField
-                                        control={form.control}
-                                        name={`organizations.${index}.address`}
-                                        render={({ field }) => (
-                                            <FormItem>
-                                            <FormControl>
-                                                <Input placeholder="Org Address" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                            </FormItem>
-                                        )}
-                                        />
-                                  </TableCell>
                                   <TableCell>
                                     {orgFields.length > 1 && (
                                       <Button variant="ghost" size="icon" onClick={() => removeOrg(index)}>
@@ -361,7 +347,7 @@ export default function EditContactPage() {
                               ))}
                             </TableBody>
                         </Table>
-                         <Button type="button" variant="outline" size="sm" onClick={() => appendOrg({ organization: '', designation: '', team: '', department: '', address: '' })}>
+                         <Button type="button" variant="outline" size="sm" onClick={() => appendOrg({ organization: '', designation: '', team: '', department: '' })}>
                           <PlusCircle className="mr-2 h-4 w-4" /> Add Organization
                         </Button>
                     </div>

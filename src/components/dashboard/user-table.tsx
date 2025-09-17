@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { User } from '@/lib/types';
@@ -86,7 +87,7 @@ export function UserTable({ users }: UserTableProps) {
                 <TableCell className="hidden lg:table-cell">
                    <div className="flex flex-wrap gap-1">
                         {user.organizations?.map(org => (
-                            <Badge key={org} variant="secondary" className="font-normal">{org}</Badge>
+                            <Badge key={org.id} variant="secondary" className="font-normal">{org.name}</Badge>
                         ))}
                    </div>
                 </TableCell>

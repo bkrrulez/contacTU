@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 export const contactFormSchema = z.object({
@@ -19,7 +20,6 @@ export const contactFormSchema = z.object({
     designation: z.string().optional(),
     team: z.string().optional(),
     department: z.string().optional(),
-    address: z.string().optional(),
   })).min(1, 'At least one organization is required'),
 
   address: z.string().optional(),
@@ -70,17 +70,7 @@ export const teamFormSchema = z.object({
 });
 
 
-export const ExtractedContactSchema = contactFormSchema.pick({
-    firstName: true,
-    lastName: true,
-    emails: true,
-    phones: true,
-    organizations: true,
-    address: true,
-    website: true,
-}).partial().extend({
-    // All fields from pick are optional due to .partial()
-    // We can add descriptions here for the AI model
+export const ExtractedContactSchema = z.object({
     firstName: z.string().optional().describe('The first name of the contact.'),
     lastName: z.string().optional().describe('The last name of the contact.'),
     emails: z.array(z.object({ email: z.string().email() })).optional().describe('Email addresses of the contact.'),
@@ -90,8 +80,7 @@ export const ExtractedContactSchema = contactFormSchema.pick({
         designation: z.string().optional(),
         team: z.string().optional(),
         department: z.string().optional(),
-        address: z.string().optional()
-    })).optional().describe("The contact's organization, including their title/designation, team, department and address if available."),
+    })).optional().describe("The contact's organization, including their title/designation, team, and department if available."),
     address: z.string().optional().describe('The full mailing address of the contact or their organization.'),
     website: z.string().optional().describe("The contact's personal or company website URL."),
 });

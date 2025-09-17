@@ -1,14 +1,14 @@
 
+
 'use server';
 
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { users, contactOrganizations } from '@/lib/db/schema';
+import { users, organizations as orgsTable, teams as teamsTable, users_to_organizations } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import { userFormSchema } from '@/lib/schemas';
-import { and, isNotNull, ne, sql } from 'drizzle-orm';
-
+import { inArray } from 'drizzle-orm';
 
 export async function createUser(values: z.infer<typeof userFormSchema>) {
     const validatedFields = userFormSchema.safeParse(values);
@@ -29,9 +29,28 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
         password: hashedPassword,
         role,
         avatar,
-        organizations
     }).returning();
+    
+    if (organizations.length > 0) {
+        const allOrgs = await db.query.organizations.findMany();
+        let orgIdsToInsert: number[];
 
+        if (organizations.includes('All Organizations')) {
+            orgIdsToInsert = allOrgs.map(org => org.id);
+        } else {
+            const selectedOrgs = await db.query.organizations.findMany({
+                where: inArray(orgsTable.name, organizations),
+            });
+            orgIdsToInsert = selectedOrgs.map(org => org.id);
+        }
+
+        await db.insert(users_to_organizations).values(
+            orgIdsToInsert.map(orgId => ({
+                userId: newUser.id,
+                organizationId: orgId,
+            }))
+        );
+    }
 
     revalidatePath('/dashboard/users');
 
@@ -40,21 +59,15 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
 
 
 export async function getOrganizationsForUserForm() {
-    const result: { organization: string }[] = await db.execute(sql`
-        SELECT DISTINCT organization 
-        FROM contact_organizations 
-        WHERE organization IS NOT NULL AND organization != ''
-        ORDER BY organization
-    `);
-    return result.map(r => r.organization);
+    const result = await db.query.organizations.findMany({
+        orderBy: (orgs, { asc }) => [asc(orgs.name)],
+    });
+    return result.map(r => r.name);
 }
 
 export async function getTeamsForUserForm() {
-    const result: { team: string }[] = await db.execute(sql`
-        SELECT DISTINCT team 
-        FROM contact_organizations 
-        WHERE team IS NOT NULL AND team != ''
-        ORDER BY team
-    `);
-    return result.map(r => r.team);
+     const result = await db.query.teams.findMany({
+        orderBy: (teams, { asc }) => [asc(teams.name)],
+    });
+    return result.map(r => r.name);
 }

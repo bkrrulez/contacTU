@@ -6,13 +6,22 @@ import type {
     ContactPhoneSchema,
     ContactUrlSchema,
     ContactSocialLinkSchema,
-    ContactAssociatedNameSchema
+    ContactAssociatedNameSchema,
+    OrganizationSchema,
+    TeamSchema
 } from './db/schema';
 
-export type User = UserSchema;
+export type User = UserSchema & {
+    organizations?: { organization: OrganizationSchema }[];
+};
+
+export type ContactOrganization = ContactOrganizationSchema & {
+    organization: OrganizationSchema;
+    team: TeamSchema | null;
+}
 
 export type Contact = ContactSchema & {
-    organizations?: ContactOrganizationSchema[];
+    organizations?: ContactOrganization[];
     emails?: ContactEmailSchema[];
     phones?: ContactPhoneSchema[];
     urls?: ContactUrlSchema[];

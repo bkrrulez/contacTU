@@ -1,4 +1,5 @@
 
+
 import { getContact } from '../actions';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,7 +44,7 @@ export default async function ContactDetailsPage({ params }: { params: { id: str
         </Button>
         <div className="flex-grow">
           <h1 className="text-3xl font-bold tracking-tight font-headline">{contact.firstName} {contact.lastName}</h1>
-          <p className="text-muted-foreground">{contact.organizations?.[0]?.designation} at {contact.organizations?.[0]?.organization}</p>
+          <p className="text-muted-foreground">{contact.organizations?.[0]?.designation} at {contact.organizations?.[0]?.organization.name}</p>
         </div>
         <Button asChild>
           <Link href={`/dashboard/contacts/${contact.id}/edit`}>
@@ -98,9 +99,9 @@ export default async function ContactDetailsPage({ params }: { params: { id: str
                         <TableBody>
                             {contact.organizations?.map(org => (
                                 <TableRow key={org.id}>
-                                    <TableCell>{org.organization}</TableCell>
+                                    <TableCell>{org.organization.name}</TableCell>
                                     <TableCell>{org.designation}</TableCell>
-                                    <TableCell>{org.team}</TableCell>
+                                    <TableCell>{org.team?.name}</TableCell>
                                     <TableCell>{org.department}</TableCell>
                                 </TableRow>
                             ))}

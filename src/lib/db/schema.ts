@@ -1,5 +1,6 @@
 
-import { pgTable, serial, text, varchar, date, integer, pgEnum, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
+
+import { pgTable, serial, text, varchar, date, integer, pgEnum, timestamp, jsonb, boolean, primaryKey } from 'drizzle-orm/pg-core';
 import { InferSelectModel, relations } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum('user_role', ['Admin', 'Power User', 'Standard User', 'Read-Only']);
@@ -11,10 +12,36 @@ export const users = pgTable('users', {
   password: varchar('password', { length: 256 }),
   role: userRoleEnum('role').notNull(),
   avatar: varchar('avatar', { length: 256 }),
-  organizations: jsonb('organizations').$type<string[]>().default([]),
   resetToken: varchar('reset_token', { length: 256 }),
   resetTokenExpiry: timestamp('reset_token_expiry', { withTimezone: true }),
 });
+
+export const organizations = pgTable('organizations', {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 256 }).notNull().unique(),
+    address: text('address'),
+});
+
+export const teams = pgTable('teams', {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 256 }).notNull().unique(),
+});
+
+export const teams_to_organizations = pgTable('teams_to_organizations', {
+    teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+    organizationId: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  }, (t) => ({
+    pk: primaryKey({ columns: [t.teamId, t.organizationId] }),
+  })
+);
+
+export const users_to_organizations = pgTable('users_to_organizations', {
+    userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    organizationId: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    }, (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.organizationId] }),
+    })
+);
 
 export const contacts = pgTable('contacts', {
     id: serial('id').primaryKey(),
@@ -30,11 +57,10 @@ export const contacts = pgTable('contacts', {
 export const contactOrganizations = pgTable('contact_organizations', {
   id: serial('id').primaryKey(),
   contactId: integer('contact_id').notNull().references(() => contacts.id, { onDelete: 'cascade' }),
-  organization: varchar('organization', { length: 256 }).notNull(),
+  organizationId: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  teamId: integer('team_id').references(() => teams.id, { onDelete: 'set null' }),
   designation: varchar('designation', { length: 256 }),
-  team: varchar('team', { length: 256 }).notNull(),
   department: varchar('department', { length: 256 }),
-  address: text('address'),
 });
 
 export const contactEmails = pgTable('contact_emails', {
@@ -87,6 +113,28 @@ export const auditLogs = pgTable('audit_logs', {
 
 export const usersRelations = relations(users, ({ many }) => ({
     auditLogs: many(auditLogs),
+    usersToOrganizations: many(users_to_organizations),
+}));
+
+export const organizationsRelations = relations(organizations, ({ many }) => ({
+    teamsToOrganizations: many(teams_to_organizations),
+    usersToOrganizations: many(users_to_organizations),
+    contactOrganizations: many(contactOrganizations),
+}));
+
+export const teamsRelations = relations(teams, ({ many }) => ({
+    teamsToOrganizations: many(teams_to_organizations),
+    contactOrganizations: many(contactOrganizations),
+}));
+
+export const teamsToOrganizationsRelations = relations(teams_to_organizations, ({ one }) => ({
+    organization: one(organizations, { fields: [teams_to_organizations.organizationId], references: [organizations.id] }),
+    team: one(teams, { fields: [teams_to_organizations.teamId], references: [teams.id] }),
+}));
+
+export const usersToOrganizationsRelations = relations(users_to_organizations, ({ one }) => ({
+    organization: one(organizations, { fields: [users_to_organizations.organizationId], references: [organizations.id] }),
+    user: one(users, { fields: [users_to_organizations.userId], references: [users.id] }),
 }));
 
 export const contactsRelations = relations(contacts, ({ many }) => ({
@@ -109,6 +157,14 @@ export const contactOrganizationsRelations = relations(contactOrganizations, ({ 
     contact: one(contacts, {
         fields: [contactOrganizations.contactId],
         references: [contacts.id],
+    }),
+    organization: one(organizations, {
+        fields: [contactOrganizations.organizationId],
+        references: [organizations.id],
+    }),
+    team: one(teams, {
+        fields: [contactOrganizations.teamId],
+        references: [teams.id],
     }),
 }));
 
@@ -149,6 +205,8 @@ export const contactAssociatedNamesRelations = relations(contactAssociatedNames,
 
 
 export type UserSchema = InferSelectModel<typeof users>;
+export type OrganizationSchema = InferSelectModel<typeof organizations>;
+export type TeamSchema = InferSelectModel<typeof teams>;
 export type ContactSchema = InferSelectModel<typeof contacts>;
 export type ContactOrganizationSchema = InferSelectModel<typeof contactOrganizations>;
 export type ContactEmailSchema = InferSelectModel<typeof contactEmails>;

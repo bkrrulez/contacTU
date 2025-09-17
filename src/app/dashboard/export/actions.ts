@@ -1,35 +1,28 @@
 
+
 'use server';
 
 import { db } from '@/lib/db';
-import { contactOrganizations, contacts, contactEmails, contactPhones, contactUrls, contactAssociatedNames, contactSocialLinks } from '@/lib/db/schema';
+import { organizations as orgsTable, teams as teamsTable, contactOrganizations, contacts, contactEmails, contactPhones, contactUrls, contactAssociatedNames, contactSocialLinks } from '@/lib/db/schema';
 import { sql, inArray, and, eq, or } from 'drizzle-orm';
 import * as XLSX from 'xlsx';
 import { z } from 'zod';
 
 export async function getExportData() {
-    const orgData = await db.query.contactOrganizations.findMany({
-        columns: {
-            organization: true,
-            team: true,
-        },
-        where: (org, { isNotNull, ne }) => and(isNotNull(org.organization), ne(org.organization, '')),
-    });
-
-    const orgMap = new Map<string, Set<string>>();
-    orgData.forEach(item => {
-        if (!orgMap.has(item.organization)) {
-            orgMap.set(item.organization, new Set());
-        }
-        if (item.team) {
-            orgMap.get(item.organization)!.add(item.team);
+    const orgs = await db.query.organizations.findMany({
+        with: {
+            teamsToOrganizations: {
+                with: {
+                    team: true,
+                }
+            }
         }
     });
 
-    const organizations = Array.from(orgMap.entries()).map(([name, teams]) => ({
-        name,
-        teams: Array.from(teams),
-    })).sort((a, b) => a.name.localeCompare(b.name));
+    const organizations = orgs.map(org => ({
+        name: org.name,
+        teams: org.teamsToOrganizations.map(tto => tto.team.name).sort(),
+    })).sort((a,b) => a.name.localeCompare(b.name));
 
     return { organizations };
 }
@@ -56,9 +49,9 @@ export async function exportContacts(values: z.infer<typeof exportSchema>) {
             address: contacts.address,
             birthday: contacts.birthday,
             notes: contacts.notes,
-            organization: contactOrganizations.organization,
+            organization: orgsTable.name,
             designation: contactOrganizations.designation,
-            team: contactOrganizations.team,
+            team: teamsTable.name,
             department: contactOrganizations.department,
             email: contactEmails.email,
             phone: contactPhones.phone,
@@ -69,6 +62,8 @@ export async function exportContacts(values: z.infer<typeof exportSchema>) {
         })
         .from(contacts)
         .leftJoin(contactOrganizations, eq(contacts.id, contactOrganizations.contactId))
+        .leftJoin(orgsTable, eq(contactOrganizations.organizationId, orgsTable.id))
+        .leftJoin(teamsTable, eq(contactOrganizations.teamId, teamsTable.id))
         .leftJoin(contactEmails, eq(contacts.id, contactEmails.contactId))
         .leftJoin(contactPhones, eq(contacts.id, contactPhones.contactId))
         .leftJoin(contactUrls, eq(contacts.id, contactUrls.contactId))
@@ -78,10 +73,10 @@ export async function exportContacts(values: z.infer<typeof exportSchema>) {
 
      const conditions = [];
      if (organizations.length > 0) {
-        conditions.push(inArray(contactOrganizations.organization, organizations));
+        conditions.push(inArray(orgsTable.name, organizations));
      }
      if (teams.length > 0) {
-        conditions.push(inArray(contactOrganizations.team, teams));
+        conditions.push(inArray(teamsTable.name, teams));
      }
 
      if (conditions.length > 0) {

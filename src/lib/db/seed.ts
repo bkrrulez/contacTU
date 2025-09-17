@@ -8,7 +8,11 @@ import {
   contactPhones,
   contactUrls,
   contactSocialLinks,
-  contactAssociatedNames
+  contactAssociatedNames,
+  organizations,
+  teams,
+  teams_to_organizations,
+  users_to_organizations
 } from './schema';
 import type { UserSchema } from './schema';
 import bcrypt from 'bcryptjs';
@@ -16,20 +20,66 @@ import bcrypt from 'bcryptjs';
 async function seed() {
   console.log('Seeding database...');
   
-  // Clear all data in a specific order to avoid foreign key constraints
   try {
     console.log('Clearing existing data...');
+    // Clear join tables first
+    await db.delete(users_to_organizations);
+    await db.delete(teams_to_organizations);
+    await db.delete(contactOrganizations);
+    // Clear tables with dependencies
     await db.delete(contactAssociatedNames);
     await db.delete(contactSocialLinks);
     await db.delete(contactUrls);
-    await db.delete(contactOrganizations);
     await db.delete(contactEmails);
     await db.delete(contactPhones);
+    // Clear parent tables
     await db.delete(contacts);
     await db.delete(users);
+    await db.delete(teams);
+    await db.delete(organizations);
     console.log('Cleared existing data.');
   } catch (error) {
     console.error('Error clearing data:', error);
+    process.exit(1);
+  }
+
+  // --- Seed Organizations, Teams ---
+  let seededOrgs: { id: number; name: string }[] = [];
+  let seededTeams: { id: number; name: string }[] = [];
+  try {
+    seededOrgs = await db.insert(organizations).values([
+      { name: 'Acme Corp', address: '123 Acme St, Tech City' },
+      { name: 'Tech Solutions', address: '456 Tech Ave, Innovation Valley' },
+      { name: 'WebWeavers', address: '789 Design Dr, Creative Corner' },
+    ]).returning({ id: organizations.id, name: organizations.name });
+    console.log(`Seeded ${seededOrgs.length} organizations.`);
+
+    seededTeams = await db.insert(teams).values([
+      { name: 'Platform' },
+      { name: 'Core Products' },
+      { name: 'Marketing' },
+      { name: 'Engineering' },
+      { name: 'Product' },
+      { name: 'Design' },
+    ]).returning({ id: teams.id, name: teams.name });
+    console.log(`Seeded ${seededTeams.length} teams.`);
+    
+    // Link teams to organizations
+    const orgMap = new Map(seededOrgs.map(o => [o.name, o.id]));
+    const teamMap = new Map(seededTeams.map(t => [t.name, t.id]));
+
+    await db.insert(teams_to_organizations).values([
+      { organizationId: orgMap.get('Acme Corp')!, teamId: teamMap.get('Platform')! },
+      { organizationId: orgMap.get('Acme Corp')!, teamId: teamMap.get('Engineering')! },
+      { organizationId: orgMap.get('Tech Solutions')!, teamId: teamMap.get('Core Products')! },
+      { organizationId: orgMap.get('Tech Solutions')!, teamId: teamMap.get('Product')! },
+      { organizationId: orgMap.get('WebWeavers')!, teamId: teamMap.get('Marketing')! },
+      { organizationId: orgMap.get('WebWeavers')!, teamId: teamMap.get('Design')! },
+    ]);
+    console.log('Linked teams to organizations.');
+
+  } catch(error) {
+    console.error('Error seeding orgs and teams:', error);
     process.exit(1);
   }
 
@@ -53,7 +103,6 @@ async function seed() {
         role: 'Admin',
         avatar: 'https://placehold.co/100x100.png',
         password: adminPasswordHash,
-        organizations: ['All Organizations'],
       },
       {
         name: 'Alice Johnson',
@@ -61,7 +110,6 @@ async function seed() {
         role: 'Power User',
         avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
-        organizations: ['Acme Corp', 'Tech Solutions'],
       },
       {
         name: 'Bob Williams',
@@ -69,7 +117,6 @@ async function seed() {
         role: 'Standard User',
         avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
-        organizations: ['WebWeavers'],
       },
       {
         name: 'Charlie Brown',
@@ -77,12 +124,29 @@ async function seed() {
         role: 'Read-Only',
         avatar: 'https://placehold.co/100x100.png',
         password: standardPasswordHash,
-        organizations: ['All Organizations'],
       },
     ];
 
     const seededUsers = await db.insert(users).values(usersToSeed).returning();
     console.log(`Seeded ${seededUsers.length} users successfully.`);
+
+    // Link users to organizations
+    const orgMap = new Map(seededOrgs.map(o => [o.name, o.id]));
+    const userMap = new Map(seededUsers.map(u => [u.email, u.id]));
+
+    await db.insert(users_to_organizations).values([
+        // Admin has all orgs
+        ...seededOrgs.map(org => ({ userId: userMap.get(adminEmail)!, organizationId: org.id })),
+        // Alice has two orgs
+        { userId: userMap.get('alice@example.com')!, organizationId: orgMap.get('Acme Corp')! },
+        { userId: userMap.get('alice@example.com')!, organizationId: orgMap.get('Tech Solutions')! },
+        // Bob has one org
+        { userId: userMap.get('bob@example.com')!, organizationId: orgMap.get('WebWeavers')! },
+        // Charlie has all orgs
+        ...seededOrgs.map(org => ({ userId: userMap.get('charlie@example.com')!, organizationId: org.id })),
+    ]);
+    console.log('Linked users to organizations.');
+
 
   } catch (error) {
     console.error('Error seeding users:', error);
@@ -92,13 +156,16 @@ async function seed() {
 
   // --- Contact Seeding ---
   try {
+    const orgMap = new Map(seededOrgs.map(o => [o.name, o.id]));
+    const teamMap = new Map(seededTeams.map(t => [t.name, t.id]));
+    
     const mockContacts = [
       {
         firstName: 'John',
         lastName: 'Doe',
         emails: [{ email: 'john.doe@acmecorp.com' }],
         phones: [{ phone: '123-456-7890', type: 'Telephone' as const }, { phone: '098-765-4321', type: 'Mobile' as const }],
-        organizations: [{ organization: 'Acme Corp', designation: 'Lead Engineer', team: 'Platform', department: 'Engineering' }],
+        organizations: [{ organizationId: orgMap.get('Acme Corp')!, teamId: teamMap.get('Platform')!, designation: 'Lead Engineer', department: 'Engineering' }],
         avatar: 'https://placehold.co/100x100.png',
         address: '123 Acme St, Tech City',
         notes: 'Key contact for Project Titan.',
@@ -112,7 +179,7 @@ async function seed() {
         lastName: 'Smith',
         emails: [{ email: 'jane.smith@techsolutions.io' }],
         phones: [{ phone: '234-567-8901', type: 'Telephone' as const }],
-        organizations: [{ organization: 'Tech Solutions', designation: 'Project Manager', team: 'Core Products', department: 'Product' }],
+        organizations: [{ organizationId: orgMap.get('Tech Solutions')!, teamId: teamMap.get('Core Products')!, designation: 'Project Manager', department: 'Product' }],
         avatar: 'https://placehold.co/100x100.png',
         address: '456 Tech Ave, Innovation Valley',
         notes: null,
@@ -126,7 +193,7 @@ async function seed() {
         lastName: 'Wilson',
         emails: [{ email: 'sam.wilson@webweavers.dev' }],
         phones: [{ phone: '345-678-9012', type: 'Mobile' as const }],
-        organizations: [{ organization: 'WebWeavers', designation: 'UX/UI Designer', team: 'Marketing', department: 'Design' }],
+        organizations: [{ organizationId: orgMap.get('WebWeavers')!, teamId: teamMap.get('Marketing')!, designation: 'UX/UI Designer', department: 'Design' }],
         avatar: 'https://placehold.co/100x100.png',
         notes: 'Met at the design conference.',
         address: null,
@@ -151,9 +218,9 @@ async function seed() {
         await db.insert(contactOrganizations).values(
           mockContact.organizations.map(org => ({
             contactId: newContact.id,
-            organization: org.organization,
+            organizationId: org.organizationId,
+            teamId: org.teamId,
             designation: org.designation,
-            team: org.team,
             department: org.department,
           }))
         );
