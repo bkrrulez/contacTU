@@ -28,14 +28,19 @@ export async function createUser(values: z.infer<typeof userFormSchema>) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const [newUser] = await db.insert(users).values({
+    
+    const insertData: Omit<typeof users.$inferInsert, 'id' | 'resetToken' | 'resetTokenExpiry'> = {
         name,
         email,
         password: hashedPassword,
         role,
-        avatar,
-    }).returning();
+    };
+
+    if (avatar) {
+        insertData.avatar = avatar;
+    }
+
+    const [newUser] = await db.insert(users).values(insertData).returning();
     
     let orgIdsToInsert: number[];
 
@@ -119,11 +124,17 @@ export async function updateUser(id: number, values: z.infer<typeof userFormSche
 
     const { name, email, password, role, avatar, organizations: orgNames } = validatedFields.data;
 
-    const updateData: Partial<typeof users.$inferInsert> = { name, email, role, avatar };
+    const updateData: Partial<typeof users.$inferInsert> = { name, email, role };
 
     if (password) {
         updateData.password = await bcrypt.hash(password, 10);
     }
+    
+    // Only include avatar in update if it's provided. An empty string will clear it.
+    if (avatar !== undefined) {
+        updateData.avatar = avatar;
+    }
+
 
     await db.update(users).set(updateData).where(eq(users.id, id));
 
@@ -157,3 +168,5 @@ export async function updateUser(id: number, values: z.infer<typeof userFormSche
 
     return { success: true };
 }
+
+    
