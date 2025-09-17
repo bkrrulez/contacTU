@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:seed": "node --env-file=.env.local --import tsx src/lib/db/seed.ts"
+    "db:seed": "psql $DATABASE_URL -f src/lib/db/seed.sql"
   },
   "dependencies": {
     "@genkit-ai/googleai": "latest",
