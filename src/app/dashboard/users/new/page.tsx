@@ -176,6 +176,7 @@ export default function NewUserPage() {
                                         onChange={field.onChange}
                                         className="w-full"
                                         placeholder="Select organizations..."
+                                        disabled={watchRole === 'Admin'}
                                     />
                                     <FormMessage />
                                     </FormItem>
