@@ -34,13 +34,13 @@ export function MultiSelect({
     let newSelection = [...selected];
 
     if (value === 'All Organizations') {
-        if (newSelection.includes('All Organizations')) {
-            newSelection = [];
-        } else {
-            newSelection = ['All Organizations'];
-        }
+      if (newSelection.includes('All Organizations')) {
+        newSelection = [];
+      } else {
+        newSelection = ['All Organizations'];
+      }
     } else {
-      newSelection = newSelection.filter(item => item !== 'All Organizations');
+      newSelection = newSelection.filter((item) => item !== 'All Organizations');
       if (newSelection.includes(value)) {
         newSelection = newSelection.filter((item) => item !== value);
       } else {
@@ -92,7 +92,6 @@ export function MultiSelect({
                   onClick={() => handleToggle(option.value)}
                 >
                   <CommandItem
-                    className="text-foreground"
                     value={option.label}
                   >
                     <Check
