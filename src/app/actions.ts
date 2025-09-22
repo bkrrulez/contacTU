@@ -21,6 +21,15 @@ export async function signIn(values: z.infer<typeof loginSchema>) {
 
   const { email, password } = validatedFields.data;
 
+  // Special check for the admin user defined in environment variables
+  if (email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+        return { success: 'Login successful!' };
+    } else {
+        return { error: 'Invalid email or password.' };
+    }
+  }
+
   const existingUser = await db.query.users.findFirst({
     where: eq(users.email, email),
   });
