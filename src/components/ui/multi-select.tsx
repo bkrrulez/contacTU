@@ -33,21 +33,18 @@ export function MultiSelect({
   const handleToggle = (value: string) => {
     if (value === 'All Organizations') {
       if (selected.includes('All Organizations')) {
-        // If 'All' is already selected, deselect it.
         onChange([]);
       } else {
-        // If 'All' is not selected, select only 'All'.
         onChange(['All Organizations']);
       }
     } else {
-      // If a specific option is clicked
       const newSelection = selected.includes(value)
-        ? selected.filter((item) => item !== value) // Deselect if already selected
-        : [...selected.filter(item => item !== 'All Organizations'), value]; // Select and remove 'All' if present
+        ? selected.filter((item) => item !== value)
+        : [...selected.filter(item => item !== 'All Organizations'), value];
       onChange(newSelection);
     }
   };
-
+  
   const displayValue =
     selected.length > 2
       ? `${selected.length} selected`
@@ -76,15 +73,7 @@ export function MultiSelect({
             {options.map((option) => (
               <CommandItem
                 key={option.value}
-                onSelect={() => {
-                  handleToggle(option.value);
-                  // Do not close the popover on select
-                  setOpen(true);
-                }}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  handleToggle(option.value);
-                }}
+                onSelect={() => handleToggle(option.value)}
               >
                 <Check
                   className={cn(
