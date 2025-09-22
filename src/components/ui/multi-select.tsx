@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ChevronsUpDown, Check } from 'lucide-react';
 
@@ -31,26 +31,51 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
 
   const handleToggle = (value: string) => {
+    // If "All Organizations" is clicked
     if (value === 'All Organizations') {
       if (selected.includes('All Organizations')) {
+        // If it's already selected, deselect it.
         onChange([]);
       } else {
+        // Otherwise, select only "All Organizations".
         onChange(['All Organizations']);
       }
-    } else {
-      const newSelection = selected.includes(value)
-        ? selected.filter((item) => item !== value)
-        : [...selected.filter(item => item !== 'All Organizations'), value];
-      onChange(newSelection);
+      return;
     }
+
+    // If any other option is clicked
+    let newSelection = [...selected];
+
+    // Remove "All Organizations" if it's present
+    if (newSelection.includes('All Organizations')) {
+        newSelection = [];
+    }
+
+    if (newSelection.includes(value)) {
+      // Deselect the option
+      newSelection = newSelection.filter((item) => item !== value);
+    } else {
+      // Select the option
+      newSelection.push(value);
+    }
+    onChange(newSelection);
   };
   
-  const displayValue =
-    selected.length > 2
-      ? `${selected.length} selected`
-      : selected.length > 0
-      ? selected.map((val) => options.find((opt) => opt.value === val)?.label).join(', ')
-      : placeholder;
+  const displayValue = React.useMemo(() => {
+    if (selected.includes('All Organizations')) {
+      return 'All Organizations';
+    }
+    if (selected.length > 2) {
+      return `${selected.length} selected`;
+    }
+    if (selected.length > 0) {
+      return selected
+        .map((val) => options.find((opt) => opt.value === val)?.label)
+        .join(', ');
+    }
+    return placeholder;
+  }, [selected, options, placeholder]);
+
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -68,23 +93,28 @@ export function MultiSelect({
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder="Search organizations..." />
-          <CommandEmpty>No organization found.</CommandEmpty>
-          <CommandGroup>
-            {options.map((option) => (
-              <CommandItem
-                key={option.value}
-                onSelect={() => handleToggle(option.value)}
-              >
-                <Check
-                  className={cn(
-                    'mr-2 h-4 w-4',
-                    selected.includes(option.value) ? 'opacity-100' : 'opacity-0'
-                  )}
-                />
-                {option.label}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          <CommandList>
+            <CommandEmpty>No organization found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => {
+                    handleToggle(option.value);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      selected.includes(option.value) ? 'opacity-100' : 'opacity-0'
+                    )}
+                  />
+                  {option.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
