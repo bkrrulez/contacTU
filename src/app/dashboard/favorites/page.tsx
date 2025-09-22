@@ -5,14 +5,20 @@ import { db } from '@/lib/db';
 import { Card, CardContent } from '@/components/ui/card';
 import { contacts as contactsTable } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import type { Contact } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
 export default async function FavoritesPage() {
-  const contacts = await db.query.contacts.findMany({
+  const contacts: Contact[] = await db.query.contacts.findMany({
     where: eq(contactsTable.isFavorite, true),
     with: {
-        organizations: true,
+        organizations: {
+            with: {
+                organization: true,
+                team: true,
+            }
+        },
         emails: true,
         phones: true,
     },
