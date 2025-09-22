@@ -11,7 +11,6 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:seed": "psql postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5433/${POSTGRES_DB} -f src/lib/db/seed.sql",
     "db:migrate": "psql postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5433/${POSTGRES_DB} -f src/lib/db/migration.sql"
   },
   "dependencies": {
