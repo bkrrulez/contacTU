@@ -31,32 +31,21 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
 
   const handleToggle = (value: string) => {
-    // If "All Organizations" is clicked
-    if (value === 'All Organizations') {
-      if (selected.includes('All Organizations')) {
-        // If it's already selected, deselect it.
-        onChange([]);
-      } else {
-        // Otherwise, select only "All Organizations".
-        onChange(['All Organizations']);
-      }
-      return;
-    }
-
-    // If any other option is clicked
     let newSelection = [...selected];
 
-    // Remove "All Organizations" if it's present
-    if (newSelection.includes('All Organizations')) {
+    if (value === 'All Organizations') {
+      if (selected.includes('All Organizations')) {
         newSelection = [];
-    }
-
-    if (newSelection.includes(value)) {
-      // Deselect the option
-      newSelection = newSelection.filter((item) => item !== value);
+      } else {
+        newSelection = ['All Organizations'];
+      }
     } else {
-      // Select the option
-      newSelection.push(value);
+      newSelection = newSelection.filter(item => item !== 'All Organizations');
+      if (newSelection.includes(value)) {
+        newSelection = newSelection.filter((item) => item !== value);
+      } else {
+        newSelection.push(value);
+      }
     }
     onChange(newSelection);
   };
@@ -99,8 +88,14 @@ export function MultiSelect({
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  onSelect={() => {
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     handleToggle(option.value);
+                  }}
+                  onSelect={() => {
+                     // This is for keyboard navigation
+                     handleToggle(option.value);
                   }}
                   className="cursor-pointer"
                 >
