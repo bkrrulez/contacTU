@@ -4,14 +4,9 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { ChevronsUpDown } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ChevronsUpDown, Check } from 'lucide-react';
 
 export interface MultiSelectOption {
   value: string;
@@ -24,7 +19,6 @@ interface MultiSelectProps {
   onChange: (selected: string[]) => void;
   className?: string;
   placeholder?: string;
-  disabled?: boolean;
 }
 
 export function MultiSelect({
@@ -33,39 +27,26 @@ export function MultiSelect({
   onChange,
   className,
   placeholder = 'Select...',
-  disabled = false,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
-  const allOrganizationsOption = options.find(o => o.value === 'All Organizations');
-  const otherOptions = options.filter(o => o.value !== 'All Organizations');
-
   const handleToggle = (value: string) => {
-    if (disabled) return;
-
     if (value === 'All Organizations') {
-      // If "All Organizations" is clicked:
-      // - If it's already selected, clear the selection.
-      // - If it's not selected, make it the *only* selection.
-      onChange(selected.includes('All Organizations') ? [] : ['All Organizations']);
-    } else {
-      // If an individual item is clicked:
-      let newSelection: string[];
       if (selected.includes('All Organizations')) {
-        // If "All" was selected, start a new selection with just the clicked item.
-        newSelection = [value];
+        // If 'All' is already selected, deselect it.
+        onChange([]);
       } else {
-        // Otherwise, toggle the item in the current selection.
-        newSelection = selected.includes(value)
-          ? selected.filter((item) => item !== value)
-          : [...selected, value];
+        // If 'All' is not selected, select only 'All'.
+        onChange(['All Organizations']);
       }
+    } else {
+      // If a specific option is clicked
+      const newSelection = selected.includes(value)
+        ? selected.filter((item) => item !== value) // Deselect if already selected
+        : [...selected.filter(item => item !== 'All Organizations'), value]; // Select and remove 'All' if present
       onChange(newSelection);
     }
   };
-  
-  const isAllSelected = allOrganizationsOption ? selected.includes(allOrganizationsOption.value) : false;
-  const isAnyOtherSelected = otherOptions.some(o => selected.includes(o.value));
 
   const displayValue =
     selected.length > 2
@@ -75,43 +56,48 @@ export function MultiSelect({
       : placeholder;
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={cn('w-full justify-between', className)}
-          disabled={disabled}
         >
           <span className="truncate">{displayValue}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[--radix-popover-trigger-width]">
-        {allOrganizationsOption && (
-            <>
-                <DropdownMenuCheckboxItem
-                    checked={isAllSelected}
-                    onCheckedChange={() => handleToggle(allOrganizationsOption.value)}
-                    onSelect={(e) => e.preventDefault()}
-                >
-                    {allOrganizationsOption.label}
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuSeparator />
-            </>
-        )}
-        {otherOptions.map((option) => (
-          <DropdownMenuCheckboxItem
-            key={option.value}
-            checked={isAllSelected || selected.includes(option.value)}
-            onCheckedChange={() => handleToggle(option.value)}
-            onSelect={(e) => e.preventDefault()}
-          >
-            {option.label}
-          </DropdownMenuCheckboxItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+        <Command>
+          <CommandInput placeholder="Search organizations..." />
+          <CommandEmpty>No organization found.</CommandEmpty>
+          <CommandGroup>
+            {options.map((option) => (
+              <CommandItem
+                key={option.value}
+                onSelect={() => {
+                  handleToggle(option.value);
+                  // Do not close the popover on select
+                  setOpen(true);
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleToggle(option.value);
+                }}
+              >
+                <Check
+                  className={cn(
+                    'mr-2 h-4 w-4',
+                    selected.includes(option.value) ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+                {option.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
