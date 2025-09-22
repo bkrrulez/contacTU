@@ -34,16 +34,21 @@ export function MultiSelect({
     let newSelection = [...selected];
 
     if (value === 'All Organizations') {
-      if (selected.includes('All Organizations')) {
+      if (newSelection.includes('All Organizations')) {
+        // If "All" is already selected, clicking it again clears the selection.
         newSelection = [];
       } else {
+        // If "All" is not selected, clicking it selects only "All".
         newSelection = ['All Organizations'];
       }
     } else {
+      // If a specific option is clicked, first remove "All Organizations".
       newSelection = newSelection.filter(item => item !== 'All Organizations');
       if (newSelection.includes(value)) {
+        // Deselect the specific option.
         newSelection = newSelection.filter((item) => item !== value);
       } else {
+        // Select the specific option.
         newSelection.push(value);
       }
     }
@@ -51,18 +56,18 @@ export function MultiSelect({
   };
   
   const displayValue = React.useMemo(() => {
+    if (selected.length === 0) {
+      return placeholder;
+    }
     if (selected.includes('All Organizations')) {
       return 'All Organizations';
     }
     if (selected.length > 2) {
       return `${selected.length} selected`;
     }
-    if (selected.length > 0) {
-      return selected
-        .map((val) => options.find((opt) => opt.value === val)?.label)
-        .join(', ');
-    }
-    return placeholder;
+    return selected
+      .map((val) => options.find((opt) => opt.value === val)?.label)
+      .join(', ');
   }, [selected, options, placeholder]);
 
 
@@ -86,27 +91,28 @@ export function MultiSelect({
             <CommandEmpty>No organization found.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
-                <CommandItem
+                <div
                   key={option.value}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleToggle(option.value);
-                  }}
-                  onSelect={() => {
-                     // This is for keyboard navigation
-                     handleToggle(option.value);
-                  }}
                   className="cursor-pointer"
+                  onClick={() => handleToggle(option.value)}
                 >
-                  <Check
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      selected.includes(option.value) ? 'opacity-100' : 'opacity-0'
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
+                  <CommandItem
+                    // The onSelect is still useful for keyboard navigation
+                    onSelect={() => {
+                        // We still call handleToggle to ensure consistent behavior
+                        // but the primary interaction for mouse is the div's onClick.
+                        handleToggle(option.value);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        selected.includes(option.value) ? 'opacity-100' : 'opacity-0'
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                </div>
               ))}
             </CommandGroup>
           </CommandList>
