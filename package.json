@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:seed": "psql $DATABASE_URL -f src/lib/db/seed.sql"
+    "db:seed": "psql $DATABASE_URL -f src/lib/db/seed.sql",
+    "db:migrate": "psql $DATABASE_URL -f src/lib/db/migration.sql"
   },
   "dependencies": {
     "@genkit-ai/googleai": "latest",
