@@ -65,7 +65,7 @@ export function VCardScanForm() {
         });
       }
     } catch (error) {
-        console.error("AI Extraction Error:", error);
+        console.error("AI Extraction Error (Client-side):", error);
         toast({
             variant: 'destructive',
             title: 'AI Error',

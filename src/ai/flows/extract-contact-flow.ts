@@ -48,9 +48,14 @@ const extractContactFlow = ai.defineFlow(
     outputSchema: ContactExtractionOutputSchema,
   },
   async (input) => {
+    try {
       const {output} = await extractContactPrompt(input, {
         model: 'googleai/gemini-1.5-flash-latest',
       });
       return output!;
+    } catch (error) {
+        console.error('Error in extractContactFlow:', error);
+        throw new Error('Failed to extract contact from image.', { cause: error });
+    }
   }
 );
