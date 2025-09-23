@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -52,21 +53,28 @@ export function MultiSelect({
     let newSelectedValues: string[];
 
     if (value === allOption) {
-        if (selectedValues.includes(allOption)) {
+        // If "All" is clicked, it becomes the only selection. 
+        // If it was already the only selection, it's deselected.
+        if (selectedValues.length === 1 && selectedValues[0] === allOption) {
             newSelectedValues = [];
         } else {
             newSelectedValues = [allOption];
         }
     } else {
+        // If any other option is clicked...
+        // 1. Remove "All" from the current selections
         let currentValues = selectedValues.filter(v => v !== allOption);
+        
+        // 2. Toggle the clicked value
         const index = currentValues.indexOf(value);
         if (index > -1) {
-            currentValues.splice(index, 1);
+            currentValues.splice(index, 1); // remove
         } else {
-            currentValues.push(value);
+            currentValues.push(value); // add
         }
         newSelectedValues = currentValues;
     }
+
     onChange(newSelectedValues);
   };
 
@@ -104,16 +112,16 @@ export function MultiSelect({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] p-0">
-        <div className='p-2'>
         {enableSearch && options.length > (searchThreshold || 0) && (
-          <Input
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            autoFocus
-          />
+          <div className="p-2">
+            <Input
+              placeholder={searchPlaceholder}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
         )}
-        </div>
         <ScrollArea className="max-h-60">
           <div className="p-2 pt-0">
           {filteredOptions.map((option) => (
@@ -141,3 +149,4 @@ export function MultiSelect({
     </DropdownMenu>
   );
 }
+
