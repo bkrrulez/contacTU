@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -13,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ScrollArea } from "./scroll-area"
 
 export interface MultiSelectOption {
   value: string
@@ -27,6 +27,9 @@ interface MultiSelectProps {
   className?: string
   placeholder?: string
   allOption?: string
+  enableSearch?: boolean
+  searchPlaceholder?: string
+  searchThreshold?: number
 }
 
 export function MultiSelect({
@@ -44,20 +47,13 @@ export function MultiSelect({
     let newSelectedValues: string[]
 
     if (allOption && value === allOption) {
-      // If 'All' is clicked
       if (selectedValues.includes(allOption)) {
-        newSelectedValues = [] // Deselect 'All'
+        newSelectedValues = []
       } else {
-        newSelectedValues = [allOption] // Select only 'All'
+        newSelectedValues = [allOption]
       }
     } else {
-      // If any other option is clicked
-      let currentValues = [...selectedValues]
-
-      // Remove 'All' if it's currently selected
-      if (allOption && currentValues.includes(allOption)) {
-        currentValues = []
-      }
+      let currentValues = selectedValues.filter(v => allOption ? v !== allOption : true);
       
       if (currentValues.includes(value)) {
         newSelectedValues = currentValues.filter((item) => item !== value)
@@ -67,7 +63,6 @@ export function MultiSelect({
     }
     onChange(newSelectedValues)
   }
-
 
   const getDisplayValue = () => {
     if (selectedValues.length === 0) return placeholder
@@ -98,11 +93,12 @@ export function MultiSelect({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] max-h-60 overflow-y-auto">
+      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+        <ScrollArea className="max-h-60">
         {options.map((option) => (
           <DropdownMenuItem
             key={option.value}
-            onSelect={(e) => e.preventDefault()} // Prevent closing on select
+            onSelect={(e) => e.preventDefault()}
             onClick={() => handleToggle(option.value)}
             className="flex items-center gap-2"
           >
@@ -110,6 +106,7 @@ export function MultiSelect({
               checked={selectedValues.includes(option.value)}
               aria-label={`Select ${option.label}`}
               className="h-4 w-4"
+              tabIndex={-1}
             />
             <span>{option.label}</span>
           </DropdownMenuItem>
@@ -117,6 +114,7 @@ export function MultiSelect({
         {options.length === 0 && (
           <DropdownMenuItem disabled>No options available</DropdownMenuItem>
         )}
+        </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
   )
