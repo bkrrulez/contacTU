@@ -1,168 +1,129 @@
 
-'use client';
+"use client"
 
-import React, { useState, useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronsUpDown, X } from 'lucide-react';
+import * as React from "react"
+import { Check, ChevronsUpDown, X } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 export interface MultiSelectOption {
-  value: string;
-  label: string;
+  value: string
+  label: string
 }
 
 interface MultiSelectProps {
-  options: MultiSelectOption[];
-  selectedValues: string[];
-  onChange: (selected: string[]) => void;
-  className?: string;
-  placeholder?: string;
-  enableSearch?: boolean;
-  searchPlaceholder?: string;
-  searchThreshold?: number;
-  allOption?: string;
+  options: MultiSelectOption[]
+  selectedValues: string[]
+  onChange: (selected: string[]) => void
+  onBlur?: () => void
+  className?: string
+  placeholder?: string
+  allOption?: string
 }
 
-export function MultiSelect({
+function MultiSelect({
   options,
   selectedValues,
   onChange,
+  onBlur,
   className,
-  placeholder = 'Select...',
-  enableSearch = false,
-  searchPlaceholder = 'Search...',
-  searchThreshold = 0,
-  allOption
+  placeholder = "Select...",
+  allOption,
 }: MultiSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = React.useState(false)
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [wrapperRef]);
+  const handleSelect = (value: string) => {
+    let newSelectedValues: string[]
 
-  const handleToggle = (value: string) => {
-    let newSelection;
     if (allOption && value === allOption) {
-      newSelection = selectedValues.includes(allOption) ? [] : [allOption];
-    } else {
-      const currentSelection = selectedValues.filter(v => v !== allOption);
-      if (currentSelection.includes(value)) {
-        newSelection = currentSelection.filter((item) => item !== value);
+      if (selectedValues.includes(allOption)) {
+        newSelectedValues = []
       } else {
-        newSelection = [...currentSelection, value];
+        newSelectedValues = [allOption]
+      }
+    } else {
+      const currentValues = selectedValues.filter((v) => v !== allOption)
+      if (currentValues.includes(value)) {
+        newSelectedValues = currentValues.filter((item) => item !== value)
+      } else {
+        newSelectedValues = [...currentValues, value]
       }
     }
-    onChange(newSelection);
-  };
+    onChange(newSelectedValues)
+  }
 
-
-  const handleClear = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onChange(allOption ? [allOption] : []);
-    setIsOpen(false);
-  };
-
-  const displayValue = React.useMemo(() => {
-    if (allOption && selectedValues.length > 0 && selectedValues.every(val => options.map(o => o.value).includes(val))) {
-        if(selectedValues.includes(allOption) || selectedValues.length === options.filter(o => o.value !== allOption).length) {
-            return allOption;
-        }
-    }
+  const getDisplayValue = () => {
     if (selectedValues.length === 0) {
-       return placeholder;
+      return placeholder
+    }
+    if (allOption && selectedValues.length === 1 && selectedValues[0] === allOption) {
+        return allOption
     }
     if (selectedValues.length === 1) {
-      return options.find((opt) => opt.value === selectedValues[0])?.label ?? placeholder;
+      const selectedOption = options.find(
+        (option) => option.value === selectedValues[0]
+      )
+      return selectedOption ? selectedOption.label : placeholder
     }
-    return `${selectedValues.length} selected`;
-  }, [selectedValues, options, placeholder, allOption]);
-
-  const filteredOptions = React.useMemo(() => {
-     if (enableSearch && searchTerm.length < searchThreshold) {
-      return allOption ? options : [];
-    }
-    return options.filter(option =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, options, enableSearch, searchThreshold, allOption]);
-  
-  const hasSelection = selectedValues.length > 0 && !(allOption && selectedValues.includes(allOption) && selectedValues.length === 1);
-
+    return `${selectedValues.length} selected`
+  }
 
   return (
-    <div className={cn('relative', className)} ref={wrapperRef}>
-      <Button
-        type="button"
-        variant="outline"
-        role="combobox"
-        aria-expanded={isOpen}
-        className="w-full justify-between font-normal"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span className="truncate">{displayValue}</span>
-        <div className="flex items-center">
-            {hasSelection && (
-                <span onClick={handleClear} className="h-4 w-4 shrink-0 opacity-50 hover:opacity-100 cursor-pointer">
-                    <X className="h-4 w-4" />
-                </span>
-            )}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </div>
-      </Button>
-      {isOpen && (
-        <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-lg">
-          {enableSearch && (
-            <div className="p-2">
-              <Input
-                placeholder={searchPlaceholder}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          )}
-           {enableSearch && searchTerm.length < searchThreshold && (
-             <div className="p-2 text-sm text-muted-foreground text-center">
-                {searchPlaceholder}
-             </div>
-           )}
-          <div className="max-h-60 overflow-auto p-1">
-            {filteredOptions.length > 0 ? (
-                filteredOptions.map((option) => {
-                    const isSelected = selectedValues.includes(option.value);
-                    return (
-                        <div
-                            key={option.value}
-                            className="flex cursor-pointer items-center rounded-sm p-2 text-sm outline-none hover:bg-accent"
-                            onClick={() => handleToggle(option.value)}
-                        >
-                            <Checkbox
-                                checked={isSelected}
-                                className="mr-2"
-                                readOnly
-                                tabIndex={-1}
-                            />
-                            <span>{option.label}</span>
-                        </div>
-                    );
-                })
-            ) : (
-                ( !enableSearch || searchTerm.length >= searchThreshold ) && <div className="p-2 text-center text-sm text-muted-foreground">No results found.</div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn("w-full justify-between font-normal", className)}
+          onClick={() => setOpen(!open)}
+          onBlur={onBlur}
+        >
+          <span className="truncate">{getDisplayValue()}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0">
+        <Command>
+          <CommandInput placeholder="Search..." />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => handleSelect(option.value)}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedValues.includes(option.value)
+                        ? "opacity-100"
+                        : "opacity-0"
+                    )}
+                  />
+                  {option.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
 }
+
+export { MultiSelect }
