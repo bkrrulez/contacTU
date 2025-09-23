@@ -51,7 +51,7 @@ export function MultiSelect({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [wrapperRef]);
-
+  
   const handleToggle = (value: string) => {
     if (allOption && value === allOption) {
       if (selectedValues.includes(allOption)) {
@@ -59,35 +59,35 @@ export function MultiSelect({
       } else {
         onChange([allOption]);
       }
-    } else if (allOption) {
-      const newSelection = selectedValues.includes(value)
-        ? selectedValues.filter((item) => item !== value)
-        : [...selectedValues.filter(v => v !== allOption), value];
-      onChange(newSelection);
     } else {
-       if (selectedValues.includes(value)) {
-        onChange(selectedValues.filter((item) => item !== value));
-      } else {
-        onChange([...selectedValues, value]);
-      }
-    }
+      let newSelection = selectedValues.includes(value)
+        ? selectedValues.filter((item) => item !== value)
+        : [...selectedValues.filter(v => allOption ? v !== allOption : true), value];
+      
+       if(newSelection.length === 0 && allOption) {
+         newSelection = [allOption];
+       }
+
+      onChange(newSelection);
+    } 
   };
+
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onChange([]);
+    onChange(allOption ? [allOption] : []);
     setIsOpen(false);
   };
 
   const displayValue = React.useMemo(() => {
-    if (selectedValues.length === 0) {
-      return placeholder;
+    if (selectedValues.length === 0 || (allOption && selectedValues.includes(allOption) && selectedValues.length === 1)) {
+       if (allOption && selectedValues.includes(allOption)) {
+           return allOption;
+       }
+       return placeholder;
     }
     if (selectedValues.length === 1) {
       return options.find((opt) => opt.value === selectedValues[0])?.label ?? placeholder;
-    }
-    if (allOption && selectedValues.includes(allOption)) {
-        return allOption;
     }
     return `${selectedValues.length} selected`;
   }, [selectedValues, options, placeholder, allOption]);
@@ -100,6 +100,9 @@ export function MultiSelect({
       option.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm, options, enableSearch, searchThreshold]);
+  
+  const hasSelection = selectedValues.length > 0 && !(allOption && selectedValues.includes(allOption) && selectedValues.length === 1);
+
 
   return (
     <div className={cn('relative', className)} ref={wrapperRef}>
@@ -112,7 +115,7 @@ export function MultiSelect({
       >
         <span className="truncate">{displayValue}</span>
         <div className="flex items-center">
-            {selectedValues.length > 0 && (
+            {hasSelection && (
                 <span onClick={handleClear} className="h-4 w-4 shrink-0 opacity-50 hover:opacity-100 cursor-pointer">
                     <X className="h-4 w-4" />
                 </span>
@@ -148,7 +151,6 @@ export function MultiSelect({
                         <Checkbox
                         checked={selectedValues.includes(option.value)}
                         className="mr-2"
-                        readOnly
                         />
                         <span>{option.label}</span>
                     </div>
