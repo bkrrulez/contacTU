@@ -44,6 +44,7 @@ const bottomNavItems = [
 const settingsNavItems = [
     { href: '/dashboard/settings/organization', label: 'Organization', roles: ['Admin'] },
     { href: '/dashboard/settings/team', label: 'Team', roles: ['Admin'] },
+    { href: '/dashboard/settings/data-management', label: 'Data Management', roles: ['Admin'] },
 ];
 
 export function AppSidebar() {
