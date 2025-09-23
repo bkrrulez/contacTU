@@ -6,10 +6,9 @@ import { Check, ChevronsUpDown, Search, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "./scroll-area"
+import { Checkbox } from "./checkbox"
 
 export interface MultiSelectOption {
   value: string
@@ -44,19 +43,44 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false)
   const [search, setSearch] = React.useState("")
   const triggerRef = React.useRef<HTMLButtonElement>(null)
+  const dropdownRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
 
   const handleToggle = (value: string) => {
     let newSelectedValues: string[]
 
     if (allOption && value === allOption) {
-      // If "All" is clicked, either select all or clear all
       if (selectedValues.includes(allOption)) {
+        // If "All" is already selected and we click it again, clear everything
         newSelectedValues = []
       } else {
-        newSelectedValues = [allOption] // Just select the "All" option
+        // If we select "All", it becomes the only selection
+        newSelectedValues = [allOption]
       }
     } else {
-      let currentValues = selectedValues.filter((v) => v !== allOption)
+      let currentValues = [...selectedValues]
+      
+      // If "All" is currently selected, clear it before adding the new value
+      if (currentValues.includes(allOption!)) {
+        currentValues = []
+      }
+
       if (currentValues.includes(value)) {
         newSelectedValues = currentValues.filter((item) => item !== value)
       } else {
@@ -76,7 +100,7 @@ export function MultiSelect({
       return placeholder
     }
     if (allOption && selectedValues.length === 1 && selectedValues[0] === allOption) {
-        return allOption
+      return allOption
     }
     if (selectedValues.length === 1) {
       const selectedOption = options.find((option) => option.value === selectedValues[0])
@@ -94,81 +118,83 @@ export function MultiSelect({
     )
   }, [options, enableSearch, search, searchThreshold])
 
-  const showClearButton = selectedValues.length > 0 && !(allOption && selectedValues.includes(allOption) && selectedValues.length === 1) && selectedValues.length > 0;
+  const showClearButton = selectedValues.length > 0;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          ref={triggerRef}
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn("w-full justify-between font-normal relative", className)}
-          onClick={() => setOpen(!open)}
-          onBlur={onBlur}
-        >
-          <span className="truncate">{getDisplayValue()}</span>
-           <div className="flex items-center">
-            {showClearButton && (
-                <X
-                className="h-4 w-4 shrink-0 opacity-50 mr-2"
-                onClick={handleClear}
-                />
-            )}
-            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-          </div>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-full p-0"
-        style={{ width: triggerRef.current?.offsetWidth }}
-        onOpenAutoFocus={(e) => e.preventDefault()}
+    <div className="relative">
+      <Button
+        ref={triggerRef}
+        variant="outline"
+        role="combobox"
+        aria-expanded={open}
+        className={cn("w-full justify-between font-normal relative", className)}
+        onClick={() => setOpen(!open)}
+        onBlur={onBlur}
       >
-        {enableSearch && (
-          <div className="p-2">
-            <div className="relative">
+        <span className="truncate">{getDisplayValue()}</span>
+        <div className="flex items-center">
+          {showClearButton && (
+            <X
+              className="h-4 w-4 shrink-0 opacity-50 mr-2 cursor-pointer"
+              onClick={handleClear}
+            />
+          )}
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </div>
+      </Button>
+
+      {open && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-10 mt-1 w-full rounded-md border bg-background shadow-lg"
+          style={{ width: triggerRef.current?.offsetWidth }}
+        >
+          {enableSearch && (
+            <div className="p-2">
+              <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder={searchPlaceholder}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-8"
+                  placeholder={searchPlaceholder}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-8"
                 />
+              </div>
             </div>
-          </div>
-        )}
-        <ScrollArea className="max-h-60">
+          )}
+          <ScrollArea className="max-h-60">
             <div className="p-1">
-                {filteredOptions.length > 0 ? (
+              {filteredOptions.length > 0 ? (
                 filteredOptions.map((option) => (
-                    <div
+                  <div
                     key={option.value}
                     className="flex items-center p-2 cursor-pointer hover:bg-accent rounded-md"
                     onClick={() => handleToggle(option.value)}
-                    >
+                  >
                     <Checkbox
-                        id={`multi-select-${option.value}`}
-                        checked={selectedValues.includes(option.value)}
-                        className="mr-2"
-                        onCheckedChange={() => handleToggle(option.value)}
+                      id={`multi-select-${option.value}`}
+                      checked={selectedValues.includes(option.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onCheckedChange={() => handleToggle(option.value)}
+                      className="mr-2"
                     />
                     <label
-                        htmlFor={`multi-select-${option.value}`}
-                        className="w-full cursor-pointer"
+                      htmlFor={`multi-select-${option.value}`}
+                      className="w-full cursor-pointer text-sm"
                     >
-                        {option.label}
+                      {option.label}
                     </label>
-                    </div>
+                  </div>
                 ))
-                ) : (
+              ) : (
                 <p className="p-2 text-center text-sm text-muted-foreground">
-                    No results found.
+                  No results found.
                 </p>
-                )}
+              )}
             </div>
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
+          </ScrollArea>
+        </div>
+      )}
+    </div>
   )
 }
