@@ -20,6 +20,7 @@ import {
   Settings,
   LogOut,
   Star,
+  Download,
 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Logo } from '../logo';
@@ -35,6 +36,7 @@ const navItems = [
   { href: '/dashboard/users', icon: Users, label: 'User Management', roles: ['Admin', 'Power User'] },
   { href: '/dashboard/audit', icon: FileText, label: 'Audit Logs', roles: ['Admin', 'Power User'] },
   { href: '/dashboard/import', icon: UploadCloud, label: 'Import' },
+  { href: '/dashboard/export', icon: Download, label: 'Export' },
 ];
 
 const bottomNavItems = [
