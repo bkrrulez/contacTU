@@ -53,16 +53,16 @@ export function MultiSelect({
     let newSelectedValues: string[];
 
     if (value === allOption) {
-        // If "All" is clicked, it becomes the only selection. 
-        // If it was already the only selection, it's deselected.
-        if (selectedValues.length === 1 && selectedValues[0] === allOption) {
-            newSelectedValues = [];
-        } else {
-            newSelectedValues = [allOption];
-        }
+      // If "All" is clicked, it becomes the only selection. 
+      // If it's already selected, deselect it.
+      if (selectedValues.includes(allOption)) {
+          newSelectedValues = [];
+      } else {
+          newSelectedValues = [allOption];
+      }
     } else {
         // If any other option is clicked...
-        // 1. Remove "All" from the current selections
+        // 1. Remove "All" from the current selections, if it's there
         let currentValues = selectedValues.filter(v => v !== allOption);
         
         // 2. Toggle the clicked value
@@ -77,7 +77,6 @@ export function MultiSelect({
 
     onChange(newSelectedValues);
   };
-
 
   const getDisplayValue = () => {
     if (selectedValues.length === 0) return placeholder;
@@ -122,31 +121,31 @@ export function MultiSelect({
             />
           </div>
         )}
-        <ScrollArea className="max-h-60">
+        <ScrollArea className="max-h-60 w-full">
           <div className="p-2 pt-0">
-          {filteredOptions.map((option) => (
-            <DropdownMenuItem
-              key={option.value}
-              onSelect={(e) => e.preventDefault()}
-              onClick={() => handleToggle(option.value)}
-              className="flex items-center gap-2"
-            >
-              <Checkbox
-                checked={selectedValues.includes(option.value)}
-                aria-label={`Select ${option.label}`}
-                className="h-4 w-4 pointer-events-none"
-                tabIndex={-1}
-              />
-              <span>{option.label}</span>
-            </DropdownMenuItem>
-          ))}
-          {filteredOptions.length === 0 && (
-            <DropdownMenuItem disabled>No options found</DropdownMenuItem>
-          )}
+            {filteredOptions.map((option) => (
+              <DropdownMenuItem
+                key={option.value}
+                onSelect={(e) => e.preventDefault()}
+                onClick={() => handleToggle(option.value)}
+                className="flex items-center gap-2"
+              >
+                <Checkbox
+                  checked={selectedValues.includes(option.value)}
+                  aria-label={`Select ${option.label}`}
+                  className="h-4 w-4 pointer-events-none"
+                  tabIndex={-1}
+                />
+                <span>{option.label}</span>
+              </DropdownMenuItem>
+            ))}
+
+            {filteredOptions.length === 0 && (
+              <DropdownMenuItem disabled>No options found</DropdownMenuItem>
+            )}
           </div>
         </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
-
