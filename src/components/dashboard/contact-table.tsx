@@ -221,7 +221,6 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      {contact.profilePicture && <AvatarImage src={contact.profilePicture} alt={contact.firstName} data-ai-hint="person portrait" />}
                       <AvatarFallback>
                         {contact.firstName.charAt(0)}
                         {contact.lastName.charAt(0)}
