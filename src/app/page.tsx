@@ -41,14 +41,10 @@ export default function LoginPage() {
     try {
         const result = await signIn(data);
 
-        if (result.success) {
+        if (result.success && result.user) {
           // In a real app, session data would be stored in a secure cookie.
           // For this demo, we'll use sessionStorage.
-          if (result.isAdmin) {
-             sessionStorage.setItem('user', JSON.stringify({ name: 'Admin User', role: 'Admin', email: data.email }));
-          } else if (result.user) {
-             sessionStorage.setItem('user', JSON.stringify(result.user));
-          }
+          sessionStorage.setItem('user', JSON.stringify(result.user));
           router.push('/dashboard');
         } else {
           toast({
