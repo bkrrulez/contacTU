@@ -44,14 +44,21 @@ export function MultiSelect({
     let newSelectedValues: string[]
 
     if (allOption && value === allOption) {
+      // If 'All' is clicked
       if (selectedValues.includes(allOption)) {
-        newSelectedValues = []
+        newSelectedValues = [] // Deselect 'All'
       } else {
-        newSelectedValues = [allOption]
+        newSelectedValues = [allOption] // Select only 'All'
       }
     } else {
-      let currentValues = [...selectedValues].filter((v) => v !== allOption)
+      // If any other option is clicked
+      let currentValues = [...selectedValues]
 
+      // Remove 'All' if it's currently selected
+      if (allOption && currentValues.includes(allOption)) {
+        currentValues = []
+      }
+      
       if (currentValues.includes(value)) {
         newSelectedValues = currentValues.filter((item) => item !== value)
       } else {
@@ -60,6 +67,7 @@ export function MultiSelect({
     }
     onChange(newSelectedValues)
   }
+
 
   const getDisplayValue = () => {
     if (selectedValues.length === 0) return placeholder
