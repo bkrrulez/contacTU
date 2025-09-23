@@ -34,7 +34,7 @@ export function MultiSelect({
   enableSearch = false,
   searchPlaceholder = 'Search...',
   searchThreshold = 0,
-  allOption,
+  allOption
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,25 +51,16 @@ export function MultiSelect({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [wrapperRef]);
-  
+
   const handleToggle = (value: string) => {
     if (allOption && value === allOption) {
-      if (selectedValues.includes(allOption)) {
-        onChange([]);
-      } else {
-        onChange([allOption]);
-      }
+        onChange(selectedValues.includes(allOption) ? [] : [allOption]);
     } else {
-      let newSelection = selectedValues.includes(value)
-        ? selectedValues.filter((item) => item !== value)
-        : [...selectedValues.filter(v => allOption ? v !== allOption : true), value];
-      
-       if(newSelection.length === 0 && allOption) {
-         newSelection = [allOption];
-       }
-
-      onChange(newSelection);
-    } 
+        const newSelection = selectedValues.includes(value)
+            ? selectedValues.filter((item) => item !== value)
+            : [...selectedValues.filter(v => v !== allOption), value];
+        onChange(newSelection);
+    }
   };
 
 
@@ -80,10 +71,10 @@ export function MultiSelect({
   };
 
   const displayValue = React.useMemo(() => {
-    if (selectedValues.length === 0 || (allOption && selectedValues.includes(allOption) && selectedValues.length === 1)) {
-       if (allOption && selectedValues.includes(allOption)) {
-           return allOption;
-       }
+    if (allOption && selectedValues.includes(allOption)) {
+      return allOption;
+    }
+    if (selectedValues.length === 0) {
        return placeholder;
     }
     if (selectedValues.length === 1) {
@@ -149,8 +140,9 @@ export function MultiSelect({
                         onClick={() => handleToggle(option.value)}
                     >
                         <Checkbox
-                        checked={selectedValues.includes(option.value)}
-                        className="mr-2"
+                            checked={selectedValues.includes(option.value)}
+                            className="mr-2"
+                            onClick={(e) => e.stopPropagation()}
                         />
                         <span>{option.label}</span>
                     </div>
