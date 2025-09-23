@@ -12,6 +12,8 @@ import { ExtractedContactSchema } from '@/lib/schemas';
 import { z } from 'zod';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+export const maxDuration = 60; // Set timeout to 60 seconds
+
 type ExtractedContact = z.infer<typeof ExtractedContactSchema>;
 
 export function VCardScanForm() {
