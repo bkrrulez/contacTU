@@ -48,9 +48,9 @@ export function MultiSelect({
 
     if (allOption && value === allOption) {
       if (selectedValues.includes(allOption)) {
-        newSelectedValues = []
+        newSelectedValues = [] // Deselect 'All'
       } else {
-        newSelectedValues = [allOption]
+        newSelectedValues = [allOption] // Select 'All'
       }
     } else {
       let currentValues = selectedValues.filter(v => allOption ? v !== allOption : true);
@@ -105,7 +105,7 @@ export function MultiSelect({
             <Checkbox
               checked={selectedValues.includes(option.value)}
               aria-label={`Select ${option.label}`}
-              className="h-4 w-4"
+              className="h-4 w-4 pointer-events-none"
               tabIndex={-1}
             />
             <span>{option.label}</span>
