@@ -32,18 +32,20 @@ export function MultiSelect({
   const [inputValue, setInputValue] = React.useState('');
 
   const handleToggle = (value: string) => {
-    // Special handling for the Organization filter
-    if (placeholder === 'Filter by organization...') {
+    // This is the special logic for the organization filter on the contacts page
+    const isOrgFilter = placeholder === 'Filter by organization...';
+
+    if (isOrgFilter) {
       if (value === 'All Organizations') {
-        // If 'All Organizations' is selected, clear everything else
+        // If "All Organizations" is clicked, it becomes the only selected item.
         onChange(['All Organizations']);
       } else {
-        // If another org is selected, remove 'All Organizations' and add the new one
+        // Remove "All Organizations" if another item is selected
         const newSelection = selected.filter(item => item !== 'All Organizations');
+        
         if (newSelection.includes(value)) {
-          // If the item is already selected, remove it
-          const finalSelection = newSelection.filter(item => item !== value);
-          // If nothing is left, default back to 'All Organizations'
+           // If the item is already selected, remove it. If it becomes empty, default back to "All Organizations"
+          const finalSelection = newSelection.filter((item) => item !== value);
           onChange(finalSelection.length > 0 ? finalSelection : ['All Organizations']);
         } else {
           // Add the new item
@@ -51,14 +53,13 @@ export function MultiSelect({
         }
       }
     } else {
-      // Original behavior for other multi-selects
+      // Original behavior for all other multi-selects
       onChange(
-          selected.includes(value)
+        selected.includes(value)
           ? selected.filter((item) => item !== value)
           : [...selected, value]
       );
     }
-    setInputValue('');
   };
   
   const displayValue = React.useMemo(() => {
@@ -89,7 +90,7 @@ export function MultiSelect({
 
   const handleClear = (e: React.MouseEvent) => {
       e.stopPropagation();
-      onChange([]);
+      onChange(placeholder === 'Filter by organization...' ? ['All Organizations'] : []);
   };
 
 
@@ -104,9 +105,9 @@ export function MultiSelect({
         >
           <span className="truncate">{displayValue}</span>
           <div className="flex items-center">
-           {selected.length > 0 && placeholder === 'Filter by name...' ? (
-             <span onClick={handleClear} role="button" aria-label="Clear selection" className="mr-2">
-                <X className="h-4 w-4 shrink-0 opacity-50" />
+           {(selected.length > 0 && !(selected.length === 1 && selected[0] === 'All Organizations')) ? (
+             <span onClick={handleClear} role="button" aria-label="Clear selection" className="ml-2">
+                <X className="h-4 w-4 shrink-0 opacity-50 hover:opacity-100" />
              </span>
            ) : (
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -131,7 +132,6 @@ export function MultiSelect({
               {filteredOptions.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.label}
                   onSelect={() => handleToggle(option.value)}
                 >
                   <Check
