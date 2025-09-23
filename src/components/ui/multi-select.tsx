@@ -53,10 +53,11 @@ export function MultiSelect({
   }, [selected, options, placeholder]);
 
   const filteredOptions = React.useMemo(() => {
-    if (inputValue.length < 3) {
-      if (placeholder === 'Filter by name...') return []; // Don't show any options for name filter until 3 chars are typed
-      return options;
+    // For the name filter on the contacts page, require typing before showing options.
+    if (placeholder === 'Filter by name...' && inputValue.length < 3) {
+      return [];
     }
+    // For other filters or after typing, filter the options.
     return options.filter(option => 
       option.label.toLowerCase().includes(inputValue.toLowerCase())
     );
@@ -85,7 +86,7 @@ export function MultiSelect({
           />
           <CommandList>
             <CommandEmpty>
-                {inputValue.length < 3 && placeholder === 'Filter by name...'
+                {placeholder === 'Filter by name...' && inputValue.length < 3
                  ? 'Type 3+ characters to search'
                  : 'No results found.'}
             </CommandEmpty>
