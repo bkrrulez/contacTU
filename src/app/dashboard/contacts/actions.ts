@@ -279,3 +279,39 @@ export async function toggleFavoriteStatus(id: number, isFavorite: boolean) {
         return { success: false, error: 'Failed to update contact.' };
     }
 }
+
+export async function getContactsForPage(): Promise<Contact[]> {
+  const contactsList = await db.query.contacts.findMany({
+    with: {
+        organizations: {
+            with: {
+                organization: true,
+                team: true,
+            }
+        },
+        emails: true,
+        phones: true,
+    },
+    orderBy: (contacts, { asc }) => [asc(contacts.firstName), asc(contacts.lastName)],
+  });
+  return contactsList;
+}
+
+export async function getContactFilterData() {
+    const contactsList = await db.query.contacts.findMany({
+        columns: {
+            firstName: true,
+            lastName: true,
+        }
+    });
+    const orgs = await db.query.organizations.findMany({
+        columns: {
+            name: true,
+        }
+    });
+
+    const contactNames = contactsList.map(c => `${c.firstName} ${c.lastName}`);
+    const organizationNames = orgs.map(o => o.name);
+
+    return { contactNames, organizationNames };
+}

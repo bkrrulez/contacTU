@@ -29,33 +29,20 @@ export function MultiSelect({
   placeholder = 'Select...',
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState('');
 
   const handleToggle = (value: string) => {
-    let newSelection = [...selected];
-
-    if (value === 'All Organizations') {
-      if (newSelection.includes('All Organizations')) {
-        newSelection = [];
-      } else {
-        newSelection = ['All Organizations'];
-      }
-    } else {
-      newSelection = newSelection.filter((item) => item !== 'All Organizations');
-      if (newSelection.includes(value)) {
-        newSelection = newSelection.filter((item) => item !== value);
-      } else {
-        newSelection.push(value);
-      }
-    }
-    onChange(newSelection);
+    onChange(
+        selected.includes(value)
+        ? selected.filter((item) => item !== value)
+        : [...selected, value]
+    );
+    setInputValue('');
   };
   
   const displayValue = React.useMemo(() => {
     if (selected.length === 0) {
       return placeholder;
-    }
-    if (selected.includes('All Organizations')) {
-      return 'All Organizations';
     }
     if (selected.length > 2) {
       return `${selected.length} selected`;
@@ -64,6 +51,16 @@ export function MultiSelect({
       .map((val) => options.find((opt) => opt.value === val)?.label)
       .join(', ');
   }, [selected, options, placeholder]);
+
+  const filteredOptions = React.useMemo(() => {
+    if (inputValue.length < 3) {
+      if (placeholder === 'Filter by name...') return []; // Don't show any options for name filter until 3 chars are typed
+      return options;
+    }
+    return options.filter(option => 
+      option.label.toLowerCase().includes(inputValue.toLowerCase())
+    );
+  }, [inputValue, options, placeholder]);
 
 
   return (
@@ -81,28 +78,32 @@ export function MultiSelect({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
-          <CommandInput placeholder="Search organizations..." />
+          <CommandInput 
+            placeholder="Search..." 
+            value={inputValue}
+            onValueChange={setInputValue}
+          />
           <CommandList>
-            <CommandEmpty>No organization found.</CommandEmpty>
+            <CommandEmpty>
+                {inputValue.length < 3 && placeholder === 'Filter by name...'
+                 ? 'Type 3+ characters to search'
+                 : 'No results found.'}
+            </CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
-                <div
+              {filteredOptions.map((option) => (
+                <CommandItem
                   key={option.value}
-                  className="cursor-pointer"
-                  onClick={() => handleToggle(option.value)}
+                  value={option.label}
+                  onSelect={() => handleToggle(option.value)}
                 >
-                  <CommandItem
-                    value={option.label}
-                  >
-                    <Check
-                      className={cn(
-                        'mr-2 h-4 w-4',
-                        selected.includes(option.value) ? 'opacity-100' : 'opacity-0'
-                      )}
-                    />
-                    {option.label}
-                  </CommandItem>
-                </div>
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      selected.includes(option.value) ? 'opacity-100' : 'opacity-0'
+                    )}
+                  />
+                  {option.label}
+                </CommandItem>
               ))}
             </CommandGroup>
           </CommandList>
