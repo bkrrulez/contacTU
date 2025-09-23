@@ -212,6 +212,7 @@ export default function NewUserPage() {
                                           onChange={field.onChange}
                                           className="w-full"
                                           placeholder="Select organizations..."
+                                          allOption="All Organizations"
                                       />
                                       <FormMessage />
                                       </FormItem>
