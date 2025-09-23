@@ -13,15 +13,14 @@ import {
   Contact,
   Building,
   Star,
-  Download,
-  UploadCloud,
 } from 'lucide-react';
 import { ContactTable } from '@/components/dashboard/contact-table';
-import type { Contact as ContactType, User } from '@/lib/types';
+import type { User } from '@/lib/types';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getDashboardData } from './actions';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useContacts } from '@/contexts/ContactContext';
 
 
 const StatCard = ({
@@ -60,10 +59,8 @@ const StatCard = ({
 
 
 interface DashboardData {
-    contacts: ContactType[];
     users: User[];
     organizationsCount: number;
-    favoritesCount: number;
 }
 
 function DashboardPageSkeleton() {
@@ -105,12 +102,12 @@ function DashboardPageSkeleton() {
 
 
 export default function DashboardPage() {
+    const { contacts, isLoading: areContactsLoading } = useContacts();
     const [data, setData] = useState<DashboardData | null>(null);
     const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isOtherDataLoading, setIsOtherDataLoading] = useState(true);
     
     useEffect(() => {
-        // This now runs on the client and will correctly get the user after a refresh
         const userJson = sessionStorage.getItem('user');
         if (userJson) {
             setCurrentUser(JSON.parse(userJson));
@@ -118,22 +115,27 @@ export default function DashboardPage() {
 
         async function loadData() {
             try {
-                const dashboardData = await getDashboardData();
-                setData(dashboardData);
+                // We only need to fetch non-contact data here now
+                const { users, organizationsCount } = await getDashboardData();
+                setData({ users, organizationsCount });
             } catch (error) {
                 console.error("Failed to load dashboard data", error);
             } finally {
-                setIsLoading(false);
+                setIsOtherDataLoading(false);
             }
         }
         loadData();
     }, []);
 
+  const isLoading = areContactsLoading || isOtherDataLoading;
+
   if (isLoading || !data) {
     return <DashboardPageSkeleton />;
   }
+  
+  const { users, organizationsCount } = data;
+  const favoritesCount = contacts.filter(c => c.isFavorite).length;
 
-  const { contacts, users, organizationsCount, favoritesCount } = data;
 
   return (
     <div className="space-y-6">

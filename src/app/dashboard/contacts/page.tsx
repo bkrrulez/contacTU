@@ -6,33 +6,14 @@ import { Button } from '@/components/ui/button';
 import { ContactTable } from '@/components/dashboard/contact-table';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
-import type { Contact } from '@/lib/types';
-import { useEffect, useState, useMemo } from 'react';
-import { getContactsForPage } from './actions';
+import { useMemo, useState } from 'react';
 import { ContactFilters } from '@/components/dashboard/contact-filters';
-
-export const dynamic = 'force-dynamic';
+import { useContacts } from '@/contexts/ContactContext';
 
 export default function ContactsPage() {
-  const [allContacts, setAllContacts] = useState<Contact[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { contacts: allContacts, isLoading } = useContacts();
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>(['All Organizations']);
-
-  useEffect(() => {
-    async function loadContacts() {
-      setIsLoading(true);
-      try {
-        const contacts = await getContactsForPage();
-        setAllContacts(contacts);
-      } catch (error) {
-        console.error("Failed to load contacts", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadContacts();
-  }, []);
 
   const filteredContacts = useMemo(() => {
     return allContacts.filter(contact => {

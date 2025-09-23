@@ -8,6 +8,7 @@ import { UserProfile } from '@/components/dashboard/user-profile';
 import type { User } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ContactProvider } from '@/contexts/ContactContext';
 
 function DashboardSkeleton() {
     return (
@@ -68,20 +69,22 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-muted/40">
-        <AppSidebar />
-        <div className="flex flex-col flex-1 h-screen">
-          <AppHeader user={currentUser}>
-            <UserProfile user={currentUser} />
-          </AppHeader>
-          <div className="flex flex-col flex-1 overflow-auto">
-            <main className="flex-1 p-4 lg:p-6">{children}</main>
-            <footer className="py-4 text-center text-xs" style={{ color: 'darkblue', fontSize: '0.67rem' }}>
-              Created by Bikramjit Chowdhury
-            </footer>
+      <ContactProvider>
+          <div className="flex h-screen w-full bg-muted/40">
+            <AppSidebar />
+            <div className="flex flex-col flex-1 h-screen">
+              <AppHeader user={currentUser}>
+                <UserProfile user={currentUser} />
+              </AppHeader>
+              <div className="flex flex-col flex-1 overflow-auto">
+                <main className="flex-1 p-4 lg:p-6">{children}</main>
+                <footer className="py-4 text-center text-xs" style={{ color: 'darkblue', fontSize: '0.67rem' }}>
+                  Created by Bikramjit Chowdhury
+                </footer>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+      </ContactProvider>
     </SidebarProvider>
   );
 }

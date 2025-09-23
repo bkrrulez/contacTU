@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -38,6 +37,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { deleteContact, toggleFavoriteStatus } from '@/app/dashboard/contacts/actions';
 import { useToast } from '@/hooks/use-toast';
+import { useContacts } from '@/contexts/ContactContext';
 
 
 interface ContactTableProps {
@@ -48,6 +48,7 @@ type SortKey = 'name' | 'organization' | 'email' | 'phone';
 
 export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   const { toast } = useToast();
+  const { removeContact, refreshContacts } = useContacts();
   const [selectedRows, setSelectedRows] = React.useState<Set<number>>(new Set());
   const [contacts, setContacts] = React.useState(initialContacts);
   const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>({ key: 'name', direction: 'ascending' });
@@ -149,6 +150,7 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
     if (contactToDelete) {
       try {
         await deleteContact(contactToDelete.id);
+        removeContact(contactToDelete.id); // Update context state
         toast({
           title: 'Contact Deleted',
           description: `${contactToDelete.firstName} ${contactToDelete.lastName} has been deleted.`,
@@ -173,8 +175,8 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
         title: `Contact ${contact.isFavorite ? 'unmarked' : 'marked'} as favorite`,
         description: `${contact.firstName} ${contact.lastName} has been updated.`,
       });
-      // Optionally update local state to reflect change immediately
-      setContacts(contacts.map(c => c.id === contact.id ? {...c, isFavorite: !c.isFavorite} : c));
+      // This will trigger a full refresh from context provider to ensure consistency
+      refreshContacts();
     } else {
       toast({
         variant: 'destructive',

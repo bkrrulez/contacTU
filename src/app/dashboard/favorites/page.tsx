@@ -1,29 +1,19 @@
 
+'use client';
+
 import { Star } from 'lucide-react';
 import { ContactTable } from '@/components/dashboard/contact-table';
-import { db } from '@/lib/db';
 import { Card, CardContent } from '@/components/ui/card';
-import { contacts as contactsTable } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 import type { Contact } from '@/lib/types';
+import { useContacts } from '@/contexts/ContactContext';
+import { useMemo } from 'react';
 
-export const dynamic = 'force-dynamic';
+export default function FavoritesPage() {
+  const { contacts: allContacts, isLoading } = useContacts();
 
-export default async function FavoritesPage() {
-  const contacts: Contact[] = await db.query.contacts.findMany({
-    where: eq(contactsTable.isFavorite, true),
-    with: {
-        organizations: {
-            with: {
-                organization: true,
-                team: true,
-            }
-        },
-        emails: true,
-        phones: true,
-    },
-    orderBy: (contacts, { asc }) => [asc(contacts.firstName), asc(contacts.lastName)],
-  });
+  const favoriteContacts = useMemo(() => {
+    return allContacts.filter(contact => contact.isFavorite);
+  }, [allContacts]);
 
   return (
     <div className="space-y-4">
@@ -38,8 +28,10 @@ export default async function FavoritesPage() {
       </div>
       <Card>
         <CardContent className="pt-6">
-            {contacts.length > 0 ? (
-                <ContactTable contacts={contacts} />
+            {isLoading ? (
+                <div className="text-center py-12 text-muted-foreground">Loading contacts...</div>
+            ) : favoriteContacts.length > 0 ? (
+                <ContactTable contacts={favoriteContacts} />
             ) : (
                 <div className="text-center py-12 text-muted-foreground">
                     <p>You haven't marked any contacts as favorite yet.</p>
