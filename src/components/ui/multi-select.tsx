@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -53,11 +52,11 @@ export function MultiSelect({
     let newSelectedValues: string[];
 
     if (value === allOption) {
-      if (selectedValues.includes(allOption)) {
-        // If "All" is already selected, deselect it.
+      if (selectedValues.length === 1 && selectedValues[0] === allOption) {
+        // If "All" is the only thing selected, deselect it.
         newSelectedValues = [];
       } else {
-        // Select only "All"
+        // Otherwise, select only "All"
         newSelectedValues = [allOption];
       }
     } else {
