@@ -21,7 +21,8 @@ export default async function UsersPage() {
                 organization: true
             }
         }
-    }
+    },
+    orderBy: (users, { asc }) => [asc(users.name), asc(users.email)],
   });
 
   // Map organizations to the top-level user object for easier access in the client component
