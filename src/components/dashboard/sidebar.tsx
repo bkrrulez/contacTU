@@ -35,8 +35,8 @@ const navItems = [
   { href: '/dashboard/favorites', icon: Star, label: 'Favorites' },
   { href: '/dashboard/users', icon: Users, label: 'User Management', roles: ['Admin', 'Power User'] },
   { href: '/dashboard/audit', icon: FileText, label: 'Audit Logs', roles: ['Admin', 'Power User'] },
-  { href: '/dashboard/import', icon: UploadCloud, label: 'Import' },
-  { href: '/dashboard/export', icon: Download, label: 'Export' },
+  { href: '/dashboard/import', icon: Download, label: 'Import' },
+  { href: '/dashboard/export', icon: UploadCloud, label: 'Export' },
 ];
 
 const bottomNavItems = [
