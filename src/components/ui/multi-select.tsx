@@ -53,14 +53,18 @@ export function MultiSelect({
   }, [wrapperRef]);
 
   const handleToggle = (value: string) => {
+    let newSelection;
     if (allOption && value === allOption) {
-        onChange(selectedValues.includes(allOption) ? [] : [allOption]);
+      newSelection = selectedValues.includes(allOption) ? [] : [allOption];
     } else {
-        const newSelection = selectedValues.includes(value)
-            ? selectedValues.filter((item) => item !== value)
-            : [...selectedValues.filter(v => v !== allOption), value];
-        onChange(newSelection);
+      const currentSelection = selectedValues.filter(v => v !== allOption);
+      if (currentSelection.includes(value)) {
+        newSelection = currentSelection.filter((item) => item !== value);
+      } else {
+        newSelection = [...currentSelection, value];
+      }
     }
+    onChange(newSelection);
   };
 
 
@@ -71,8 +75,10 @@ export function MultiSelect({
   };
 
   const displayValue = React.useMemo(() => {
-    if (allOption && selectedValues.includes(allOption)) {
-      return allOption;
+    if (allOption && selectedValues.length > 0 && selectedValues.every(val => options.map(o => o.value).includes(val))) {
+        if(selectedValues.includes(allOption) || selectedValues.length === options.filter(o => o.value !== allOption).length) {
+            return allOption;
+        }
     }
     if (selectedValues.length === 0) {
        return placeholder;
@@ -85,12 +91,12 @@ export function MultiSelect({
 
   const filteredOptions = React.useMemo(() => {
      if (enableSearch && searchTerm.length < searchThreshold) {
-      return [];
+      return allOption ? options : [];
     }
     return options.filter(option =>
       option.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm, options, enableSearch, searchThreshold]);
+  }, [searchTerm, options, enableSearch, searchThreshold, allOption]);
   
   const hasSelection = selectedValues.length > 0 && !(allOption && selectedValues.includes(allOption) && selectedValues.length === 1);
 
@@ -98,6 +104,7 @@ export function MultiSelect({
   return (
     <div className={cn('relative', className)} ref={wrapperRef}>
       <Button
+        type="button"
         variant="outline"
         role="combobox"
         aria-expanded={isOpen}
@@ -122,7 +129,6 @@ export function MultiSelect({
                 placeholder={searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                autoFocus
               />
             </div>
           )}
@@ -133,20 +139,24 @@ export function MultiSelect({
            )}
           <div className="max-h-60 overflow-auto p-1">
             {filteredOptions.length > 0 ? (
-                filteredOptions.map((option) => (
-                    <div
-                        key={option.value}
-                        className="flex cursor-pointer items-center rounded-sm p-2 text-sm outline-none hover:bg-accent"
-                        onClick={() => handleToggle(option.value)}
-                    >
-                        <Checkbox
-                            checked={selectedValues.includes(option.value)}
-                            className="mr-2"
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                        <span>{option.label}</span>
-                    </div>
-                ))
+                filteredOptions.map((option) => {
+                    const isSelected = selectedValues.includes(option.value);
+                    return (
+                        <div
+                            key={option.value}
+                            className="flex cursor-pointer items-center rounded-sm p-2 text-sm outline-none hover:bg-accent"
+                            onClick={() => handleToggle(option.value)}
+                        >
+                            <Checkbox
+                                checked={isSelected}
+                                className="mr-2"
+                                readOnly
+                                tabIndex={-1}
+                            />
+                            <span>{option.label}</span>
+                        </div>
+                    );
+                })
             ) : (
                 ( !enableSearch || searchTerm.length >= searchThreshold ) && <div className="p-2 text-center text-sm text-muted-foreground">No results found.</div>
             )}
