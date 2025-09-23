@@ -52,24 +52,20 @@ export function MultiSelect({
     let newSelectedValues: string[];
 
     if (value === allOption) {
-      if (selectedValues.length === 1 && selectedValues[0] === allOption) {
-        // If "All" is the only thing selected, deselect it.
-        newSelectedValues = [];
-      } else {
-        // Otherwise, select only "All"
-        newSelectedValues = [allOption];
-      }
+        if (selectedValues.includes(allOption)) {
+            newSelectedValues = [];
+        } else {
+            newSelectedValues = [allOption];
+        }
     } else {
-      // If a specific option is clicked, "All" should be deselected.
-      let currentValues = selectedValues.filter((v) => v !== allOption);
-      
-      const index = currentValues.indexOf(value);
-      if (index > -1) {
-        currentValues.splice(index, 1); // remove
-      } else {
-        currentValues.push(value); // add
-      }
-      newSelectedValues = currentValues;
+        let currentValues = selectedValues.filter(v => v !== allOption);
+        const index = currentValues.indexOf(value);
+        if (index > -1) {
+            currentValues.splice(index, 1);
+        } else {
+            currentValues.push(value);
+        }
+        newSelectedValues = currentValues;
     }
     onChange(newSelectedValues);
   };
@@ -107,18 +103,19 @@ export function MultiSelect({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] p-0">
+        <div className='p-2'>
         {enableSearch && options.length > (searchThreshold || 0) && (
-          <div className="p-2">
-            <Input
-              placeholder={searchPlaceholder}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoFocus
-            />
-          </div>
+          <Input
+            placeholder={searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoFocus
+          />
         )}
+        </div>
         <ScrollArea className="max-h-60">
+          <div className="p-2 pt-0">
           {filteredOptions.map((option) => (
             <DropdownMenuItem
               key={option.value}
@@ -138,6 +135,7 @@ export function MultiSelect({
           {filteredOptions.length === 0 && (
             <DropdownMenuItem disabled>No options found</DropdownMenuItem>
           )}
+          </div>
         </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
