@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState, useMemo } from 'react';
 import { getExportData, exportContacts } from '@/app/dashboard/export/actions';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { Download } from 'lucide-react';
+import { UploadCloud } from 'lucide-react';
 import { saveAs } from 'file-saver';
 
 type OrgAndTeamData = {
@@ -39,7 +39,7 @@ export function ExportForm() {
     }, [toast]);
     
     const availableTeams = useMemo(() => {
-        if (selectedOrgs.length === 0) {
+        if (selectedOrgs.length === 0 || selectedOrgs.includes('All Organizations')) {
              const allTeams = new Set<string>();
             data.organizations.forEach(org => {
                 org.teams.forEach(team => allTeams.add(team));
@@ -156,12 +156,12 @@ export function ExportForm() {
                  <Button onClick={handleExport} disabled={isExportDisabled}>
                     {isExporting ? (
                         <>
-                            <Download className="mr-2 h-4 w-4 animate-pulse" />
+                            <UploadCloud className="mr-2 h-4 w-4 animate-pulse" />
                             Exporting...
                         </>
                     ) : (
                         <>
-                           <Download className="mr-2 h-4 w-4" />
+                           <UploadCloud className="mr-2 h-4 w-4" />
                            Export Contacts
                         </>
                     )}

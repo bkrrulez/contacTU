@@ -39,7 +39,14 @@ export async function exportContacts(values: z.infer<typeof exportSchema>) {
          return { error: 'Invalid input.' };
      }
 
-     const { fileType, organizations, teams } = validatedFields.data;
+     let { fileType, organizations, teams } = validatedFields.data;
+
+     // If 'All Organizations' is selected, fetch all organization names
+     if (organizations.includes('All Organizations')) {
+        const allOrgs = await db.query.organizations.findMany({ columns: { name: true }});
+        organizations = allOrgs.map(org => org.name);
+     }
+
 
      const query = db.select({
             id: contacts.id,
