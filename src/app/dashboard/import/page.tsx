@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ImportForm } from '@/components/dashboard/import-form';
 import { VCardScanForm } from '@/components/dashboard/vcard-scan-form';
 
+export const maxDuration = 60; // Set timeout to 60 seconds for AI processing
 
 export default function ImportPage() {
   return (
