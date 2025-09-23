@@ -47,19 +47,30 @@ export function MultiSelect({
     let newSelectedValues: string[]
 
     if (allOption && value === allOption) {
-      if (selectedValues.includes(allOption)) {
-        newSelectedValues = [] // Deselect 'All'
-      } else {
-        newSelectedValues = [allOption] // Select 'All'
-      }
+        // If 'All' is clicked
+        if (selectedValues.includes(allOption)) {
+            // If 'All' is already selected, deselect it (clear selection)
+            newSelectedValues = []
+        } else {
+            // If 'All' is not selected, select it and deselect everything else
+            newSelectedValues = [allOption]
+        }
     } else {
-      let currentValues = selectedValues.filter(v => allOption ? v !== allOption : true);
-      
-      if (currentValues.includes(value)) {
-        newSelectedValues = currentValues.filter((item) => item !== value)
-      } else {
-        newSelectedValues = [...currentValues, value]
-      }
+        // If any other option is clicked
+        let currentValues = [...selectedValues]
+
+        // If 'All' is currently selected, deselect it
+        if (allOption && currentValues.includes(allOption)) {
+            currentValues = []
+        }
+
+        if (currentValues.includes(value)) {
+            // If the option is already selected, deselect it
+            newSelectedValues = currentValues.filter((item) => item !== value)
+        } else {
+            // If the option is not selected, select it
+            newSelectedValues = [...currentValues, value]
+        }
     }
     onChange(newSelectedValues)
   }
