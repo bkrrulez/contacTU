@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -6,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ChevronsUpDown, Check } from 'lucide-react';
+import { ChevronsUpDown, Check, X } from 'lucide-react';
 
 export interface MultiSelectOption {
   value: string;
@@ -32,6 +33,12 @@ export function MultiSelect({
   const [inputValue, setInputValue] = React.useState('');
 
   const handleToggle = (value: string) => {
+    
+    if (placeholder === 'Filter by organization...' && value === 'All Organizations') {
+        onChange([]);
+        return;
+    }
+
     onChange(
         selected.includes(value)
         ? selected.filter((item) => item !== value)
@@ -43,6 +50,9 @@ export function MultiSelect({
   const displayValue = React.useMemo(() => {
     if (selected.length === 0) {
       return placeholder;
+    }
+     if (selected.length === 1 && selected[0] === 'All Organizations') {
+      return 'All Organizations';
     }
     if (selected.length > 2) {
       return `${selected.length} selected`;
@@ -63,6 +73,11 @@ export function MultiSelect({
     );
   }, [inputValue, options, placeholder]);
 
+  const handleClear = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onChange([]);
+  };
+
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -74,7 +89,11 @@ export function MultiSelect({
           className={cn('w-full justify-between', className)}
         >
           <span className="truncate">{displayValue}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+           {selected.length > 0 && placeholder === 'Filter by name...' ? (
+            <X className="ml-2 h-4 w-4 shrink-0 opacity-50" onClick={handleClear} />
+           ) : (
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">

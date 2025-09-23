@@ -38,7 +38,7 @@ export default function ContactsPage() {
   const filteredContacts = useMemo(() => {
     return allContacts.filter(contact => {
       const nameMatch = selectedNames.length === 0 || selectedNames.includes(`${contact.firstName} ${contact.lastName}`);
-      const orgMatch = selectedOrgs.length === 0 || contact.organizations?.some(org => selectedOrgs.includes(org.organization.name));
+      const orgMatch = selectedOrgs.length === 0 || selectedOrgs.includes('All Organizations') || contact.organizations?.some(org => selectedOrgs.includes(org.organization.name));
       return nameMatch && orgMatch;
     });
   }, [allContacts, selectedNames, selectedOrgs]);
@@ -49,7 +49,7 @@ export default function ContactsPage() {
     allContacts.forEach(c => {
         c.organizations?.forEach(o => orgs.add(o.organization.name));
     });
-    return Array.from(orgs).sort();
+    return ['All Organizations', ...Array.from(orgs).sort()];
   }, [allContacts]);
 
 
