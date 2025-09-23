@@ -1,47 +1,70 @@
 
+'use client';
+
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/sidebar';
 import { AppHeader } from '@/components/dashboard/header';
 import { UserProfile } from '@/components/dashboard/user-profile';
-import { db } from '@/lib/db';
-import { headers } from 'next/headers';
 import type { User } from '@/lib/types';
+import { useState, useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-
-// This is a server component, but we're creating a mock user for the admin
-// to avoid fetching from the DB unnecessarily when the admin logs in.
-function getFakeAdminUser(): User {
-    return {
-        id: 0, // A non-existent ID
-        name: 'Admin User',
-        email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
-        role: 'Admin',
-        profilePicture: 'https://picsum.photos/seed/1/100/100',
-        usersToOrganizations: [{ organization: { id: -1, name: 'All Organizations', address: null } }],
-    }
+function DashboardSkeleton() {
+    return (
+        <div className="flex h-screen w-full bg-muted/40">
+            <div className="hidden md:flex flex-col w-[256px] border-r p-2 gap-2">
+                <div className="h-16 flex items-center px-4">
+                    <Skeleton className="h-8 w-32" />
+                </div>
+                <div className="flex-1 space-y-2 p-2">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="p-2 mt-auto">
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </div>
+            <div className="flex flex-col flex-1 h-screen">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+                    <div className="flex-1">
+                        <Skeleton className="h-8 w-1/3" />
+                    </div>
+                    <Skeleton className="h-10 w-48" />
+                </header>
+                <main className="flex-1 p-4 lg:p-6">
+                    <Skeleton className="h-full w-full" />
+                </main>
+            </div>
+        </div>
+    )
 }
 
-
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-    // A simplified way to check if we are the admin user.
-    // In a real app, this would be handled by a proper session management system.
-    const referer = headers().get('referer');
-    const isProbablyAdmin = referer?.endsWith('/') || false;
+    const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    let currentUser: Partial<User> | null = null;
-    if (isProbablyAdmin) {
-        currentUser = getFakeAdminUser();
-    } else {
-        // For any other user, we try to fetch from the DB
-        // In a real app, we'd get the user ID from the session.
-        // For this demo, we'll just grab the first non-admin user.
-         currentUser = await db.query.users.findFirst();
+    useEffect(() => {
+        try {
+            const userJson = sessionStorage.getItem('user');
+            if (userJson) {
+                setCurrentUser(JSON.parse(userJson));
+            }
+        } catch (error) {
+            console.error("Failed to parse user from sessionStorage", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    if (isLoading) {
+        return <DashboardSkeleton />;
     }
-
 
   return (
     <SidebarProvider>

@@ -14,7 +14,7 @@ import {
   Building,
   Star,
   Download,
-  ShieldQuestion,
+  UploadCloud,
 } from 'lucide-react';
 import { ContactTable } from '@/components/dashboard/contact-table';
 import type { Contact as ContactType, User } from '@/lib/types';
@@ -110,7 +110,7 @@ export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
     
     useEffect(() => {
-        // Fetch user from session storage
+        // This now runs on the client and will correctly get the user after a refresh
         const userJson = sessionStorage.getItem('user');
         if (userJson) {
             setCurrentUser(JSON.parse(userJson));
@@ -147,14 +147,14 @@ export default function DashboardPage() {
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/dashboard/import">
-              <Download className="mr-2 h-4 w-4" />
+              <UploadCloud className="mr-2 h-4 w-4" />
               Import
             </Link>
           </Button>
            <Button variant="outline" asChild>
-            <Link href="/dashboard/settings">
-              <ShieldQuestion className="mr-2 h-4 w-4" />
-              Manage Duplicates
+            <Link href="/dashboard/export">
+              <Download className="mr-2 h-4 w-4" />
+              Export Contacts
             </Link>
           </Button>
         </div>
