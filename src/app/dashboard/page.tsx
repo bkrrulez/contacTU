@@ -144,20 +144,6 @@ export default function DashboardPage() {
             Welcome back, {currentUser?.name ?? 'User'}! Here's your contact management overview.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/dashboard/import">
-              <UploadCloud className="mr-2 h-4 w-4" />
-              Import
-            </Link>
-          </Button>
-           <Button variant="outline" asChild>
-            <Link href="/dashboard/export">
-              <Download className="mr-2 h-4 w-4" />
-              Export Contacts
-            </Link>
-          </Button>
-        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
