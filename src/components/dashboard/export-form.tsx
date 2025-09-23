@@ -57,7 +57,9 @@ export function ExportForm() {
     }, [selectedOrgs, data.organizations]);
     
      useEffect(() => {
+        // Filter out teams that are no longer available in the updated `availableTeams`
         const newSelectedTeams = selectedTeams.filter(team => availableTeams.includes(team));
+        // Only update state if the selected teams have actually changed
         if (JSON.stringify(newSelectedTeams) !== JSON.stringify(selectedTeams)) {
             setSelectedTeams(newSelectedTeams);
         }
@@ -102,7 +104,7 @@ export function ExportForm() {
     const orgOptions = data.organizations.map(org => ({ value: org.name, label: org.name }));
     const teamOptions = availableTeams.map(team => ({ value: team, label: team }));
 
-    const isExportDisabled = isExporting || isLoading || selectedOrgs.length === 0;
+    const isExportDisabled = isExporting || isLoading;
 
     return (
         <Card>
@@ -125,13 +127,13 @@ export function ExportForm() {
                         </Select>
                     </div>
                     <div>
-                        <label className="text-sm font-medium mb-2 block">Organization <span className="text-destructive">*</span></label>
+                        <label className="text-sm font-medium mb-2 block">Organization</label>
                         <MultiSelect
                             options={orgOptions}
                             selected={selectedOrgs}
                             onChange={setSelectedOrgs}
                             className="w-full"
-                            placeholder="Select organizations..."
+                            placeholder="All Organizations"
                         />
                     </div>
                     <div>
@@ -141,7 +143,7 @@ export function ExportForm() {
                             selected={selectedTeams}
                             onChange={setSelectedTeams}
                             className="w-full"
-                            placeholder="Select teams..."
+                            placeholder="All Teams"
                         />
                     </div>
                 </div>
