@@ -1,4 +1,5 @@
 
+'use client';
 
 import {
   Card,
@@ -12,18 +13,16 @@ import {
   Contact,
   Building,
   Star,
-  Upload,
   Download,
   ShieldQuestion,
 } from 'lucide-react';
 import { ContactTable } from '@/components/dashboard/contact-table';
-import { db } from '@/lib/db';
 import type { Contact as ContactType, User } from '@/lib/types';
 import Link from 'next/link';
-import { eq } from 'drizzle-orm';
-import { contacts as contactsTable } from '@/lib/db/schema';
+import { useEffect, useState } from 'react';
+import { getDashboardData } from './actions';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export const dynamic = 'force-dynamic';
 
 const StatCard = ({
   title,
@@ -59,25 +58,82 @@ const StatCard = ({
   return cardContent;
 };
 
-export default async function DashboardPage() {
-  const allContacts: ContactType[] = await db.query.contacts.findMany({
-    with: {
-      organizations: {
-        with: {
-            organization: true,
-            team: true,
+
+interface DashboardData {
+    contacts: ContactType[];
+    users: User[];
+    organizationsCount: number;
+    favoritesCount: number;
+}
+
+function DashboardPageSkeleton() {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-9 w-48" />
+            <Skeleton className="h-5 w-64 mt-2" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-10 w-28" />
+            <Skeleton className="h-10 w-44" />
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-7 w-40" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+}
+
+
+export default function DashboardPage() {
+    const [data, setData] = useState<DashboardData | null>(null);
+    const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    
+    useEffect(() => {
+        // Fetch user from session storage
+        const userJson = sessionStorage.getItem('user');
+        if (userJson) {
+            setCurrentUser(JSON.parse(userJson));
         }
-      },
-      emails: true,
-      phones: true,
-    },
-  });
-  const users: User[] = await db.query.users.findMany();
-  const organizations = await db.query.organizations.findMany();
-  const currentUser = await db.query.users.findFirst();
 
-  const favoriteContacts = await db.select().from(contactsTable).where(eq(contactsTable.isFavorite, true));
+        async function loadData() {
+            try {
+                const dashboardData = await getDashboardData();
+                setData(dashboardData);
+            } catch (error) {
+                console.error("Failed to load dashboard data", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadData();
+    }, []);
 
+  if (isLoading || !data) {
+    return <DashboardPageSkeleton />;
+  }
+
+  const { contacts, users, organizationsCount, favoritesCount } = data;
 
   return (
     <div className="space-y-6">
@@ -105,10 +161,10 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Contacts" value={allContacts.length} icon={Contact} color="#2563EB" />
+        <StatCard title="Total Contacts" value={contacts.length} icon={Contact} color="#2563EB" />
         <StatCard title="Active Users" value={users.length} icon={Users} color="#16A34A" />
-        <StatCard title="Organizations" value={organizations.length} icon={Building} color="#9333EA" />
-        <StatCard title="Favorite Contacts" value={favoriteContacts.length} icon={Star} color="#F59E0B" href="/dashboard/favorites" />
+        <StatCard title="Organizations" value={organizationsCount} icon={Building} color="#9333EA" />
+        <StatCard title="Favorite Contacts" value={favoritesCount} icon={Star} color="#F59E0B" href="/dashboard/favorites" />
       </div>
 
       <div className="grid gap-6">
@@ -120,8 +176,8 @@ export default async function DashboardPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            {allContacts.length > 0 ? (
-                <ContactTable contacts={allContacts.slice(0, 5)} />
+            {contacts.length > 0 ? (
+                <ContactTable contacts={contacts.slice(0, 5)} />
             ): (
                 <div className="text-center text-muted-foreground py-12">
                     No contacts found

@@ -32,22 +32,37 @@ export default function LoginPage() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || '',
+      password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '',
     },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    const result = await signIn(data);
+    try {
+        const result = await signIn(data);
 
-    if (result.success) {
-      router.push('/dashboard');
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: result.error,
-      });
+        if (result.success) {
+          // In a real app, session data would be stored in a secure cookie.
+          // For this demo, we'll use sessionStorage.
+          if (result.isAdmin) {
+             sessionStorage.setItem('user', JSON.stringify({ name: 'Admin User', role: 'Admin', email: data.email }));
+          } else if (result.user) {
+             sessionStorage.setItem('user', JSON.stringify(result.user));
+          }
+          router.push('/dashboard');
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: result.error,
+          });
+        }
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "An unexpected error occurred.",
+        });
     }
   };
 

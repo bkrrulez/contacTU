@@ -24,7 +24,7 @@ export async function signIn(values: z.infer<typeof loginSchema>) {
   // Special check for the admin user defined in environment variables
   if (email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
     if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-        return { success: 'Login successful!' };
+        return { success: 'Login successful!', isAdmin: true };
     } else {
         return { error: 'Invalid email or password.' };
     }
@@ -44,5 +44,8 @@ export async function signIn(values: z.infer<typeof loginSchema>) {
     return { error: 'Invalid email or password.' };
   }
 
-  return { success: 'Login successful!' };
+  // Omit password from the returned user object
+  const { password: _, ...userWithoutPassword } = existingUser;
+
+  return { success: 'Login successful!', user: userWithoutPassword };
 }
