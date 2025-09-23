@@ -65,11 +65,11 @@ export function VCardScanForm() {
         });
       }
     } catch (error) {
-        console.error("Extraction error:", error);
+        console.error("AI Extraction Error:", error);
         toast({
             variant: 'destructive',
             title: 'AI Error',
-            description: 'An error occurred while processing the image.',
+            description: 'An error occurred while processing the image. Check the server logs for details.',
         });
     } finally {
         setIsLoading(false);
