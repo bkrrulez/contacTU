@@ -25,14 +25,6 @@ export function ContactFilters({
     const nameOptions = contactNames.map(name => ({ value: name, label: name }));
     const orgOptions = organizationNames.map(name => ({ value: name, label: name }));
 
-    const handleOrgChange = (newOrgs: string[]) => {
-        if (newOrgs.length > 1 && newOrgs.includes('All Organizations')) {
-            onSelectedOrgsChange(newOrgs.filter(org => org !== 'All Organizations'));
-        } else {
-            onSelectedOrgsChange(newOrgs);
-        }
-    };
-    
     return (
         <div className="flex gap-2">
             <MultiSelect
@@ -48,9 +40,10 @@ export function ContactFilters({
             <MultiSelect
                 options={orgOptions}
                 selectedValues={selectedOrgs}
-                onChange={handleOrgChange}
+                onChange={onSelectedOrgsChange}
                 placeholder="Filter by organization..."
                 className="w-48"
+                allOption="All Organizations"
             />
         </div>
     );

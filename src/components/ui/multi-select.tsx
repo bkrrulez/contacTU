@@ -22,6 +22,7 @@ interface MultiSelectProps {
   enableSearch?: boolean;
   searchPlaceholder?: string;
   searchThreshold?: number;
+  allOption?: string;
 }
 
 export function MultiSelect({
@@ -33,6 +34,7 @@ export function MultiSelect({
   enableSearch = false,
   searchPlaceholder = 'Search...',
   searchThreshold = 0,
+  allOption,
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,10 +53,23 @@ export function MultiSelect({
   }, [wrapperRef]);
 
   const handleToggle = (value: string) => {
-    if (selectedValues.includes(value)) {
-      onChange(selectedValues.filter((item) => item !== value));
+    if (allOption && value === allOption) {
+      if (selectedValues.includes(allOption)) {
+        onChange([]);
+      } else {
+        onChange([allOption]);
+      }
+    } else if (allOption) {
+      const newSelection = selectedValues.includes(value)
+        ? selectedValues.filter((item) => item !== value)
+        : [...selectedValues.filter(v => v !== allOption), value];
+      onChange(newSelection);
     } else {
-      onChange([...selectedValues, value]);
+       if (selectedValues.includes(value)) {
+        onChange(selectedValues.filter((item) => item !== value));
+      } else {
+        onChange([...selectedValues, value]);
+      }
     }
   };
 
@@ -71,8 +86,11 @@ export function MultiSelect({
     if (selectedValues.length === 1) {
       return options.find((opt) => opt.value === selectedValues[0])?.label ?? placeholder;
     }
+    if (allOption && selectedValues.includes(allOption)) {
+        return allOption;
+    }
     return `${selectedValues.length} selected`;
-  }, [selectedValues, options, placeholder]);
+  }, [selectedValues, options, placeholder, allOption]);
 
   const filteredOptions = React.useMemo(() => {
      if (enableSearch && searchTerm.length < searchThreshold) {
