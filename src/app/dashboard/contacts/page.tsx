@@ -18,7 +18,7 @@ export default function ContactsPage() {
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
-  const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
+  const [selectedOrgs, setSelectedOrgs] = useState<string[]>(['All Organizations']);
 
   useEffect(() => {
     async function loadContacts() {

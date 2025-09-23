@@ -32,26 +32,41 @@ export function MultiSelect({
   const [inputValue, setInputValue] = React.useState('');
 
   const handleToggle = (value: string) => {
-    
-    if (placeholder === 'Filter by organization...' && value === 'All Organizations') {
-        onChange([]);
-        return;
+    // Special handling for the Organization filter
+    if (placeholder === 'Filter by organization...') {
+      if (value === 'All Organizations') {
+        // If 'All Organizations' is selected, clear everything else
+        onChange(['All Organizations']);
+      } else {
+        // If another org is selected, remove 'All Organizations' and add the new one
+        const newSelection = selected.filter(item => item !== 'All Organizations');
+        if (newSelection.includes(value)) {
+          // If the item is already selected, remove it
+          const finalSelection = newSelection.filter(item => item !== value);
+          // If nothing is left, default back to 'All Organizations'
+          onChange(finalSelection.length > 0 ? finalSelection : ['All Organizations']);
+        } else {
+          // Add the new item
+          onChange([...newSelection, value]);
+        }
+      }
+    } else {
+      // Original behavior for other multi-selects
+      onChange(
+          selected.includes(value)
+          ? selected.filter((item) => item !== value)
+          : [...selected, value]
+      );
     }
-
-    onChange(
-        selected.includes(value)
-        ? selected.filter((item) => item !== value)
-        : [...selected, value]
-    );
     setInputValue('');
   };
   
   const displayValue = React.useMemo(() => {
-    if (selected.length === 0) {
+    if (selected.length === 0 || (selected.length === 1 && selected[0] === 'All Organizations' && placeholder === 'Filter by organization...')) {
       return placeholder;
     }
-     if (selected.length === 1 && selected[0] === 'All Organizations') {
-      return 'All Organizations';
+     if (selected.length === 1) {
+      return options.find((opt) => opt.value === selected[0])?.label ?? placeholder;
     }
     if (selected.length > 2) {
       return `${selected.length} selected`;
