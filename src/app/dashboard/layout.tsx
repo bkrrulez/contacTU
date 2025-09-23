@@ -16,7 +16,7 @@ function getFakeAdminUser(): User {
         name: 'Admin User',
         email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
         role: 'Admin',
-        profilePicture: null,
+        profilePicture: 'https://picsum.photos/seed/admin/100/100',
         usersToOrganizations: [{ organization: { id: -1, name: 'All Organizations', address: null } }],
     }
 }
