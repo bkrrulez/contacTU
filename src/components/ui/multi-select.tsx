@@ -54,26 +54,27 @@ export function MultiSelect({
 
     if (value === allOption) {
       if (selectedValues.includes(allOption)) {
-        newSelectedValues = []; // Deselect "All"
+        // Already selected → no change
+        newSelectedValues = [...selectedValues];
       } else {
-        newSelectedValues = [allOption]; // Select only "All"
+        // Select only "All"
+        newSelectedValues = [allOption];
       }
     } else {
-      let currentValues = [...selectedValues];
-      
-      // Remove "All" option if it's present
-      const allIndex = allOption ? currentValues.indexOf(allOption) : -1;
-      if (allIndex > -1) {
-        currentValues.splice(allIndex, 1);
-      }
-      
-      const valueIndex = currentValues.indexOf(value);
-      if (valueIndex > -1) {
-        currentValues.splice(valueIndex, 1);
+      if (allOption && selectedValues.includes(allOption)) {
+        // Replace "All" with the clicked value
+        newSelectedValues = [value];
       } else {
-        currentValues.push(value);
+        // Normal toggle behavior
+        let currentValues = [...selectedValues];
+        const index = currentValues.indexOf(value);
+        if (index > -1) {
+          currentValues.splice(index, 1); // remove
+        } else {
+          currentValues.push(value); // add
+        }
+        newSelectedValues = currentValues;
       }
-      newSelectedValues = currentValues;
     }
 
     onChange(newSelectedValues);
