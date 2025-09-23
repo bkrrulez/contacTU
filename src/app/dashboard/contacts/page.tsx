@@ -18,7 +18,7 @@ export default function ContactsPage() {
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
-  const [selectedOrgs, setSelectedOrgs] = useState<string[]>(['All Organizations']);
+  const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadContacts() {
@@ -38,7 +38,11 @@ export default function ContactsPage() {
   const filteredContacts = useMemo(() => {
     return allContacts.filter(contact => {
       const nameMatch = selectedNames.length === 0 || selectedNames.includes(`${contact.firstName} ${contact.lastName}`);
-      const orgMatch = selectedOrgs.length === 0 || selectedOrgs.includes('All Organizations') || contact.organizations?.some(org => selectedOrgs.includes(org.organization.name));
+      
+      const effectiveSelectedOrgs = selectedOrgs.length === 0 || (selectedOrgs.length === 1 && selectedOrgs[0] === 'All Organizations');
+
+      const orgMatch = effectiveSelectedOrgs || contact.organizations?.some(org => selectedOrgs.includes(org.organization.name));
+
       return nameMatch && orgMatch;
     });
   }, [allContacts, selectedNames, selectedOrgs]);
