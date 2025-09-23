@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { PlusCircle } from 'lucide-react';
@@ -18,7 +17,7 @@ export default function ContactsPage() {
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
-  const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
+  const [selectedOrgs, setSelectedOrgs] = useState<string[]>(['All Organizations']);
 
   useEffect(() => {
     async function loadContacts() {
@@ -39,9 +38,7 @@ export default function ContactsPage() {
     return allContacts.filter(contact => {
       const nameMatch = selectedNames.length === 0 || selectedNames.includes(`${contact.firstName} ${contact.lastName}`);
       
-      const effectiveSelectedOrgs = selectedOrgs.length === 0 || (selectedOrgs.length === 1 && selectedOrgs[0] === 'All Organizations');
-
-      const orgMatch = effectiveSelectedOrgs || contact.organizations?.some(org => selectedOrgs.includes(org.organization.name));
+      const orgMatch = selectedOrgs.includes('All Organizations') || selectedOrgs.length === 0 || contact.organizations?.some(org => selectedOrgs.includes(org.organization.name));
 
       return nameMatch && orgMatch;
     });

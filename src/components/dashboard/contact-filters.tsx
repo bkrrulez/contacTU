@@ -25,34 +25,31 @@ export function ContactFilters({
     const nameOptions = contactNames.map(name => ({ value: name, label: name }));
     const orgOptions = organizationNames.map(name => ({ value: name, label: name }));
 
-    // Handle org change to ensure "All Organizations" is selected when empty
     const handleOrgChange = (newOrgs: string[]) => {
-        if (newOrgs.length === 0) {
-            onSelectedOrgsChange(['All Organizations']);
-        } else if (newOrgs.length > 1 && newOrgs.includes('All Organizations')) {
+        if (newOrgs.length > 1 && newOrgs.includes('All Organizations')) {
             onSelectedOrgsChange(newOrgs.filter(org => org !== 'All Organizations'));
         } else {
             onSelectedOrgsChange(newOrgs);
         }
     };
     
-    // Determine what to pass to the MultiSelect component
-    const displayOrgs = selectedOrgs.length === 1 && selectedOrgs[0] === 'All Organizations' ? [] : selectedOrgs;
-
     return (
         <div className="flex gap-2">
             <MultiSelect
                 options={nameOptions}
-                selected={selectedNames}
+                selectedValues={selectedNames}
                 onChange={onSelectedNamesChange}
                 placeholder="Filter by name..."
                 className="w-48"
+                enableSearch={true}
+                searchPlaceholder='Type 3+ characters...'
+                searchThreshold={3}
             />
             <MultiSelect
                 options={orgOptions}
-                selected={displayOrgs}
+                selectedValues={selectedOrgs}
                 onChange={handleOrgChange}
-                placeholder="All Organizations"
+                placeholder="Filter by organization..."
                 className="w-48"
             />
         </div>

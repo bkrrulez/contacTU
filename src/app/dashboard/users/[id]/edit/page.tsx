@@ -236,7 +236,7 @@ export default function EditUserPage() {
                                     <FormLabel>Organizations</FormLabel>
                                     <MultiSelect
                                         options={organizationOptions}
-                                        selected={field.value}
+                                        selectedValues={field.value}
                                         onChange={field.onChange}
                                         className="w-full"
                                         placeholder="Select organizations..."
@@ -250,10 +250,7 @@ export default function EditUserPage() {
                           <FormLabel>Profile Picture</FormLabel>
                           <div className="flex items-center gap-4">
                             <Avatar className="h-20 w-20">
-                                <AvatarImage src={avatarPreview ?? undefined} />
-                                <AvatarFallback className="text-2xl">
-                                    <UserIcon className="h-8 w-8" />
-                                </AvatarFallback>
+                                {avatarPreview ? <AvatarImage src={avatarPreview} /> : <AvatarFallback className="text-2xl"><UserIcon className="h-8 w-8" /></AvatarFallback> }
                             </Avatar>
                             <FormControl>
                                 <>

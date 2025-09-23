@@ -22,7 +22,7 @@ export function ExportForm() {
     const [data, setData] = useState<OrgAndTeamData>({ organizations: [] });
     
     const [fileType, setFileType] = useState<'xlsx' | 'csv'>('xlsx');
-    const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
+    const [selectedOrgs, setSelectedOrgs] = useState<string[]>(['All Organizations']);
     const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
     
     useEffect(() => {
@@ -133,7 +133,7 @@ export function ExportForm() {
                         <label className="text-sm font-medium mb-2 block">Organization</label>
                         <MultiSelect
                             options={orgOptions}
-                            selected={selectedOrgs}
+                            selectedValues={selectedOrgs}
                             onChange={setSelectedOrgs}
                             className="w-full"
                             placeholder="All Organizations"
@@ -143,7 +143,7 @@ export function ExportForm() {
                         <label className="text-sm font-medium mb-2 block">Team</label>
                         <MultiSelect
                             options={teamOptions}
-                            selected={selectedTeams}
+                            selectedValues={selectedTeams}
                             onChange={setSelectedTeams}
                             className="w-full"
                             placeholder="All Teams"
