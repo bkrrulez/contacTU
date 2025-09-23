@@ -13,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from './scroll-area';
 import { Input } from './input';
+import { ScrollArea } from './scroll-area';
 
 export interface MultiSelectOption {
   value: string;
@@ -54,35 +54,24 @@ export function MultiSelect({
 
     if (value === allOption) {
       if (selectedValues.includes(allOption)) {
-        // Already selected → no change
-        newSelectedValues = [...selectedValues];
+        // If "All" is already selected, deselect it.
+        newSelectedValues = [];
       } else {
         // Select only "All"
         newSelectedValues = [allOption];
       }
     } else {
-      if (allOption && selectedValues.includes(allOption)) {
-        // If "All" was selected → deselect it and replace with clicked value
-        newSelectedValues = [value];
+      // If a specific option is clicked, "All" should be deselected.
+      let currentValues = selectedValues.filter((v) => v !== allOption);
+      
+      const index = currentValues.indexOf(value);
+      if (index > -1) {
+        currentValues.splice(index, 1); // remove
       } else {
-        // Normal toggle behavior
-        let currentValues = [...selectedValues];
-
-        // Ensure "All" is removed just in case
-        if (allOption) {
-          currentValues = currentValues.filter((v) => v !== allOption);
-        }
-
-        const index = currentValues.indexOf(value);
-        if (index > -1) {
-          currentValues.splice(index, 1); // remove
-        } else {
-          currentValues.push(value); // add
-        }
-        newSelectedValues = currentValues;
+        currentValues.push(value); // add
       }
+      newSelectedValues = currentValues;
     }
-
     onChange(newSelectedValues);
   };
 
