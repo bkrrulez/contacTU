@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -89,11 +88,15 @@ export function MultiSelect({
           className={cn('w-full justify-between', className)}
         >
           <span className="truncate">{displayValue}</span>
+          <div className="flex items-center">
            {selected.length > 0 && placeholder === 'Filter by name...' ? (
-            <X className="ml-2 h-4 w-4 shrink-0 opacity-50" onClick={handleClear} />
+             <span onClick={handleClear} role="button" aria-label="Clear selection" className="mr-2">
+                <X className="h-4 w-4 shrink-0 opacity-50" />
+             </span>
            ) : (
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
            )}
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
