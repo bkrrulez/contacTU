@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "./scroll-area"
+import { Input } from "./input"
 
 export interface MultiSelectOption {
   value: string
@@ -40,54 +42,60 @@ export function MultiSelect({
   className,
   placeholder = "Select...",
   allOption,
+  enableSearch = false,
+  searchPlaceholder = 'Search...',
+  searchThreshold = 0,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
+  const [search, setSearch] = React.useState('')
 
   const handleToggle = (value: string) => {
-    let newSelectedValues: string[]
+    let newSelectedValues: string[];
 
     if (allOption && value === allOption) {
-        // If 'All' is clicked
-        if (selectedValues.includes(allOption)) {
-            // If 'All' is already selected, deselect it (clear selection)
-            newSelectedValues = []
-        } else {
-            // If 'All' is not selected, select it and deselect everything else
-            newSelectedValues = [allOption]
-        }
+      // If user clicks "All", it becomes the only selected item.
+      newSelectedValues = [allOption];
     } else {
-        // If any other option is clicked
-        let currentValues = [...selectedValues]
+      let currentValues = [...selectedValues];
 
-        // If 'All' is currently selected, deselect it
-        if (allOption && currentValues.includes(allOption)) {
-            currentValues = []
-        }
+      // If "All" was selected, deselect it and start fresh with the new selection.
+      if (allOption && currentValues.includes(allOption)) {
+        currentValues = [];
+      }
 
-        if (currentValues.includes(value)) {
-            // If the option is already selected, deselect it
-            newSelectedValues = currentValues.filter((item) => item !== value)
-        } else {
-            // If the option is not selected, select it
-            newSelectedValues = [...currentValues, value]
-        }
+      if (currentValues.includes(value)) {
+        // If the option is already selected, deselect it.
+        newSelectedValues = currentValues.filter((item) => item !== value);
+      } else {
+        // If the option is not selected, select it.
+        newSelectedValues = [...currentValues, value];
+      }
+
+      // If after toggling, the selection is empty and there's an allOption, maybe we should select all? For now, we leave it empty.
+      if (newSelectedValues.length === 0 && allOption) {
+        // default to allOption being selected if selection becomes empty
+        // newSelectedValues = [allOption];
+      }
     }
-    onChange(newSelectedValues)
+    onChange(newSelectedValues);
   }
 
   const getDisplayValue = () => {
     if (selectedValues.length === 0) return placeholder
     if (allOption && selectedValues.includes(allOption)) return allOption
 
-    if (selectedValues.length <= 2) {
-      return selectedValues
-        .map(
-          (value) => options.find((option) => option.value === value)?.label
-        )
-        .join(", ")
+    if (selectedValues.length === 1) {
+       return options.find(o => o.value === selectedValues[0])?.label ?? placeholder;
     }
-    return `${selectedValues.length} selected`
+    
+    if (selectedValues.length > 1) {
+      return `${selectedValues.length} selected`
+    }
   }
+  
+  const filteredOptions = options.filter(option => 
+    option.label.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -105,8 +113,18 @@ export function MultiSelect({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+        {enableSearch && options.length > (searchThreshold || 0) && (
+            <div className="p-2">
+                <Input 
+                    placeholder={searchPlaceholder}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    autoFocus
+                />
+            </div>
+        )}
         <ScrollArea className="max-h-60">
-        {options.map((option) => (
+        {filteredOptions.map((option) => (
           <DropdownMenuItem
             key={option.value}
             onSelect={(e) => e.preventDefault()}
@@ -122,8 +140,8 @@ export function MultiSelect({
             <span>{option.label}</span>
           </DropdownMenuItem>
         ))}
-        {options.length === 0 && (
-          <DropdownMenuItem disabled>No options available</DropdownMenuItem>
+        {filteredOptions.length === 0 && (
+          <DropdownMenuItem disabled>No options found</DropdownMenuItem>
         )}
         </ScrollArea>
       </DropdownMenuContent>
