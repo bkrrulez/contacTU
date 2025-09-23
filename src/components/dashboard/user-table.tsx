@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { User } from '@/lib/types';
@@ -22,11 +21,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import React from 'react';
 import type { OrganizationSchema } from '@/lib/db/schema';
+import { cn } from '@/lib/utils';
 
 interface UserTableProps {
   users: (User & { organizations: OrganizationSchema[] })[];
@@ -39,18 +39,88 @@ const roleVariant: { [key in User['role']]: 'default' | 'secondary' | 'destructi
   'Read-Only': 'outline',
 };
 
-export function UserTable({ users }: UserTableProps) {
+type SortKey = 'name' | 'email' | 'role' | 'organizations';
+type UserWithOrgs = User & { organizations: OrganizationSchema[] };
+
+export function UserTable({ users: initialUsers }: UserTableProps) {
+  const [users, setUsers] = React.useState(initialUsers);
+  const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>({ key: 'name', direction: 'ascending' });
+
+  React.useEffect(() => {
+    setUsers(initialUsers);
+  }, [initialUsers]);
   
+  const handleSort = (key: SortKey) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+
+    const sortedUsers = [...users].sort((a, b) => {
+      let aValue: string | number = '';
+      let bValue: string | number = '';
+
+      switch (key) {
+        case 'name':
+          aValue = a.name;
+          bValue = b.name;
+          break;
+        case 'email':
+          aValue = a.email;
+          bValue = b.email;
+          break;
+        case 'role':
+          aValue = a.role;
+          bValue = b.role;
+          break;
+        case 'organizations':
+          aValue = a.organizations?.map(o => o.name).join(', ') || '';
+          bValue = b.organizations?.map(o => o.name).join(', ') || '';
+          break;
+      }
+
+      if (aValue < bValue) {
+        return direction === 'ascending' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return direction === 'ascending' ? 1 : -1;
+      }
+      return 0;
+    });
+    setUsers(sortedUsers);
+  };
+
+  const getSortIndicator = (key: SortKey) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground/50" />;
+    }
+    return sortConfig.direction === 'ascending' ? (
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    ) : (
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    );
+  };
+  
+   const renderHeader = (key: SortKey, label: string, className?: string) => (
+    <TableHead className={cn('cursor-pointer', className)} onClick={() => handleSort(key)}>
+      <div className="flex items-center">
+        {label}
+        {getSortIndicator(key)}
+      </div>
+    </TableHead>
+  );
+
   return (
     <Card>
-      <CardContent>
+      <CardContent className="pt-6">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="hidden md:table-cell">Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead className="hidden lg:table-cell">Organizations</TableHead>
+              {renderHeader('name', 'Name')}
+              {renderHeader('email', 'Email', 'hidden md:table-cell')}
+              {renderHeader('role', 'Role')}
+              {renderHeader('organizations', 'Organizations', 'hidden lg:table-cell')}
               <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
