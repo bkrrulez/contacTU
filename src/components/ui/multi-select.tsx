@@ -62,11 +62,17 @@ export function MultiSelect({
       }
     } else {
       if (allOption && selectedValues.includes(allOption)) {
-        // Replace "All" with the clicked value
+        // If "All" was selected → deselect it and replace with clicked value
         newSelectedValues = [value];
       } else {
         // Normal toggle behavior
         let currentValues = [...selectedValues];
+
+        // Ensure "All" is removed just in case
+        if (allOption) {
+          currentValues = currentValues.filter((v) => v !== allOption);
+        }
+
         const index = currentValues.indexOf(value);
         if (index > -1) {
           currentValues.splice(index, 1); // remove
@@ -79,6 +85,7 @@ export function MultiSelect({
 
     onChange(newSelectedValues);
   };
+
 
   const getDisplayValue = () => {
     if (selectedValues.length === 0) return placeholder;
