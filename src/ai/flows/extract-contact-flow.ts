@@ -11,6 +11,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { ExtractedContactSchema } from '@/lib/schemas';
+import { appendFile } from 'fs/promises';
+import { join } from 'path';
 
 
 const ContactExtractionInputSchema = z.object({
@@ -53,8 +55,15 @@ const extractContactFlow = ai.defineFlow(
         model: 'googleai/gemini-1.5-flash-latest',
       });
       return output!;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error in extractContactFlow:', error);
+        const logFilePath = join(process.cwd(), 'ai-scan-error.log');
+        const logMessage = `[${new Date().toISOString()}] AI SCANNER ERROR:\n${error.stack || error.message || String(error)}\n\n`;
+        try {
+          await appendFile(logFilePath, logMessage);
+        } catch (logError) {
+          console.error('Failed to write to log file:', logError);
+        }
         throw new Error('Failed to extract contact from image.', { cause: error });
     }
   }
