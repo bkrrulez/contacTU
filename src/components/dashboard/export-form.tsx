@@ -58,12 +58,15 @@ export function ExportForm() {
     
      useEffect(() => {
         // Filter out teams that are no longer available in the updated `availableTeams`
-        const newSelectedTeams = selectedTeams.filter(team => availableTeams.includes(team));
-        // Only update state if the selected teams have actually changed
-        if (JSON.stringify(newSelectedTeams) !== JSON.stringify(selectedTeams)) {
-            setSelectedTeams(newSelectedTeams);
+        if (selectedTeams.length === 0 && availableTeams.length > 0 && selectedOrgs.length === 0) {
+             // do not auto-select any teams if no org is selected.
+        } else {
+            const newSelectedTeams = selectedTeams.filter(team => availableTeams.includes(team));
+             if (JSON.stringify(newSelectedTeams) !== JSON.stringify(selectedTeams)) {
+                setSelectedTeams(newSelectedTeams);
+            }
         }
-    }, [availableTeams, selectedTeams]);
+    }, [availableTeams, selectedTeams, selectedOrgs]);
 
 
     const handleExport = async () => {
@@ -101,7 +104,7 @@ export function ExportForm() {
         }
     }
 
-    const orgOptions = data.organizations.map(org => ({ value: org.name, label: org.name }));
+    const orgOptions = [{ value: 'All Organizations', label: 'All Organizations' }, ...data.organizations.map(org => ({ value: org.name, label: org.name }))];
     const teamOptions = availableTeams.map(team => ({ value: team, label: team }));
 
     const isExportDisabled = isExporting || isLoading;
