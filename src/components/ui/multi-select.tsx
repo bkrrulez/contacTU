@@ -52,33 +52,38 @@ export function MultiSelect({
   const handleToggle = (value: string) => {
     let newSelectedValues: string[];
 
-    if (allOption && value === allOption) {
-      // If user clicks "All", it becomes the only selected item.
-      newSelectedValues = [allOption];
+    if (value === allOption) {
+      // If "All" option is clicked
+      if (selectedValues.includes(allOption)) {
+        // If "All" is already selected, deselect it (clear selection)
+        newSelectedValues = [];
+      } else {
+        // If "All" is not selected, select it and clear all other options
+        newSelectedValues = [allOption];
+      }
     } else {
+      // If any other option is clicked
       let currentValues = [...selectedValues];
 
-      // If "All" was selected, deselect it and start fresh with the new selection.
-      if (allOption && currentValues.includes(allOption)) {
-        currentValues = [];
+      // Remove "All" option if it's present
+      const allIndex = allOption ? currentValues.indexOf(allOption) : -1;
+      if (allIndex > -1) {
+        currentValues.splice(allIndex, 1);
       }
 
-      if (currentValues.includes(value)) {
-        // If the option is already selected, deselect it.
-        newSelectedValues = currentValues.filter((item) => item !== value);
+      // Toggle the clicked option
+      const valueIndex = currentValues.indexOf(value);
+      if (valueIndex > -1) {
+        currentValues.splice(valueIndex, 1); // Deselect if already selected
       } else {
-        // If the option is not selected, select it.
-        newSelectedValues = [...currentValues, value];
+        currentValues.push(value); // Select if not selected
       }
-
-      // If after toggling, the selection is empty and there's an allOption, maybe we should select all? For now, we leave it empty.
-      if (newSelectedValues.length === 0 && allOption) {
-        // default to allOption being selected if selection becomes empty
-        // newSelectedValues = [allOption];
-      }
+      newSelectedValues = currentValues;
     }
+
     onChange(newSelectedValues);
   }
+
 
   const getDisplayValue = () => {
     if (selectedValues.length === 0) return placeholder
