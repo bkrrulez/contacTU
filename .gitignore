@@ -42,4 +42,5 @@ next-env.d.ts
 
 .gitlab-ci.yml
 Dockerfile
+docker-compose.ymlDockerfile
 docker-compose.yml
