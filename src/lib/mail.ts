@@ -7,11 +7,13 @@ const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
 const smtpUser = process.env.SMTP_USER || '';
 const smtpPassword = process.env.SMTP_PASSWORD || '';
 
+const isSecure = smtpPort === 465;
+
 const transportOptions: TransportOptions = {
     host: smtpHost,
     port: smtpPort,
-    secure: smtpPort === 465, // true for 465, false for other ports
-    requireTLS: true, // Force STARTTLS for port 587
+    secure: isSecure,
+    ...(isSecure ? {} : { requireTLS: true }), // Only force TLS on non-secure ports
     auth: {
         user: smtpUser,
         pass: smtpPassword,
