@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, XIcon } from 'lucide-react';
 
 export interface MultiSelectOption {
   value: string;
@@ -62,6 +62,15 @@ export function MultiSelect({
     }
   };
 
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange([]);
+    if (onInputChange) {
+        onInputChange('');
+    }
+  };
+
+
   const getDisplayValue = () => {
     if (inputValue) return inputValue;
     if (selectedValues.length === 0) return placeholder;
@@ -103,6 +112,8 @@ export function MultiSelect({
     }
   }, [open]);
 
+  const showClearButton = (selectedValues && selectedValues.length > 0) || (inputValue && inputValue.length > 0);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -113,7 +124,15 @@ export function MultiSelect({
           className={cn('w-full justify-between font-normal', className)}
         >
           <span className="truncate">{getDisplayValue()}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <div className="flex items-center">
+            {showClearButton && (
+                <XIcon
+                className="h-4 w-4 shrink-0 opacity-50 mr-2"
+                onClick={handleClear}
+                />
+            )}
+            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
