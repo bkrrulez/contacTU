@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -127,7 +128,7 @@ export function MultiSelect({
           <div className="flex items-center">
             {showClearButton && (
                 <XIcon
-                className="h-4 w-4 shrink-0 opacity-50 mr-2"
+                className="h-4 w-4 shrink-0 opacity-50 mr-2 cursor-pointer"
                 onClick={handleClear}
                 />
             )}
