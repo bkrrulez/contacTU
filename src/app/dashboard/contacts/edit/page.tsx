@@ -5,14 +5,14 @@
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { createContact } from '../actions';
+import { updateContact, getContact } from '../../actions';
 import Link from 'next/link';
 import { ArrowLeft, CalendarIcon, PlusCircle, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,86 +20,80 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { contactFormSchema, ExtractedContactSchema } from '@/lib/schemas';
+import { useEffect, useState } from 'react';
+import type { Contact } from '@/lib/types';
+import { contactFormSchema } from '@/lib/schemas';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useEffect } from 'react';
-import { extractContactFromImage } from '@/ai/flows/extract-contact-flow';
 import { useContacts } from '@/contexts/ContactContext';
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
-type ExtractedContact = z.infer<typeof ExtractedContactSchema>;
 
-export default function NewContactPage() {
+
+export default function EditContactPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const params = useParams();
   const { toast } = useToast();
   const { refreshContacts } = useContacts();
+  const contactId = parseInt(params.id as string, 10);
+  const [contact, setContact] = useState<Contact | null>(null);
   
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      emails: [{ email: '' }],
-      phones: [{ phone: '', type: 'Mobile' }],
-      organizations: [{ organization: '', designation: '', team: '', department: '' }],
-      address: '',
-      notes: '',
-      website: '',
-      subordinateName: '',
-      socialMedia: '',
-    },
+        firstName: '',
+        lastName: '',
+        emails: [],
+        phones: [],
+        organizations: [],
+        address: '',
+        notes: '',
+        website: '',
+        subordinateName: '',
+        socialMedia: '',
+      },
   });
-  
-  useEffect(() => {
-    const dataParam = searchParams.get('data');
-    if (dataParam) {
-        try {
-            const extractedData: ExtractedContact = JSON.parse(dataParam);
-            const { emails, phones, organizations, ...rest } = extractedData;
-
-            // Reset the form with the new data
-            form.reset({
-              ...form.getValues(), // keep existing defaults
-              ...rest,
-              emails: emails && emails.length > 0 ? emails : [{ email: '' }],
-              phones: phones && phones.length > 0 ? phones : [{ phone: '', type: 'Mobile' }],
-              organizations: organizations && organizations.length > 0 ? organizations.map(o => ({...o, team: o.team || '', designation: o.designation || '', department: o.department || ''})) : [{ organization: '', designation: '', team: '', department: '' }],
-            });
-
-            toast({
-              title: "Contact Info Extracted",
-              description: "Please review the information extracted from the image and save the contact."
-            })
-        } catch (error) {
-            console.error("Failed to parse extracted contact data:", error);
-        }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, form.reset]);
-
 
   const { fields: emailFields, append: appendEmail, remove: removeEmail } = useFieldArray({
-    control: form.control,
-    name: "emails",
+    control: form.control, name: "emails",
   });
-
   const { fields: phoneFields, append: appendPhone, remove: removePhone } = useFieldArray({
-    control: form.control,
-    name: "phones",
+    control: form.control, name: "phones",
+  });
+  const { fields: orgFields, append: appendOrg, remove: removeOrg } = useFieldArray({
+    control: form.control, name: "organizations",
   });
 
-  const { fields: orgFields, append: appendOrg, remove: removeOrg } = useFieldArray({
-    control: form.control,
-    name: "organizations",
-  });
+
+  useEffect(() => {
+    if (contactId) {
+      getContact(contactId).then(data => {
+        if (data) {
+          setContact(data);
+          form.reset({
+            firstName: data.firstName,
+            lastName: data.lastName,
+            emails: data.emails?.length ? data.emails.map(e => ({ email: e.email })) : [{email: ''}],
+            phones: data.phones?.length ? data.phones.map(p => ({ phone: p.phone, type: p.type as 'Mobile' | 'Telephone' })) : [{phone: '', type: 'Mobile'}],
+            organizations: data.organizations?.length ? data.organizations.map(o => ({ organization: o.organization.name, designation: o.designation || '', team: o.team?.name || '', department: o.department || '' })) : [{organization: '', designation: '', team: '', department: ''}],
+            address: data.address ?? '',
+            notes: data.notes ?? '',
+            website: data.urls?.[0]?.url ?? '',
+            birthday: data.birthday ? new Date(data.birthday) : undefined,
+            subordinateName: data.associatedNames?.[0]?.name ?? '',
+            socialMedia: data.socialLinks?.[0]?.link ?? '',
+          });
+        }
+      });
+    }
+  }, [contactId, form]);
+
 
   const onSubmit = async (data: ContactFormValues) => {
     try {
-      await createContact(data);
+      await updateContact(contactId, data);
       toast({
-        title: 'Contact Created',
-        description: `${data.firstName} ${data.lastName} has been added to your contacts.`,
+        title: 'Contact Updated',
+        description: `${data.firstName} ${data.lastName} has been updated.`,
       });
       refreshContacts();
       router.push('/dashboard/contacts');
@@ -108,10 +102,14 @@ export default function NewContactPage() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Something went wrong while creating the contact.',
+        description: 'Something went wrong while updating the contact.',
       });
     }
   };
+
+  if (!contact) {
+      return <div>Loading...</div>
+  }
 
   return (
     <div className="space-y-4">
@@ -123,8 +121,8 @@ export default function NewContactPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight font-headline">Add New Contact</h1>
-            <p className="text-muted-foreground">Fill out the form to add a new contact.</p>
+            <h1 className="text-2xl font-bold tracking-tight font-headline">Edit Contact</h1>
+            <p className="text-muted-foreground">Modify the details for {contact.firstName} {contact.lastName}.</p>
           </div>
         </div>
         <Form {...form}>
@@ -159,7 +157,7 @@ export default function NewContactPage() {
                             )}
                         />
                     </div>
-                    
+                   
                     {/* Emails */}
                     <div className="space-y-2">
                         <FormLabel>Emails <span className="text-destructive">*</span></FormLabel>
@@ -469,7 +467,7 @@ export default function NewContactPage() {
                     <CardFooter className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => router.push('/dashboard/contacts')}>Cancel</Button>
                         <Button type="submit" disabled={form.formState.isSubmitting}>
-                            {form.formState.isSubmitting ? 'Creating...' : 'Create Contact'}
+                            {form.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </CardFooter>
                 </Card>
