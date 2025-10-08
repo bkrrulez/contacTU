@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import type { Contact } from '@/lib/types';
 import { getContactsForPage } from '@/app/dashboard/contacts/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -10,7 +11,7 @@ interface ContactContextType {
   contacts: Contact[];
   isLoading: boolean;
   removeContact: (contactId: number) => void;
-  refreshContacts: () => void;
+  refreshContacts: () => Promise<void>;
 }
 
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
@@ -20,7 +21,7 @@ export function ContactProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchContacts = async () => {
+  const fetchContacts = useCallback(async () => {
     setIsLoading(true);
     try {
       const contactsData = await getContactsForPage();
@@ -35,20 +36,19 @@ export function ContactProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchContacts();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchContacts]);
 
   const removeContact = (contactId: number) => {
     setContacts(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
   };
   
-  const refreshContacts = () => {
-      fetchContacts();
-  }
+  const refreshContacts = useCallback(async () => {
+      await fetchContacts();
+  }, [fetchContacts])
 
   return (
     <ContactContext.Provider value={{ contacts, isLoading, removeContact, refreshContacts }}>

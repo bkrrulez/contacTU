@@ -101,7 +101,7 @@ export default function NewContactPage() {
         title: 'Contact Created',
         description: `${data.firstName} ${data.lastName} has been added to your contacts.`,
       });
-      refreshContacts();
+      await refreshContacts();
       router.push('/dashboard/contacts');
     } catch (error) {
       console.error(error);
