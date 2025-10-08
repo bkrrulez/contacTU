@@ -33,6 +33,7 @@ export function MultiSelect({
   allOption,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState("");
 
   const handleToggle = (value: string) => {
     let newSelectedValues: string[];
@@ -56,7 +57,7 @@ export function MultiSelect({
     }
     onChange(newSelectedValues);
   };
-  
+
   const getDisplayValue = () => {
     if (selectedValues.length === 0) return placeholder;
     if (allOption && selectedValues.includes(allOption)) return allOption;
@@ -69,6 +70,27 @@ export function MultiSelect({
       return `${selectedValues.length} selected`;
     }
   };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const input = event.currentTarget.querySelector('input');
+    if (input) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const firstItem = event.currentTarget.querySelector('[cmdk-item]');
+        if (firstItem) {
+          (firstItem as HTMLElement).focus();
+        }
+      }
+    }
+  };
+  
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+    // If you want to filter based on typing without selecting
+    // you can call onChange with a special value or handle it here
+  }
+
+  const filteredOptions = options.filter(option => option.label.toLowerCase().includes(inputValue.toLowerCase()));
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -85,8 +107,12 @@ export function MultiSelect({
             </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-            <Command>
-                <CommandInput placeholder="Search..." />
+            <Command onKeyDown={handleKeyDown}>
+                <CommandInput 
+                  placeholder="Search..." 
+                  value={inputValue}
+                  onValueChange={handleInputChange}
+                />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
                     <CommandGroup>
@@ -94,7 +120,10 @@ export function MultiSelect({
                          <CommandItem
                             key={allOption}
                             value={allOption}
-                            onSelect={() => handleToggle(allOption)}
+                            onSelect={() => {
+                              handleToggle(allOption);
+                              setInputValue('');
+                            }}
                             >
                             <Check
                                 className={cn(
@@ -105,11 +134,14 @@ export function MultiSelect({
                             {allOption}
                         </CommandItem>
                     )}
-                    {options.filter(opt => opt.value !== allOption).map((option) => (
+                    {filteredOptions.filter(opt => opt.value !== allOption).map((option) => (
                         <CommandItem
                             key={option.value}
                             value={option.label}
-                            onSelect={() => handleToggle(option.value)}
+                            onSelect={() => {
+                              handleToggle(option.value);
+                              setInputValue('');
+                            }}
                         >
                             <Check
                                 className={cn(
