@@ -223,6 +223,7 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
 
   const isAllSelected = selectedRows.size > 0 && selectedRows.size === contacts.length;
   const isSomeSelected = selectedRows.size > 0 && !isAllSelected;
+  const showBulkActions = selectedRows.size >= 2;
 
   if (contacts.length === 0) {
     return null;
@@ -230,10 +231,10 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   
   return (
       <>
-        <div className="flex items-center gap-2 mb-4 h-9">
-            {selectedRows.size > 0 && (
-                <div className='flex items-center gap-2'>
-                     <Button variant="outline" size="sm" onClick={handleBulkFavorite}>
+        <div className="mb-4 flex min-h-[36px] items-center justify-end gap-2">
+            {showBulkActions && (
+                <>
+                    <Button variant="outline" size="sm" onClick={handleBulkFavorite}>
                         <Star className="mr-2 h-4 w-4" />
                         Favorite ({selectedRows.size})
                     </Button>
@@ -245,7 +246,7 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete ({selectedRows.size})
                     </Button>
-                </div>
+                </>
             )}
         </div>
         <Table>
@@ -296,7 +297,7 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={selectedRows.size > 0}>
+                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={showBulkActions}>
                         <span className="sr-only">Open menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
