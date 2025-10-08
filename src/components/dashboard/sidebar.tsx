@@ -59,6 +59,9 @@ export function AppSidebar() {
   const isSettingsRouteActive = settingsNavItems.some(item => pathname.startsWith(item.href));
   const canViewSettings = settingsNavItems.some(item => !item.roles || item.roles.includes(userRole));
 
+  const handleLogout = () => {
+    localStorage.removeItem('userSession');
+  };
 
   return (
     <Sidebar
@@ -127,6 +130,7 @@ export function AppSidebar() {
                         asChild
                         tooltip={{ children: item.label }}
                         isActive={pathname === item.href}
+                        onClick={handleLogout}
                     >
                         <Link href={item.href}>
                         <item.icon />

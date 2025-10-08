@@ -9,6 +9,7 @@ import type { User } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ContactProvider } from '@/contexts/ContactContext';
+import { useRouter } from 'next/navigation';
 
 function DashboardSkeleton() {
     return (
@@ -49,21 +50,37 @@ export default function DashboardLayout({
 }) {
     const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
         try {
-            const userJson = sessionStorage.getItem('user');
-            if (userJson) {
-                setCurrentUser(JSON.parse(userJson));
+            const sessionJson = localStorage.getItem('userSession');
+            if (sessionJson) {
+                const { user, timestamp } = JSON.parse(sessionJson);
+                const now = new Date().getTime();
+                const twelveHours = 12 * 60 * 60 * 1000;
+
+                if (now - timestamp < twelveHours) {
+                    setCurrentUser(user);
+                } else {
+                    // Session expired
+                    localStorage.removeItem('userSession');
+                    router.push('/');
+                }
+            } else {
+                // No session found
+                router.push('/');
             }
         } catch (error) {
-            console.error("Failed to parse user from sessionStorage", error);
+            console.error("Failed to parse user from localStorage", error);
+            localStorage.removeItem('userSession');
+            router.push('/');
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [router]);
 
-    if (isLoading) {
+    if (isLoading || !currentUser) {
         return <DashboardSkeleton />;
     }
 

@@ -20,6 +20,10 @@ import type { User } from '@/lib/types';
 
 export function AppHeader({ children, user }: { children: React.ReactNode, user: Partial<User> | null }) {
 
+  const handleLogout = () => {
+    localStorage.removeItem('userSession');
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <div className="flex items-center gap-4 md:hidden">
@@ -62,7 +66,7 @@ export function AppHeader({ children, user }: { children: React.ReactNode, user:
           <DropdownMenuSeparator />
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild><Link href="/">Logout</Link></DropdownMenuItem>
+          <DropdownMenuItem asChild onClick={handleLogout}><Link href="/">Logout</Link></DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

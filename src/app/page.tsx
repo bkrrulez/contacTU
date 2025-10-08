@@ -42,9 +42,12 @@ export default function LoginPage() {
         const result = await signIn(data);
 
         if (result.success && result.user) {
-          // In a real app, session data would be stored in a secure cookie.
-          // For this demo, we'll use sessionStorage.
-          sessionStorage.setItem('user', JSON.stringify(result.user));
+          // Store user data and timestamp in localStorage for persistence.
+          const sessionData = {
+            user: result.user,
+            timestamp: new Date().getTime(), // Get current time in milliseconds
+          };
+          localStorage.setItem('userSession', JSON.stringify(sessionData));
           router.push('/dashboard');
         } else {
           toast({
