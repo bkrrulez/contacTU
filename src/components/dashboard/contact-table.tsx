@@ -231,24 +231,24 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   
   return (
       <>
-        <div className="mb-4 flex items-center justify-end gap-2 h-[36px]">
-            {showBulkActions && (
-                <>
-                    <Button variant="outline" size="sm" onClick={handleBulkFavorite}>
-                        <Star className="mr-2 h-4 w-4" />
-                        Favorite ({selectedRows.size})
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={handleBulkShare}>
-                        <Share2 className="mr-2 h-4 w-4" />
-                        Share ({selectedRows.size})
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={openBulkDeleteDialog}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete ({selectedRows.size})
-                    </Button>
-                </>
-            )}
-        </div>
+        {showBulkActions ? (
+            <div className="mb-4 flex items-center justify-end gap-2 h-[36px]">
+                <Button variant="outline" size="sm" onClick={handleBulkFavorite}>
+                    <Star className="mr-2 h-4 w-4" />
+                    Favorite ({selectedRows.size})
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleBulkShare}>
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share ({selectedRows.size})
+                </Button>
+                <Button variant="destructive" size="sm" onClick={openBulkDeleteDialog}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete ({selectedRows.size})
+                </Button>
+            </div>
+        ) : (
+          <div className="h-[36px] mb-4"></div>
+        )}
         <Table>
           <TableHeader>
             <TableRow>
