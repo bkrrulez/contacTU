@@ -9,6 +9,8 @@ interface ContactFiltersProps {
     organizationNames: string[];
     selectedNames: string[];
     onSelectedNamesChange: (names: string[]) => void;
+    nameFilter: string;
+    onNameFilterChange: (filter: string) => void;
     selectedOrgs: string[];
     onSelectedOrgsChange: (orgs: string[]) => void;
 }
@@ -18,6 +20,8 @@ export function ContactFilters({
     organizationNames,
     selectedNames,
     onSelectedNamesChange,
+    nameFilter,
+    onNameFilterChange,
     selectedOrgs,
     onSelectedOrgsChange,
 }: ContactFiltersProps) {
@@ -31,6 +35,8 @@ export function ContactFilters({
                 options={nameOptions}
                 selectedValues={selectedNames}
                 onChange={onSelectedNamesChange}
+                inputValue={nameFilter}
+                onInputChange={onNameFilterChange}
                 placeholder="Filter by name..."
                 className="w-48"
             />

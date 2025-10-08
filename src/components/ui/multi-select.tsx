@@ -21,6 +21,8 @@ interface MultiSelectProps {
   className?: string;
   placeholder?: string;
   allOption?: string;
+  inputValue?: string;
+  onInputChange?: (value: string) => void;
 }
 
 export function MultiSelect({
@@ -31,9 +33,10 @@ export function MultiSelect({
   className,
   placeholder = 'Select...',
   allOption,
+  inputValue = '',
+  onInputChange,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("");
   const [pointer, setPointer] = React.useState(-1);
 
   const handleToggle = (value: string) => {
@@ -57,9 +60,14 @@ export function MultiSelect({
       newSelectedValues = currentValues;
     }
     onChange(newSelectedValues);
+    // Clear text input when a selection is made
+    if (onInputChange) {
+      onInputChange('');
+    }
   };
 
   const getDisplayValue = () => {
+    if (inputValue) return inputValue;
     if (selectedValues.length === 0) return placeholder;
     if (allOption && selectedValues.includes(allOption)) return allOption;
 
@@ -72,7 +80,9 @@ export function MultiSelect({
     }
   };
 
-  const filteredOptions = options.filter(option => option.label.toLowerCase().includes(inputValue.toLowerCase()));
+  const filteredOptions = options.filter(option => 
+    option.label.toLowerCase().includes(inputValue.toLowerCase())
+  );
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'ArrowDown') {
@@ -83,9 +93,11 @@ export function MultiSelect({
         setPointer(prev => (prev > 0 ? prev - 1 : 0));
     } else if (event.key === 'Enter') {
         event.preventDefault();
-        if (pointer !== -1 && filteredOptions[pointer]) {
-            handleToggle(filteredOptions[pointer].value);
-            setInputValue('');
+        if (pointer >= 0 && pointer < filteredOptions.length) {
+          handleToggle(filteredOptions[pointer].value);
+        } else {
+          // If no item is highlighted, just close the popover
+          setOpen(false);
         }
     }
   };
@@ -93,7 +105,6 @@ export function MultiSelect({
   React.useEffect(() => {
     if (!open) {
       setPointer(-1);
-      setInputValue('');
     }
   }, [open]);
 
@@ -116,7 +127,7 @@ export function MultiSelect({
                 <CommandInput 
                   placeholder="Search..." 
                   value={inputValue}
-                  onValueChange={setInputValue}
+                  onValueChange={onInputChange}
                 />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
@@ -125,10 +136,7 @@ export function MultiSelect({
                          <CommandItem
                             key={allOption}
                             value={allOption}
-                            onSelect={() => {
-                              handleToggle(allOption);
-                              setInputValue('');
-                            }}
+                            onSelect={() => handleToggle(allOption)}
                             data-highlighted={pointer === filteredOptions.findIndex(o => o.value === allOption)}
                             >
                             <Check
@@ -144,10 +152,7 @@ export function MultiSelect({
                         <CommandItem
                             key={option.value}
                             value={option.label}
-                            onSelect={() => {
-                              handleToggle(option.value);
-                              setInputValue('');
-                            }}
+                            onSelect={() => handleToggle(option.value)}
                             data-highlighted={pointer === index}
                         >
                             <Check

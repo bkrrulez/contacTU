@@ -13,17 +13,24 @@ import { useContacts } from '@/contexts/ContactContext';
 export default function ContactsPage() {
   const { contacts: allContacts, isLoading } = useContacts();
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
+  const [nameFilter, setNameFilter] = useState('');
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>(['All Organizations']);
 
   const filteredContacts = useMemo(() => {
     return allContacts.filter(contact => {
-      const nameMatch = selectedNames.length === 0 || selectedNames.includes(`${contact.firstName} ${contact.lastName}`);
+      const fullName = `${contact.firstName} ${contact.lastName}`.toLowerCase();
+      
+      const nameTextMatch = nameFilter ? fullName.includes(nameFilter.toLowerCase()) : true;
+
+      const nameSelectionMatch = selectedNames.length === 0 || selectedNames.includes(`${contact.firstName} ${contact.lastName}`);
       
       const orgMatch = selectedOrgs.includes('All Organizations') || selectedOrgs.length === 0 || contact.organizations?.some(org => selectedOrgs.includes(org.organization.name));
 
-      return nameMatch && orgMatch;
+      // If there's a text filter, it takes precedence over the selection for name filtering.
+      // If there's no text filter, fall back to the selection.
+      return (nameFilter ? nameTextMatch : nameSelectionMatch) && orgMatch;
     });
-  }, [allContacts, selectedNames, selectedOrgs]);
+  }, [allContacts, selectedNames, selectedOrgs, nameFilter]);
   
   const contactNames = useMemo(() => allContacts.map(c => `${c.firstName} ${c.lastName}`), [allContacts]);
   const organizationNames = useMemo(() => {
@@ -48,6 +55,8 @@ export default function ContactsPage() {
             organizationNames={organizationNames}
             selectedNames={selectedNames}
             onSelectedNamesChange={setSelectedNames}
+            nameFilter={nameFilter}
+            onNameFilterChange={setNameFilter}
             selectedOrgs={selectedOrgs}
             onSelectedOrgsChange={setSelectedOrgs}
           />
