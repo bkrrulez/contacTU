@@ -226,13 +226,13 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   const showBulkActions = selectedRows.size >= 2;
 
   if (contacts.length === 0) {
-    return null;
+    return <div className="text-center py-12 text-muted-foreground">No contacts found.</div>;
   }
   
   return (
       <>
-        {showBulkActions ? (
-            <div className="mb-4 flex items-center justify-end gap-2 h-[36px]">
+        {showBulkActions && (
+            <div className="mb-4 flex items-center justify-end gap-2">
                 <Button variant="outline" size="sm" onClick={handleBulkFavorite}>
                     <Star className="mr-2 h-4 w-4" />
                     Favorite ({selectedRows.size})
@@ -246,8 +246,6 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                     Delete ({selectedRows.size})
                 </Button>
             </div>
-        ) : (
-          <div className="h-[36px] mb-4"></div>
         )}
         <Table>
           <TableHeader>
