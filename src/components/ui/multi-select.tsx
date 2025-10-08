@@ -22,6 +22,7 @@ interface MultiSelectProps {
   allOption?: string;
   inputValue?: string;
   onInputChange?: (value: string) => void;
+  onClear?: () => void;
 }
 
 export function MultiSelect({
@@ -33,6 +34,7 @@ export function MultiSelect({
   allOption,
   inputValue = '',
   onInputChange,
+  onClear,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [pointer, setPointer] = React.useState(-1);
@@ -65,9 +67,13 @@ export function MultiSelect({
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onChange([]);
-    if (onInputChange) {
-        onInputChange('');
+    if (onClear) {
+      onClear();
+    } else {
+      onChange([]);
+      if (onInputChange) {
+          onInputChange('');
+      }
     }
   };
 

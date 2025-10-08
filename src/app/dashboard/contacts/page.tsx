@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PlusCircle } from 'lucide-react';
@@ -20,15 +19,18 @@ export default function ContactsPage() {
     return allContacts.filter(contact => {
       const fullName = `${contact.firstName} ${contact.lastName}`.toLowerCase();
       
-      const nameTextMatch = nameFilter ? fullName.includes(nameFilter.toLowerCase()) : true;
-
+      // If there's text in the filter box, it's the primary filter
+      if (nameFilter) {
+        return fullName.includes(nameFilter.toLowerCase());
+      }
+      
+      // If no text filter, use the selected names (if any)
       const nameSelectionMatch = selectedNames.length === 0 || selectedNames.includes(`${contact.firstName} ${contact.lastName}`);
       
+      // Always apply organization filter
       const orgMatch = selectedOrgs.includes('All Organizations') || selectedOrgs.length === 0 || contact.organizations?.some(org => selectedOrgs.includes(org.organization.name));
 
-      // If there's a text filter, it takes precedence over the selection for name filtering.
-      // If there's no text filter, fall back to the selection.
-      return (nameFilter ? nameTextMatch : nameSelectionMatch) && orgMatch;
+      return nameSelectionMatch && orgMatch;
     });
   }, [allContacts, selectedNames, selectedOrgs, nameFilter]);
   
@@ -40,6 +42,11 @@ export default function ContactsPage() {
     });
     return ['All Organizations', ...Array.from(orgs).sort()];
   }, [allContacts]);
+  
+  const handleClearNameFilter = () => {
+    setSelectedNames([]);
+    setNameFilter('');
+  };
 
 
   return (
@@ -57,6 +64,7 @@ export default function ContactsPage() {
             onSelectedNamesChange={setSelectedNames}
             nameFilter={nameFilter}
             onNameFilterChange={setNameFilter}
+            onClearNameFilter={handleClearNameFilter}
             selectedOrgs={selectedOrgs}
             onSelectedOrgsChange={setSelectedOrgs}
           />
