@@ -66,64 +66,69 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="space-y-1 text-center pt-8 flex items-center justify-center">
-            <Logo />
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="name@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                     <div className="flex items-center">
-                        <FormLabel>Password</FormLabel>
-                        <Link href="/forgot-password" prefetch={false} className="ml-auto inline-block text-sm underline">
-                          Forgot your password?
-                        </Link>
-                      </div>
-                    <FormControl>
-                      <div className="relative">
-                        <Input type={showPassword ? 'text' : 'password'} placeholder="********" {...field} />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute inset-y-0 right-0 h-full px-3"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <EyeOff /> : <Eye />}
-                          <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                 {form.formState.isSubmitting ? 'Signing in...' : 'Sign in'}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <div className="flex-grow flex items-center justify-center w-full">
+        <Card className="w-full max-w-md mx-auto">
+          <CardHeader className="space-y-1 text-center pt-8 flex items-center justify-center">
+              <Logo />
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="name@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center">
+                          <FormLabel>Password</FormLabel>
+                          <Link href="/forgot-password" prefetch={false} className="ml-auto inline-block text-sm underline">
+                            Forgot your password?
+                          </Link>
+                        </div>
+                      <FormControl>
+                        <div className="relative">
+                          <Input type={showPassword ? 'text' : 'password'} placeholder="********" {...field} />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute inset-y-0 right-0 h-full px-3"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? <EyeOff /> : <Eye />}
+                            <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? 'Signing in...' : 'Sign in'}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+      <footer className="py-4 text-center text-xs" style={{ color: 'darkblue', fontSize: '0.67rem' }}>
+        Created by Bikramjit Chowdhury
+      </footer>
     </div>
   );
 }
