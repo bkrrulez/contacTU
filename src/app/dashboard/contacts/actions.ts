@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { contacts, contactEmails, contactPhones, contactOrganizations, contactUrls, contactSocialLinks, contactAssociatedNames, auditLogs, organizations as orgsTable, teams as teamsTable } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, inArray } from 'drizzle-orm';
 import type { Contact } from '@/lib/types';
 import { contactFormSchema } from '@/lib/schemas';
 
@@ -237,6 +237,33 @@ export async function deleteContact(id: number) {
     revalidatePath('/dashboard/favorites');
     revalidatePath('/dashboard');
 
+
+    return { success: true };
+}
+
+export async function deleteMultipleContacts(ids: number[]) {
+    if (ids.length === 0) {
+        return { success: true, message: 'No contacts selected for deletion.' };
+    }
+    const contactsToDelete = await db.query.contacts.findMany({
+        where: inArray(contacts.id, ids)
+    });
+
+    if (contactsToDelete.length === 0) {
+        return { error: 'No matching contacts found to delete.' };
+    }
+
+    await db.delete(contacts).where(inArray(contacts.id, ids));
+
+    // Create audit logs for all deleted contacts
+    for (const contact of contactsToDelete) {
+        await createAuditLog('delete', contact.id, { contactName: `${contact.firstName} ${contact.lastName}` });
+    }
+    
+    revalidatePath('/dashboard/contacts');
+    revalidatePath('/dashboard/audit');
+    revalidatePath('/dashboard/favorites');
+    revalidatePath('/dashboard');
 
     return { success: true };
 }

@@ -23,7 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MoreHorizontal, ArrowUpDown, Star } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Star, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -35,7 +35,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { deleteContact, toggleFavoriteStatus } from '@/app/dashboard/contacts/actions';
+import { deleteContact, deleteMultipleContacts, toggleFavoriteStatus } from '@/app/dashboard/contacts/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useContacts } from '@/contexts/ContactContext';
 
@@ -53,11 +53,17 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   const [contacts, setContacts] = React.useState(initialContacts);
   const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>({ key: 'name', direction: 'ascending' });
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-  const [contactToDelete, setContactToDelete] = React.useState<Contact | null>(null);
+  const [contactsToDelete, setContactsToDelete] = React.useState<Contact[]>([]);
 
   React.useEffect(() => {
     setContacts(initialContacts);
   }, [initialContacts]);
+
+  React.useEffect(() => {
+    // Clear selection if contacts list changes (e.g. due to filtering)
+    setSelectedRows(new Set());
+  }, [contacts]);
+
 
   const handleSort = (key: SortKey) => {
     let direction: 'ascending' | 'descending' = 'ascending';
@@ -142,31 +148,52 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   };
 
   const openDeleteDialog = (contact: Contact) => {
-    setContactToDelete(contact);
+    setContactsToDelete([contact]);
     setShowDeleteDialog(true);
   };
+  
+  const openBulkDeleteDialog = () => {
+    const toDelete = contacts.filter(c => selectedRows.has(c.id));
+    if (toDelete.length > 0) {
+      setContactsToDelete(toDelete);
+      setShowDeleteDialog(true);
+    }
+  }
 
   const handleDeleteConfirm = async () => {
-    if (contactToDelete) {
+    if (contactsToDelete.length > 0) {
+      const idsToDelete = contactsToDelete.map(c => c.id);
       try {
-        await deleteContact(contactToDelete.id);
-        removeContact(contactToDelete.id); // Update context state
+        await deleteMultipleContacts(idsToDelete);
+        idsToDelete.forEach(id => removeContact(id)); // Update context state
         toast({
-          title: 'Contact Deleted',
-          description: `${contactToDelete.firstName} ${contactToDelete.lastName} has been deleted.`,
+          title: 'Contacts Deleted',
+          description: `${contactsToDelete.length} contact(s) have been deleted.`,
         });
+        setSelectedRows(new Set());
       } catch (error) {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Failed to delete contact.',
+          description: 'Failed to delete contacts.',
         });
       } finally {
         setShowDeleteDialog(false);
-        setContactToDelete(null);
+        setContactsToDelete([]);
       }
     }
   };
+
+  const getDeleteDialogDescription = () => {
+    if (contactsToDelete.length === 1) {
+        return `This action cannot be undone. This will permanently delete the contact for ${contactsToDelete[0].firstName} ${contactsToDelete[0].lastName}.`;
+    }
+    if (contactsToDelete.length > 1) {
+        return `This action cannot be undone. This will permanently delete ${contactsToDelete.length} selected contacts.`;
+    }
+    return '';
+  }
+
 
   const handleToggleFavorite = async (contact: Contact) => {
     const result = await toggleFavoriteStatus(contact.id, contact.isFavorite);
@@ -195,6 +222,14 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   
   return (
       <>
+        <div className="flex items-center gap-2 mb-4">
+            {selectedRows.size > 0 && (
+                <Button variant="destructive" size="sm" onClick={openBulkDeleteDialog}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Selected ({selectedRows.size})
+                </Button>
+            )}
+        </div>
         <Table>
           <TableHeader>
             <TableRow>
@@ -279,8 +314,7 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the contact
-                for {contactToDelete?.firstName} {contactToDelete?.lastName}.
+                {getDeleteDialogDescription()}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
