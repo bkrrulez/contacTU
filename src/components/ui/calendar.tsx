@@ -1,12 +1,13 @@
-
 "use client"
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, useDayPicker, useNavigation } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
+import { format } from "date-fns"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -16,6 +17,77 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+
+  const CustomCaption = (props: { displayMonth: Date }) => {
+    const { goToMonth, nextMonth, previousMonth } = useNavigation();
+    const { fromYear, toYear } = useDayPicker();
+
+    const handleYearChange = (value: string) => {
+      const newDate = new Date(props.displayMonth);
+      newDate.setFullYear(parseInt(value, 10));
+      goToMonth(newDate);
+    }
+
+    const handleMonthChange = (value: string) => {
+      const newDate = new Date(props.displayMonth);
+      newDate.setMonth(parseInt(value, 10));
+      goToMonth(newDate);
+    }
+    
+    let fromYearValue = fromYear || (toYear ? toYear-100 : new Date().getFullYear()-100)
+    let toYearValue = toYear || (fromYear ? fromYear+100 : new Date().getFullYear()+100)
+
+    const yearOptions = [];
+    for(let i=fromYearValue; i<=toYearValue; i++){
+      yearOptions.push(i)
+    }
+
+    const monthOptions = Array.from({length: 12}, (_, i) => ({ value: i, label: format(new Date(2000, i), "MMMM")}));
+
+    return (
+      <div className="flex justify-between items-center px-2">
+        <Button
+          variant="outline"
+          className="h-7 w-7 p-0"
+          onClick={() => previousMonth && goToMonth(previousMonth)}
+          disabled={!previousMonth}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex gap-2">
+          <Select value={String(props.displayMonth.getMonth())} onValueChange={handleMonthChange}>
+            <SelectTrigger className="w-[120px] h-8 text-sm focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {monthOptions.map(month => (
+                <SelectItem key={month.value} value={String(month.value)}>{month.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={String(props.displayMonth.getFullYear())} onValueChange={handleYearChange}>
+            <SelectTrigger className="w-[90px] h-8 text-sm focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {yearOptions.map(year => (
+                <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <Button
+          variant="outline"
+          className="h-7 w-7 p-0"
+          onClick={() => nextMonth && goToMonth(nextMonth)}
+          disabled={!nextMonth}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -45,9 +117,9 @@ function Calendar({
         day_range_end: "day-range-end",
         day_selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
+        day_today: "bg-sky-200 text-accent-foreground dark:bg-sky-800",
         day_outside:
-          "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
+          "day-outside text-muted-foreground opacity-90 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
@@ -55,12 +127,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4", className)} {...props} />
-        ),
+        Caption: props.captionLayout === 'dropdown-buttons' ? CustomCaption : undefined,
       }}
       {...props}
     />

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -6,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, X as ClearIcon } from 'lucide-react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 
 export interface MultiSelectOption {
   value: string;
@@ -17,7 +16,6 @@ interface MultiSelectProps {
   options: MultiSelectOption[];
   selectedValues: string[];
   onChange: (selected: string[]) => void;
-  onBlur?: () => void;
   className?: string;
   placeholder?: string;
   allOption?: string;
@@ -29,7 +27,6 @@ export function MultiSelect({
   options,
   selectedValues,
   onChange,
-  onBlur,
   className,
   placeholder = 'Select...',
   allOption,
@@ -100,21 +97,11 @@ export function MultiSelect({
     }
   };
 
-  const handleClear = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onChange([]);
-    if (onInputChange) {
-      onInputChange('');
-    }
-  }
-  
   React.useEffect(() => {
     if (!open) {
       setPointer(-1);
     }
   }, [open]);
-
-  const showClearButton = inputValue.length > 0 || selectedValues.length > 0;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -123,24 +110,10 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('w-full justify-between font-normal relative', className)}
-          onBlur={onBlur}
+          className={cn('w-full justify-between font-normal', className)}
         >
-          <span className="truncate pr-8">{getDisplayValue()}</span>
-          <div className="absolute right-1 flex items-center">
-            {showClearButton && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={handleClear}
-                aria-label="Clear filter"
-              >
-                <ClearIcon className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            )}
-            <ChevronsUpDown className={cn("h-4 w-4 shrink-0 opacity-50", showClearButton && "hidden")} />
-          </div>
+          <span className="truncate">{getDisplayValue()}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">

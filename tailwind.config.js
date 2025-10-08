@@ -11,7 +11,7 @@ module.exports = {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
-        code: ['Source Code Pro', 'monospace'],
+        code: ['monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
