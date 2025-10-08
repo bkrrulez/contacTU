@@ -23,7 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MoreHorizontal, ArrowUpDown, Star, Trash2 } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Star, Trash2, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -35,7 +35,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { deleteContact, deleteMultipleContacts, toggleFavoriteStatus } from '@/app/dashboard/contacts/actions';
+import { deleteMultipleContacts, toggleFavoriteMultiple } from '@/app/dashboard/contacts/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useContacts } from '@/contexts/ContactContext';
 
@@ -195,23 +195,31 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   }
 
 
-  const handleToggleFavorite = async (contact: Contact) => {
-    const result = await toggleFavoriteStatus(contact.id, contact.isFavorite);
+  const handleBulkFavorite = async () => {
+    const ids = Array.from(selectedRows);
+    const result = await toggleFavoriteMultiple(ids);
     if (result.success) {
-      toast({
-        title: `Contact ${contact.isFavorite ? 'unmarked' : 'marked'} as favorite`,
-        description: `${contact.firstName} ${contact.lastName} has been updated.`,
-      });
-      // This will trigger a full refresh from context provider to ensure consistency
-      refreshContacts();
+        toast({
+            title: `Favorites Updated`,
+            description: `${ids.length} contact(s) have been updated.`,
+        });
+        refreshContacts();
+        setSelectedRows(new Set());
     } else {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: result.error,
-      });
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: result.error,
+        });
     }
   };
+
+  const handleBulkShare = () => {
+    toast({
+        title: 'Coming Soon',
+        description: 'Bulk sharing functionality will be available in a future update.',
+    });
+  }
 
   const isAllSelected = selectedRows.size > 0 && selectedRows.size === contacts.length;
   const isSomeSelected = selectedRows.size > 0 && !isAllSelected;
@@ -222,12 +230,22 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
   
   return (
       <>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-4 h-9">
             {selectedRows.size > 0 && (
-                <Button variant="destructive" size="sm" onClick={openBulkDeleteDialog}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Selected ({selectedRows.size})
-                </Button>
+                <div className='flex items-center gap-2'>
+                     <Button variant="outline" size="sm" onClick={handleBulkFavorite}>
+                        <Star className="mr-2 h-4 w-4" />
+                        Favorite ({selectedRows.size})
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleBulkShare}>
+                        <Share2 className="mr-2 h-4 w-4" />
+                        Share ({selectedRows.size})
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={openBulkDeleteDialog}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete ({selectedRows.size})
+                    </Button>
+                </div>
             )}
         </div>
         <Table>
@@ -278,7 +296,7 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={selectedRows.size > 0}>
                         <span className="sr-only">Open menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
@@ -291,10 +309,10 @@ export function ContactTable({ contacts: initialContacts }: ContactTableProps) {
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/contacts/${contact.id}/edit`}>Edit</Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleToggleFavorite(contact)}>
-                        {contact.isFavorite ? 'Remove from Favorite' : 'Mark as Favorite'}
+                      <DropdownMenuItem onClick={() => handleBulkFavorite()}>
+                        {contact.isFavorite ? 'Unfavorite' : 'Favorite'}
                       </DropdownMenuItem>
-                      <DropdownMenuItem>Share</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleBulkShare()}>Share</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         className="text-destructive"

@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { contacts, contactEmails, contactPhones, contactOrganizations, contactUrls, contactSocialLinks, contactAssociatedNames, auditLogs, organizations as orgsTable, teams as teamsTable } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
-import { eq, and, sql, inArray } from 'drizzle-orm';
+import { eq, and, sql, inArray, not } from 'drizzle-orm';
 import type { Contact } from '@/lib/types';
 import { contactFormSchema } from '@/lib/schemas';
 
@@ -222,24 +222,6 @@ export async function updateContact(id: number, values: z.infer<typeof contactFo
     return { success: true };
 }
 
-export async function deleteContact(id: number) {
-    const contactToDelete = await db.query.contacts.findFirst({ where: eq(contacts.id, id) });
-    if (!contactToDelete) {
-        throw new Error('Contact not found');
-    }
-
-    await db.delete(contacts).where(eq(contacts.id, id));
-
-    await createAuditLog('delete', id, { contactName: `${contactToDelete.firstName} ${contactToDelete.lastName}` });
-    
-    revalidatePath('/dashboard/contacts');
-    revalidatePath('/dashboard/audit');
-    revalidatePath('/dashboard/favorites');
-    revalidatePath('/dashboard');
-
-
-    return { success: true };
-}
 
 export async function deleteMultipleContacts(ids: number[]) {
     if (ids.length === 0) {
@@ -290,20 +272,25 @@ export async function getContact(id: number): Promise<Contact | null> {
     return contact || null;
 }
 
-export async function toggleFavoriteStatus(id: number, isFavorite: boolean) {
+export async function toggleFavoriteMultiple(ids: number[]) {
+    if (ids.length === 0) {
+        return { success: false, error: 'No contacts selected.' };
+    }
     try {
+        // This query toggles the `isFavorite` status for all selected contacts.
         await db.update(contacts)
-            .set({ isFavorite: !isFavorite })
-            .where(eq(contacts.id, id));
-
+            .set({ isFavorite: not(contacts.isFavorite) })
+            .where(inArray(contacts.id, ids));
+        
         revalidatePath('/dashboard');
         revalidatePath('/dashboard/contacts');
         revalidatePath('/dashboard/favorites');
-        revalidatePath(`/dashboard/contacts/${id}`);
+        ids.forEach(id => revalidatePath(`/dashboard/contacts/${id}`));
+
         return { success: true };
     } catch (error) {
-        console.error('Failed to toggle favorite status:', error);
-        return { success: false, error: 'Failed to update contact.' };
+        console.error('Failed to toggle favorite status for multiple contacts:', error);
+        return { success: false, error: 'Failed to update contacts.' };
     }
 }
 
