@@ -34,6 +34,7 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
+  const [pointer, setPointer] = React.useState(-1);
 
   const handleToggle = (value: string) => {
     let newSelectedValues: string[];
@@ -71,26 +72,30 @@ export function MultiSelect({
     }
   };
 
+  const filteredOptions = options.filter(option => option.label.toLowerCase().includes(inputValue.toLowerCase()));
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const input = event.currentTarget.querySelector('input');
-    if (input) {
-      if (event.key === 'ArrowDown') {
+    if (event.key === 'ArrowDown') {
         event.preventDefault();
-        const firstItem = event.currentTarget.querySelector('[cmdk-item]');
-        if (firstItem) {
-          (firstItem as HTMLElement).focus();
+        setPointer(prev => (prev < filteredOptions.length - 1 ? prev + 1 : prev));
+    } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        setPointer(prev => (prev > 0 ? prev - 1 : 0));
+    } else if (event.key === 'Enter') {
+        event.preventDefault();
+        if (pointer !== -1 && filteredOptions[pointer]) {
+            handleToggle(filteredOptions[pointer].value);
+            setInputValue('');
         }
-      }
     }
   };
   
-  const handleInputChange = (value: string) => {
-    setInputValue(value);
-    // If you want to filter based on typing without selecting
-    // you can call onChange with a special value or handle it here
-  }
-
-  const filteredOptions = options.filter(option => option.label.toLowerCase().includes(inputValue.toLowerCase()));
+  React.useEffect(() => {
+    if (!open) {
+      setPointer(-1);
+      setInputValue('');
+    }
+  }, [open]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -111,7 +116,7 @@ export function MultiSelect({
                 <CommandInput 
                   placeholder="Search..." 
                   value={inputValue}
-                  onValueChange={handleInputChange}
+                  onValueChange={setInputValue}
                 />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
@@ -124,6 +129,7 @@ export function MultiSelect({
                               handleToggle(allOption);
                               setInputValue('');
                             }}
+                            data-highlighted={pointer === filteredOptions.findIndex(o => o.value === allOption)}
                             >
                             <Check
                                 className={cn(
@@ -134,7 +140,7 @@ export function MultiSelect({
                             {allOption}
                         </CommandItem>
                     )}
-                    {filteredOptions.filter(opt => opt.value !== allOption).map((option) => (
+                    {filteredOptions.map((option, index) => (
                         <CommandItem
                             key={option.value}
                             value={option.label}
@@ -142,6 +148,7 @@ export function MultiSelect({
                               handleToggle(option.value);
                               setInputValue('');
                             }}
+                            data-highlighted={pointer === index}
                         >
                             <Check
                                 className={cn(
