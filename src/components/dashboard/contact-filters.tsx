@@ -33,9 +33,6 @@ export function ContactFilters({
                 onChange={onSelectedNamesChange}
                 placeholder="Filter by name..."
                 className="w-48"
-                enableSearch={true}
-                searchPlaceholder='Type 3+ characters...'
-                searchThreshold={3}
             />
             <MultiSelect
                 options={orgOptions}

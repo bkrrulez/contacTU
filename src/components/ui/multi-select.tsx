@@ -2,19 +2,11 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronsUpDown } from 'lucide-react';
-
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from './input';
-import { ScrollArea } from './scroll-area';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
 
 export interface MultiSelectOption {
   value: string;
@@ -29,9 +21,6 @@ interface MultiSelectProps {
   className?: string;
   placeholder?: string;
   allOption?: string;
-  enableSearch?: boolean;
-  searchPlaceholder?: string;
-  searchThreshold?: number;
 }
 
 export function MultiSelect({
@@ -42,42 +31,32 @@ export function MultiSelect({
   className,
   placeholder = 'Select...',
   allOption,
-  enableSearch = false,
-  searchPlaceholder = 'Search...',
-  searchThreshold = 0,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState('');
 
   const handleToggle = (value: string) => {
     let newSelectedValues: string[];
 
     if (value === allOption) {
-      // If "All" is clicked, it becomes the only selection. 
-      // If it's already selected, deselect it.
       if (selectedValues.includes(allOption)) {
-          newSelectedValues = [];
+        newSelectedValues = [];
       } else {
-          newSelectedValues = [allOption];
+        newSelectedValues = [allOption];
       }
     } else {
-        // If any other option is clicked...
-        // 1. Remove "All" from the current selections, if it's there
-        let currentValues = selectedValues.filter(v => v !== allOption);
-        
-        // 2. Toggle the clicked value
-        const index = currentValues.indexOf(value);
-        if (index > -1) {
-            currentValues.splice(index, 1); // remove
-        } else {
-            currentValues.push(value); // add
-        }
-        newSelectedValues = currentValues;
+      let currentValues = selectedValues.filter(v => v !== allOption);
+      
+      const index = currentValues.indexOf(value);
+      if (index > -1) {
+        currentValues.splice(index, 1);
+      } else {
+        currentValues.push(value);
+      }
+      newSelectedValues = currentValues;
     }
-
     onChange(newSelectedValues);
   };
-
+  
   const getDisplayValue = () => {
     if (selectedValues.length === 0) return placeholder;
     if (allOption && selectedValues.includes(allOption)) return allOption;
@@ -91,61 +70,60 @@ export function MultiSelect({
     }
   };
 
-  const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn('w-full justify-between font-normal', className)}
-          onClick={() => setOpen(!open)}
-          onBlur={onBlur}
-        >
-          <span className="truncate">{getDisplayValue()}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] p-0">
-        {enableSearch && options.length > (searchThreshold || 0) && (
-          <div className="p-2">
-            <Input
-              placeholder={searchPlaceholder}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoFocus
-            />
-          </div>
-        )}
-        <ScrollArea className="max-h-60 w-full">
-          <div className="p-2 pt-0">
-            {filteredOptions.map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                onSelect={(e) => e.preventDefault()}
-                onClick={() => handleToggle(option.value)}
-                className="flex items-center gap-2"
-              >
-                <Checkbox
-                  checked={selectedValues.includes(option.value)}
-                  aria-label={`Select ${option.label}`}
-                  className="h-4 w-4 pointer-events-none"
-                  tabIndex={-1}
-                />
-                <span>{option.label}</span>
-              </DropdownMenuItem>
-            ))}
-
-            {filteredOptions.length === 0 && (
-              <DropdownMenuItem disabled>No options found</DropdownMenuItem>
-            )}
-          </div>
-        </ScrollArea>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+            <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn('w-full justify-between font-normal', className)}
+            onBlur={onBlur}
+            >
+            <span className="truncate">{getDisplayValue()}</span>
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+            <Command>
+                <CommandInput placeholder="Search..." />
+                <CommandList>
+                    <CommandEmpty>No results found.</CommandEmpty>
+                    <CommandGroup>
+                    {allOption && (
+                         <CommandItem
+                            key={allOption}
+                            value={allOption}
+                            onSelect={() => handleToggle(allOption)}
+                            >
+                            <Check
+                                className={cn(
+                                'mr-2 h-4 w-4',
+                                selectedValues.includes(allOption) ? 'opacity-100' : 'opacity-0'
+                                )}
+                            />
+                            {allOption}
+                        </CommandItem>
+                    )}
+                    {options.filter(opt => opt.value !== allOption).map((option) => (
+                        <CommandItem
+                            key={option.value}
+                            value={option.label}
+                            onSelect={() => handleToggle(option.value)}
+                        >
+                            <Check
+                                className={cn(
+                                'mr-2 h-4 w-4',
+                                selectedValues.includes(option.value) ? 'opacity-100' : 'opacity-0'
+                                )}
+                            />
+                            {option.label}
+                        </CommandItem>
+                    ))}
+                    </CommandGroup>
+                </CommandList>
+            </Command>
+        </PopoverContent>
+    </Popover>
   );
 }
